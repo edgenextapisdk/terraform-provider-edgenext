@@ -88,7 +88,9 @@ func dataSourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 	d.SetId(taskID)
 
 	// Set response data
-	d.Set("total", response.Data.Total)
+	if err := d.Set("total", response.Data.Total); err != nil {
+		return fmt.Errorf("error setting total: %w", err)
+	}
 	// Set the list of successfully submitted URLs
 	var list []map[string]interface{}
 	for _, elem := range response.Data.List {
@@ -101,7 +103,9 @@ func dataSourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 		}
 		list = append(list, elemMap)
 	}
-	d.Set("list", list)
+	if err := d.Set("list", list); err != nil {
+		return fmt.Errorf("error setting list: %w", err)
+	}
 
 	log.Printf("[INFO] File purge task query successful, total %d records", response.Data.Total)
 	return nil
@@ -202,7 +206,9 @@ func dataSourcePurgesRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Set response data
-	d.Set("total", response.Data.Total)
+	if err := d.Set("total", response.Data.Total); err != nil {
+		return fmt.Errorf("error setting total: %w", err)
+	}
 	var list []map[string]interface{}
 	ids := make([]string, 0)
 	for _, elem := range response.Data.List {

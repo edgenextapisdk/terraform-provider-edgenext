@@ -126,8 +126,12 @@ func resourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 	// Set resource ID
 	d.SetId(taskID)
 	// Set response data
-	d.Set("task_id", taskID)
-	d.Set("total", response.Data.Total)
+	if err := d.Set("task_id", taskID); err != nil {
+		return fmt.Errorf("error setting task_id: %w", err)
+	}
+	if err := d.Set("total", response.Data.Total); err != nil {
+		return fmt.Errorf("error setting total: %w", err)
+	}
 	var list []map[string]interface{}
 	for _, elem := range response.Data.List {
 		elemMap := map[string]interface{}{

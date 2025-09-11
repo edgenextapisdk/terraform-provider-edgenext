@@ -1852,17 +1852,39 @@ func resourceDomainConfigRead(d *schema.ResourceData, m interface{}) error {
 	domainData := response.Data[0]
 
 	// Set all computed fields
-	d.Set("id", domainData.ID)
-	d.Set("domain", domainData.Domain)
-	d.Set("type", domainData.Type)
-	d.Set("status", domainData.Status)
-	d.Set("icp_num", domainData.IcpNum)
-	d.Set("icp_status", domainData.IcpStatus)
-	d.Set("area", domainData.Area)
-	d.Set("cname", domainData.Cname)
-	d.Set("https", domainData.Https)
-	d.Set("create_time", domainData.CreateTime)
-	d.Set("update_time", domainData.UpdateTime)
+	if err := d.Set("id", domainData.ID); err != nil {
+		return fmt.Errorf("error setting id: %w", err)
+	}
+	if err := d.Set("domain", domainData.Domain); err != nil {
+		return fmt.Errorf("error setting domain: %w", err)
+	}
+	if err := d.Set("type", domainData.Type); err != nil {
+		return fmt.Errorf("error setting type: %w", err)
+	}
+	if err := d.Set("status", domainData.Status); err != nil {
+		return fmt.Errorf("error setting status: %w", err)
+	}
+	if err := d.Set("icp_num", domainData.IcpNum); err != nil {
+		return fmt.Errorf("error setting icp_num: %w", err)
+	}
+	if err := d.Set("icp_status", domainData.IcpStatus); err != nil {
+		return fmt.Errorf("error setting icp_status: %w", err)
+	}
+	if err := d.Set("area", domainData.Area); err != nil {
+		return fmt.Errorf("error setting area: %w", err)
+	}
+	if err := d.Set("cname", domainData.Cname); err != nil {
+		return fmt.Errorf("error setting cname: %w", err)
+	}
+	if err := d.Set("https", domainData.Https); err != nil {
+		return fmt.Errorf("error setting https: %w", err)
+	}
+	if err := d.Set("create_time", domainData.CreateTime); err != nil {
+		return fmt.Errorf("error setting create_time: %w", err)
+	}
+	if err := d.Set("update_time", domainData.UpdateTime); err != nil {
+		return fmt.Errorf("error setting update_time: %w", err)
+	}
 
 	// 2. Get domain configuration
 	log.Printf("[INFO] Reading domain configuration: %s", domain)
@@ -1890,7 +1912,9 @@ func resourceDomainConfigRead(d *schema.ResourceData, m interface{}) error {
 	apiConfig := response2.Data[0].Config
 	terraformConfig := convertAPIConfigToTerraform(apiConfig)
 	configList := []map[string]interface{}{terraformConfig}
-	d.Set("config", configList)
+	if err := d.Set("config", configList); err != nil {
+		return fmt.Errorf("error setting config: %w", err)
+	}
 
 	log.Printf("[INFO] Domain and configuration read successfully: %s", domain)
 	return nil
