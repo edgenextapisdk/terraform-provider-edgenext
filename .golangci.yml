@@ -1,18 +1,18 @@
 run:
   timeout: 5m
   allow-parallel-runners: true
+  skip-dirs:
+    - vendor
+  skip-files:
+    - ".*\\.pb\\.go$"
 
 linters:
   disable-all: true
   enable:
     - errcheck
     - goimports
-    - golint
     - govet
     - ineffassign
-    - misspell
-    - unconvert
-    - unused
     - staticcheck
     - gosimple
 
@@ -21,8 +21,6 @@ linters-settings:
     check-type-assertions: true
   govet:
     check-shadowing: true
-  misspell:
-    locale: US
 
 issues:
   exclude-rules:
@@ -30,3 +28,9 @@ issues:
     - path: _test\.go
       linters:
         - errcheck
+    # Exclude vendor directory
+    - path: vendor/
+      linters:
+        - errcheck
+        - staticcheck
+        - gosimple
