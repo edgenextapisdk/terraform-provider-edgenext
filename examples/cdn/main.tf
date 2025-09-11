@@ -8,7 +8,7 @@
 terraform {
   required_providers {
     edgenext = {
-      source = "edgenextapisdk/edgenext"
+      source  = "edgenext/edgenext"
       version = "~> 1.0"
     }
   }
