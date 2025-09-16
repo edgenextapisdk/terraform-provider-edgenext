@@ -407,11 +407,11 @@ func TestCreateDomain(t *testing.T) {
 			Domain: "example.com",
 			Area:   "mainland_china",
 			Type:   "page",
-			Config: DomainConfig{
-				Origin: OriginItem{
-					DefaultMaster: "origin.example.com",
-					OriginMode:    "https",
-					Port:          "443",
+			Config: map[string]interface{}{
+				"origin": map[string]interface{}{
+					"default_master": "origin.example.com",
+					"origin_mode":    "https",
+					"port":           "443",
 				},
 			},
 		}

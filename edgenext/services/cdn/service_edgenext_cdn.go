@@ -2,8 +2,8 @@ package cdn
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 )
@@ -20,15 +20,10 @@ func NewCdnService(client *connectivity.Client) *CdnService {
 
 // DomainCreateRequest domain creation request
 type DomainCreateRequest struct {
-	Domain string       `json:"domain"`
-	Area   string       `json:"area,omitempty"`
-	Type   string       `json:"type"`
-	Config DomainConfig `json:"config"`
-}
-
-// DomainConfig domain configuration
-type DomainConfig struct {
-	Origin OriginItem `json:"origin"`
+	Domain string                 `json:"domain"`
+	Area   string                 `json:"area,omitempty"`
+	Type   string                 `json:"type"`
+	Config map[string]interface{} `json:"config"`
 }
 
 // DomainResponse domain response
@@ -226,348 +221,10 @@ type GetDomainConfigResponse struct {
 }
 
 type DomainConfigItem struct {
-	Domain   string `json:"domain"`
-	DomainID string `json:"domain_id"`
-	Status   string `json:"status"`
-	// Config   ConfigItem `json:"config"`
-	Config map[string]interface{} `json:"config"` // Only includes fields actually returned by API
-}
-
-type ConfigItem struct {
-	Origin              OriginItem               `json:"origin,omitempty"`
-	OriginHost          OriginHostItem           `json:"origin_host,omitempty"`
-	CacheRule           CacheRuleItem            `json:"cache_rule,omitempty"`
-	CacheRuleList       CacheRuleListItem        `json:"cache_rule_list,omitempty"`
-	Referer             RefererItem              `json:"referer,omitempty"`
-	IPBlackList         IPBlackListItem          `json:"ip_black_list,omitempty"`
-	IPWhiteList         IPWhiteListItem          `json:"ip_white_list,omitempty"`
-	AddResponseHead     AddResponseHeadItem      `json:"add_response_head,omitempty"`
-	AddBackSourceHead   []AddBackSourceHeadItem  `json:"add_back_source_head,omitempty"`
-	HTTPS               HTTPSItem                `json:"https,omitempty"`
-	VisitTimestamp      VisitTimestampItem       `json:"visit_timestamp,omitempty"`
-	ForbidHTTPX         ForbidHTTPXItem          `json:"forbid_http_x,omitempty"`
-	CacheErrorCode      CacheErrorCodeItem       `json:"cache_error_code,omitempty"`
-	VideoDrag           VideoDragItem            `json:"video_drag,omitempty"`
-	CompressResponse    CompressResponseItem     `json:"compress_response,omitempty"`
-	SpeedLimit          []SpeedLimitItem         `json:"speed_limit,omitempty"`
-	VisitDenyWhitelist  []VisitDenyWhitelistItem `json:"visit_deny_whitelist,omitempty"`
-	RangeBackSource     string                   `json:"range_back_source,omitempty"`
-	Extend              []ExtendItem             `json:"extend,omitempty"`
-	RateLimit           RateLimitItem            `json:"rate_limit,omitempty"`
-	NewOrigin           []NewOriginItem          `json:"new_origin,omitempty"`
-	CacheShare          CacheShareItem           `json:"cache_share,omitempty"`
-	HeadControl         HeadControlItem          `json:"head_control,omitempty"`
-	Timeout             TimeoutItem              `json:"timeout,omitempty"`
-	ConnectTimeout      ConnectTimeoutItem       `json:"connect_timeout,omitempty"`
-	QiniuOriginAuth     QiniuOriginAuthItem      `json:"qiniu_origin_auth,omitempty"`
-	ForwardStatus       ForwardStatusItem        `json:"forward_status,omitempty"`
-	ErrorPageRewrite    []ErrorPageRewriteItem   `json:"error_page_rewrite,omitempty"`
-	PostUploadSizeLimit PostUploadSizeLimitItem  `json:"post_upload_size_limit,omitempty"`
-	SourceURLRewrite    []SourceURLRewriteItem   `json:"source_url_rewrite,omitempty"`
-	CombinedBan         []CombinedBanItem        `json:"combined_ban,omitempty"`
-	DenyURL             DenyURLItem              `json:"deny_url,omitempty"`
-	TosOrigin           []TosOriginItem          `json:"tos_origin,omitempty"`
-	ClientRealIP        ClientRealIPItem         `json:"client_real_ip,omitempty"`
-	UserAgent           UserAgentItem            `json:"user_agent,omitempty"`
-	VisitAreasLimit     VisitAreasLimitItem      `json:"visit_areas_limit,omitempty"`
-}
-
-func (c *ConfigItem) UnmarshalJSON(data []byte) error {
-	// If it's an empty array, ignore directly
-	if string(data) == "[]" {
-		return nil
-	}
-	// Otherwise parse as object
-	type Alias ConfigItem
-	return json.Unmarshal(data, (*Alias)(c))
-}
-
-// OriginItem origin configuration
-type OriginItem struct {
-	DefaultMaster string `json:"default_master,omitempty"`
-	DefaultSlave  string `json:"default_slave,omitempty"`
-	OriginMode    string `json:"origin_mode,omitempty"`
-	OriHttps      string `json:"ori_https,omitempty"`
-	Port          string `json:"port,omitempty"`
-}
-
-// OriginHostItem origin HOST configuration
-type OriginHostItem struct {
-	Host string `json:"host,omitempty"`
-}
-
-// CacheRuleItem cache rule configuration
-type CacheRuleItem struct {
-	Type          int    `json:"type,omitempty"`
-	Pattern       string `json:"pattern,omitempty"`
-	Time          int    `json:"time,omitempty"`
-	TimeUnit      string `json:"timeunit,omitempty"`
-	IgnoreNoCache string `json:"ignore_no_cache,omitempty"`
-	IgnoreExpired string `json:"ignore_expired,omitempty"`
-	IgnoreQuery   string `json:"ignore_query,omitempty"`
-}
-
-// CacheRuleListItem new cache rule configuration
-type CacheRuleListItem struct {
-	MatchMethod          string `json:"match_method,omitempty"`
-	Pattern              string `json:"pattern,omitempty"`
-	CaseIgnore           string `json:"case_ignore,omitempty"`
-	Expire               int    `json:"expire,omitempty"`
-	ExpireUnit           string `json:"expire_unit,omitempty"`
-	IgnoreNoCacheHeaders string `json:"ignore_no_cache_headers,omitempty"`
-	FollowExpired        string `json:"follow_expired,omitempty"`
-	QueryParamsOp        string `json:"query_params_op,omitempty"`
-	Priority             int    `json:"priority,omitempty"`
-}
-
-// RefererItem Referer blacklist/whitelist configuration
-type RefererItem struct {
-	Type       int      `json:"type,omitempty"`
-	List       []string `json:"list,omitempty"`
-	AllowEmpty bool     `json:"allow_empty,omitempty"`
-}
-
-// IPBlackListItem IP blacklist configuration
-type IPBlackListItem struct {
-	List []string `json:"list,omitempty"`
-	Mode string   `json:"mode,omitempty"`
-}
-
-// IPWhiteListItem IP whitelist configuration
-type IPWhiteListItem struct {
-	List []string `json:"list,omitempty"`
-	Mode string   `json:"mode,omitempty"`
-}
-
-// AddResponseHeadItem response header configuration
-type AddResponseHeadItem struct {
-	Type string               `json:"type,omitempty"`
-	List []ResponseHeaderItem `json:"list,omitempty"`
-}
-
-// ResponseHeaderItem response header item
-type ResponseHeaderItem struct {
-	Name  string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
-}
-
-// AddBackSourceHeadItem add back source request header
-type AddBackSourceHeadItem struct {
-	Name            string `json:"head_name,omitempty"`
-	Value           string `json:"head_value,omitempty"`
-	WriteWhenExists string `json:"write_when_exists,omitempty"` // Whether to overwrite when the same request header exists, default value is yes when not filled.
-}
-
-// HTTPSItem HTTPS configuration
-type HTTPSItem struct {
-	CertID      int      `json:"cert_id,omitempty"`
-	HTTP2       string   `json:"http2,omitempty"`
-	ForceHTTPS  string   `json:"force_https,omitempty"`
-	OCSP        string   `json:"ocsp,omitempty"`
-	SSLProtocol []string `json:"ssl_protocol,omitempty"`
-}
-
-// VisitTimestampItem timestamp anti-leech configuration
-type VisitTimestampItem struct {
-	Pattern    string `json:"pattern,omitempty"`
-	TimeFormat string `json:"time_format,omitempty"`
-	Key        string `json:"key,omitempty"`
-	Deadtime   int    `json:"deadtime,omitempty"`
-	ReqURIType int    `json:"req_uri_type,omitempty"`
-	OriginType int    `json:"origin_type,omitempty"`
-	Style      string `json:"style,omitempty"`
-	Timename   string `json:"timename,omitempty"`
-	Keyname    string `json:"keyname,omitempty"`
-}
-
-// ForbidHTTPXItem forbid HTTP or HTTPS access configuration
-type ForbidHTTPXItem struct {
-	Protocol string `json:"protocol,omitempty"`
-}
-
-// CacheErrorCodeItem error status code cache configuration
-type CacheErrorCodeItem struct {
-	BCache    string   `json:"bcache,omitempty"`
-	Code      []string `json:"code,omitempty"`
-	CacheTime int      `json:"cache_time,omitempty"`
-	CacheUnit string   `json:"cache_unit,omitempty"`
-}
-
-// VideoDragItem video drag configuration
-type VideoDragItem struct {
-	URL   string `json:"url,omitempty"`
-	MP4   string `json:"mp4,omitempty"`
-	Flv   string `json:"flv,omitempty"`
-	Start string `json:"start,omitempty"`
-	End   string `json:"end,omitempty"`
-}
-
-// CompressResponseItem compress response configuration
-type CompressResponseItem struct {
-	ContentType []string `json:"content_type,omitempty"`
-	MinSize     int      `json:"min_size,omitempty"`
-	MinSizeUnit string   `json:"min_size_unit,omitempty"`
-}
-
-// SpeedLimitItem single link speed limit configuration
-type SpeedLimitItem struct {
-	Type      string `json:"type,omitempty"`
-	Pattern   string `json:"pattern,omitempty"`
-	Speed     string `json:"speed,omitempty"`
-	BeginTime string `json:"begin_time,omitempty"`
-	EndTime   string `json:"end_time,omitempty"`
-}
-
-// VisitDenyWhitelistItem anti-leech whitelist configuration
-type VisitDenyWhitelistItem struct {
-	URL    string `json:"url,omitempty"`
-	TurnOn bool   `json:"turn_on,omitempty"`
-}
-
-// ExtendItem Squid extension configuration
-type ExtendItem struct {
-	Squid string `json:"squid"`
-}
-
-// RateLimitItem rate limit configuration
-type RateLimitItem struct {
-	MaxRateCount     int    `json:"max_rate_count"`
-	LeadingFlowCount int    `json:"leading_flow_count"`
-	LeadingFlowUnit  string `json:"leading_flow_unit"`
-	MaxRateUnit      string `json:"max_rate_unit"`
-}
-
-// NewOriginItem domain origin (new) configuration
-type NewOriginItem struct {
-	Origin      string `json:"origin"`
-	Port        int    `json:"port"`
-	Protocol    string `json:"protocol"`
-	Host        string `json:"host"`
-	Level       int    `json:"level"`
-	WeightLevel int    `json:"weight_level"`
-	ISP         string `json:"isp"`
-	ConnectTime int    `json:"connect_time"`
-}
-
-// CacheShareItem shared cache configuration
-type CacheShareItem struct {
-	ShareWay string `json:"share_way"`
-	Domain   string `json:"domain"`
-}
-
-// HeadControlItem HTTP header control configuration
-type HeadControlItem struct {
-	List []HeadControlItemData `json:"list,omitempty"`
-}
-
-type HeadControlItemData struct {
-	Regex         string `json:"regex,omitempty"`
-	HeadOp        string `json:"head_op,omitempty"`
-	HeadDirection string `json:"head_direction,omitempty"`
-	Head          string `json:"head,omitempty"`
-	Value         string `json:"value,omitempty"`
-	Order         int    `json:"order,omitempty"`
-}
-
-// TimeoutItem origin read timeout configuration
-type TimeoutItem struct {
-	Time string `json:"time,omitempty"`
-}
-
-// ConnectTimeoutItem origin connection timeout configuration
-type ConnectTimeoutItem struct {
-	OriginConnectTimeout string `json:"origin_connect_timeout,omitempty"`
-}
-
-// QiniuOriginAuthItem Qiniu origin authentication configuration
-type QiniuOriginAuthItem struct {
-	AuthURL     string `json:"auth_url,omitempty"`
-	MatchMethod string `json:"match_method,omitempty"`
-	Pattern     string `json:"pattern,omitempty"`
-}
-
-// ForwardStatusItem continue to fetch redirected content configuration
-type ForwardStatusItem struct {
-	Codes []int `json:"codes,omitempty"`
-}
-
-// ErrorPageRewriteItem custom error page configuration
-type ErrorPageRewriteItem struct {
-	ErrorCode    int    `json:"error_status_code,omitempty"`
-	RedirectCode int    `json:"redirect_status_code,omitempty"`
-	RedirectURL  string `json:"redirect_url,omitempty"`
-}
-
-// PostUploadSizeLimitItem POST upload size limit configuration
-type PostUploadSizeLimitItem struct {
-	LimitValue int `json:"limit_value,omitempty"`
-}
-
-// SourceURLRewriteItem origin URL rewrite configuration
-type SourceURLRewriteItem struct {
-	OriginURL string `json:"origin_url,omitempty"`
-	TargetURL string `json:"target_url,omitempty"`
-}
-
-// CombinedBanItem Combined-Ban combination ban configuration
-type CombinedBanItem struct {
-	Action  string                            `json:"action"`
-	Configs map[string]CombinedBanConfigsItem `json:"configs"`
-}
-
-type CombinedBanConfigsItem struct {
-	IsMatch         string   `json:"is_match"`
-	CaseInsensitive string   `json:"case_insensitive"`
-	MethodType      string   `json:"method_type"`
-	List            []string `json:"list"`
-}
-
-// DenyURLItem block illegal URL configuration
-type DenyURLItem struct {
-	URLs []string `json:"urls"`
-}
-
-// TosOriginItem TOS domain origin configuration
-type TosOriginItem struct {
-	ISP            string   `json:"isp"`
-	IPs            []string `json:"ips"`
-	GroupSort      int      `json:"group_sort"`
-	Weight         int      `json:"weight"`
-	OriginMode     string   `json:"origin_mode"`
-	Protocol       string   `json:"protocol"`
-	Port           int      `json:"port"`
-	HostMode       string   `json:"host_mode"`
-	Host           string   `json:"host"`
-	AuthType       string   `json:"auth_type"`
-	AuthSecretKey  string   `json:"auth_secret_key"`
-	AuthAccessKey  string   `json:"auth_access_key"`
-	AuthBucketName string   `json:"auth_bucket_name"`
-	AuthExpire     int      `json:"auth_expire"`
-	AuthCDNTag     string   `json:"auth_cdn_tag"`
-	ParsePriority  string   `json:"parse_priority"`
-}
-
-// ClientRealIPItem client real IP configuration
-type ClientRealIPItem struct {
-	Head string `json:"head"`
-}
-
-// UserAgentItem User-Agent blacklist/whitelist configuration
-type UserAgentItem struct {
-	UAList             string `json:"ua_list"`
-	URLPattern         string `json:"url_pattern"`
-	URLCaseInsensitive string `json:"url_case_insensitive"`
-	AllowEmptyUA       string `json:"allow_empty_ua"`
-	UACaseInsensitive  string `json:"ua_case_insensitive"`
-	URLMatchType       string `json:"url_match_type"`
-	UAType             string `json:"ua_type"`
-	UAMatchType        string `json:"ua_match_type"`
-}
-
-// VisitAreasLimitItem access area blacklist/whitelist configuration
-type VisitAreasLimitItem struct {
-	LimitType   string `json:"limit_type"`
-	CountryList string `json:"country_list"`
+	Domain   string                 `json:"domain"`
+	DomainID string                 `json:"domain_id"`
+	Status   string                 `json:"status"`
+	Config   map[string]interface{} `json:"config"` // Only includes fields actually returned by API
 }
 
 // SetDomainConfig sets domain configuration
@@ -578,7 +235,7 @@ func (c *CdnService) SetDomainConfig(domains string, config map[string]interface
 		Domains: domains,
 		Config:  config,
 	}
-
+	// log.Printf("[DEBUG] Set domain config request body: %+v", requestBody)
 	var response DomainConfigResponse
 	err := c.client.Post(ctx, "/v2/domain/config", requestBody, &response)
 	if err != nil {
@@ -613,6 +270,8 @@ func (c *CdnService) GetDomainConfig(domains string, config []string) (*GetDomai
 	if response.Code != 0 {
 		return nil, fmt.Errorf("failed to query domain configuration: %s", response.Msg)
 	}
+	log.Printf("DEBUG config:%s", config)
+	log.Printf("DEBUG response:%+v", response)
 
 	return &response, nil
 }

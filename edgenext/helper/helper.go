@@ -27,3 +27,13 @@ func HashString(s string) int {
 	// v == MinInt
 	return 0
 }
+
+func MergeStringBoolMaps(maps ...map[string]bool) map[string]bool {
+	result := make(map[string]bool)
+	for _, m := range maps {
+		for k, v := range m {
+			result[k] = v
+		}
+	}
+	return result
+}

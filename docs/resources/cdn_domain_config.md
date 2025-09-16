@@ -32,7 +32,7 @@ description: |-
 - `https` (Number) HTTPS
 - `icp_num` (String) ICP filing number
 - `icp_status` (String) ICP filing status
-- `id` (String) Domain ID
+- `id` (String) The ID of this resource.
 - `status` (String) Domain status
 - `update_time` (String) Update time
 
@@ -43,40 +43,22 @@ Optional:
 
 - `add_back_source_head` (Block List) Add origin request headers (see [below for nested schema](#nestedblock--config--add_back_source_head))
 - `add_response_head` (Block List, Max: 1) Add response headers (see [below for nested schema](#nestedblock--config--add_response_head))
-- `cache_error_code` (Block List, Max: 1) Cache error codes (see [below for nested schema](#nestedblock--config--cache_error_code))
 - `cache_rule` (Block List) Cache rule list (see [below for nested schema](#nestedblock--config--cache_rule))
 - `cache_rule_list` (Block List) New cache rules (see [below for nested schema](#nestedblock--config--cache_rule_list))
 - `cache_share` (Block List, Max: 1) Shared cache (see [below for nested schema](#nestedblock--config--cache_share))
-- `client_real_ip` (Block List, Max: 1) Client real IP (see [below for nested schema](#nestedblock--config--client_real_ip))
-- `combined_ban` (Block List) Combined-Ban combined blocking (see [below for nested schema](#nestedblock--config--combined_ban))
 - `compress_response` (Block List, Max: 1) Compress response (see [below for nested schema](#nestedblock--config--compress_response))
 - `connect_timeout` (Block List, Max: 1) Origin connection timeout (see [below for nested schema](#nestedblock--config--connect_timeout))
 - `deny_url` (Block List, Max: 1) Block illegal URLs (see [below for nested schema](#nestedblock--config--deny_url))
-- `error_page_rewrite` (Block List, Max: 1) Custom error page (see [below for nested schema](#nestedblock--config--error_page_rewrite))
-- `extend` (Block List, Max: 1) Squid extended configuration (see [below for nested schema](#nestedblock--config--extend))
-- `forbid_http_x` (Block List, Max: 1) Forbid HTTP or HTTPS access (see [below for nested schema](#nestedblock--config--forbid_http_x))
-- `forward_status` (Block List, Max: 1) Continue to fetch content after redirect (see [below for nested schema](#nestedblock--config--forward_status))
 - `head_control` (Block List, Max: 1) HTTP header control (see [below for nested schema](#nestedblock--config--head_control))
 - `https` (Block List, Max: 1) HTTPS configuration (see [below for nested schema](#nestedblock--config--https))
 - `ip_black_list` (Block List, Max: 1) IP blacklist (see [below for nested schema](#nestedblock--config--ip_black_list))
 - `ip_white_list` (Block List, Max: 1) IP whitelist (see [below for nested schema](#nestedblock--config--ip_white_list))
-- `new_origin` (Block List) Domain origin (new) (see [below for nested schema](#nestedblock--config--new_origin))
 - `origin` (Block List, Max: 1) Origin configuration (see [below for nested schema](#nestedblock--config--origin))
 - `origin_host` (Block List, Max: 1) Origin HOST (see [below for nested schema](#nestedblock--config--origin_host))
-- `post_upload_size_limit` (Block List, Max: 1) POST upload size limit (see [below for nested schema](#nestedblock--config--post_upload_size_limit))
-- `qiniu_origin_auth` (Block List, Max: 1) Qiniu origin authentication (see [below for nested schema](#nestedblock--config--qiniu_origin_auth))
-- `range_back_source` (String) Range back-to-source. Default enables range back-to-source, configure off to disable range back-to-source. Note: configuring on will not display in domain details, configuring off can be displayed in domain details
 - `rate_limit` (Block List, Max: 1) Rate limit (see [below for nested schema](#nestedblock--config--rate_limit))
 - `referer` (Block List, Max: 1) Referer blacklist and whitelist (see [below for nested schema](#nestedblock--config--referer))
-- `source_url_rewrite` (Block List) Origin URL rewrite (see [below for nested schema](#nestedblock--config--source_url_rewrite))
 - `speed_limit` (Block List) Speed limit (see [below for nested schema](#nestedblock--config--speed_limit))
 - `timeout` (Block List, Max: 1) Origin read timeout (see [below for nested schema](#nestedblock--config--timeout))
-- `tos_origin` (Block List, Max: 1) TOS domain origin (see [below for nested schema](#nestedblock--config--tos_origin))
-- `user_agent` (Block List, Max: 1) User-Agent blacklist/whitelist (see [below for nested schema](#nestedblock--config--user_agent))
-- `video_drag` (Block List, Max: 1) Video seeking (see [below for nested schema](#nestedblock--config--video_drag))
-- `visit_areas_limit` (Block List, Max: 1) Access area blacklist/whitelist (see [below for nested schema](#nestedblock--config--visit_areas_limit))
-- `visit_deny_whitelist` (Block List) Anti-hotlinking whitelist (see [below for nested schema](#nestedblock--config--visit_deny_whitelist))
-- `visit_timestamp` (Block List, Max: 1) Timestamp anti-hotlinking (see [below for nested schema](#nestedblock--config--visit_timestamp))
 
 <a id="nestedblock--config--add_back_source_head"></a>
 ### Nested Schema for `config.add_back_source_head`
@@ -112,22 +94,8 @@ Default value is reset when not specified.
 Required:
 
 - `name` (String) Response header name
-
-Optional:
-
 - `value` (String) Response header value
 
-
-
-<a id="nestedblock--config--cache_error_code"></a>
-### Nested Schema for `config.cache_error_code`
-
-Required:
-
-- `bcache` (String) Whether to enable caching, optional values are on,off
-- `cache_time` (Number) Cache time, used with cache_unit, maximum time not exceeding 2 years, note: this parameter is required when bcache=on
-- `cache_unit` (String) Cache time unit, optional values are (year:year,month:month,day:day,hour:hour,minute:minute,second:second) note: this parameter is required when bcache=on
-- `code` (Number) Status code list, multiple values can be set separated by commas, optional values are 400,403,404,414,500,501,502,503,504,506,5xx, where 5xx includes 500,501,502,503,504,506.
 
 
 <a id="nestedblock--config--cache_rule"></a>
@@ -163,7 +131,6 @@ Required:
 
 Optional:
 
-- `cache_or_not` (String) Whether to cache, optional values: ['yes','no'], if not passed, defaults to determining cache based on expire
 - `case_ignore` (String) Whether to ignore case, yes to ignore, no to not ignore. Default is yes
 - `expire_unit` (String) Cache time unit, default value is s, optional values are (Y year, M month, D day, h hour, i minute, s second)
 - `follow_expired` (String) Whether to follow origin server cache time, default value is no, optional parameters: no,yes
@@ -185,108 +152,6 @@ Required:
 inner_share: HTTP and HTTPS share cache within this domain; 
 cross_single_share: HTTP and HTTPS separately share cache between different domains 
 cross_all_share: HTTP and HTTPS all share cache between different domains
-
-
-<a id="nestedblock--config--client_real_ip"></a>
-### Nested Schema for `config.client_real_ip`
-
-Required:
-
-- `head` (String) Required field, client real IP header
-
-
-<a id="nestedblock--config--combined_ban"></a>
-### Nested Schema for `config.combined_ban`
-
-Required:
-
-- `configs` (Block List, Min: 1, Max: 1) Required field, rule group configuration info key (see [below for nested schema](#nestedblock--config--combined_ban--configs))
-
-Optional:
-
-- `action` (String) Optional, default: ban, note currently only supports ban method
-
-<a id="nestedblock--config--combined_ban--configs"></a>
-### Nested Schema for `config.combined_ban.configs`
-
-Optional:
-
-- `ip` (Block List) (see [below for nested schema](#nestedblock--config--combined_ban--configs--ip))
-- `method` (Block List) (see [below for nested schema](#nestedblock--config--combined_ban--configs--method))
-- `referer` (Block List) (see [below for nested schema](#nestedblock--config--combined_ban--configs--referer))
-- `ua` (Block List) (see [below for nested schema](#nestedblock--config--combined_ban--configs--ua))
-- `url` (Block List) (see [below for nested schema](#nestedblock--config--combined_ban--configs--url))
-
-<a id="nestedblock--config--combined_ban--configs--ip"></a>
-### Nested Schema for `config.combined_ban.configs.ip`
-
-Required:
-
-- `list` (List of String) Required field, blocked URL list
-- `method_type` (String) Required field, blocking type key, currently only supports method, ip, referer, url, ua
-
-Optional:
-
-- `case_insensitive` (String) Optional, whether to ignore case, default: yes, options: yes, no
-- `is_match` (String) Optional, whether to match, if not matched then treated as non-range, default: yes, options: yes, no
-
-
-<a id="nestedblock--config--combined_ban--configs--method"></a>
-### Nested Schema for `config.combined_ban.configs.method`
-
-Required:
-
-- `list` (List of String) Required field, blocked URL list
-- `method_type` (String) Required field, blocking type key, currently only supports method, ip, referer, url, ua
-
-Optional:
-
-- `case_insensitive` (String) Optional, whether to ignore case, default: yes, options: yes, no
-- `is_match` (String) Optional, whether to match, if not matched then treated as non-range, default: yes, options: yes, no
-
-
-<a id="nestedblock--config--combined_ban--configs--referer"></a>
-### Nested Schema for `config.combined_ban.configs.referer`
-
-Required:
-
-- `list` (List of String) Required field, blocked URL list
-- `method_type` (String) Required field, blocking type key, currently only supports method, ip, referer, url, ua
-
-Optional:
-
-- `case_insensitive` (String) Optional, whether to ignore case, default: yes, options: yes, no
-- `is_match` (String) Optional, whether to match, if not matched then treated as non-range, default: yes, options: yes, no
-
-
-<a id="nestedblock--config--combined_ban--configs--ua"></a>
-### Nested Schema for `config.combined_ban.configs.ua`
-
-Required:
-
-- `list` (List of String) Required field, blocked URL list
-- `method_type` (String) Required field, blocking type key, currently only supports method, ip, referer, url, ua
-
-Optional:
-
-- `case_insensitive` (String) Optional, whether to ignore case, default: yes, options: yes, no
-- `is_match` (String) Optional, whether to match, if not matched then treated as non-range, default: yes, options: yes, no
-
-
-<a id="nestedblock--config--combined_ban--configs--url"></a>
-### Nested Schema for `config.combined_ban.configs.url`
-
-Required:
-
-- `list` (List of String) Required field, blocked URL list
-- `method_type` (String) Required field, blocking type key, currently only supports method, ip, referer, url, ua
-
-Optional:
-
-- `case_insensitive` (String) Optional, whether to ignore case, default: yes, options: yes, no
-- `is_match` (String) Optional, whether to match, if not matched then treated as non-range, default: yes, options: yes, no
-
-
 
 
 <a id="nestedblock--config--compress_response"></a>
@@ -313,40 +178,6 @@ Required:
 Required:
 
 - `urls` (List of String) Required field, blocked URL list
-
-
-<a id="nestedblock--config--error_page_rewrite"></a>
-### Nested Schema for `config.error_page_rewrite`
-
-Required:
-
-- `error_status_code` (Number) Required field, error status code, value range 400<=x<=599
-- `redirect_status_code` (Number) Required field, redirect status code, value range 301,302
-- `redirect_url` (String) Required field, redirect URL, must start with http:// or https://, and conform to URL format
-
-
-<a id="nestedblock--config--extend"></a>
-### Nested Schema for `config.extend`
-
-Required:
-
-- `squid` (String) Required field, Squid extended configuration
-
-
-<a id="nestedblock--config--forbid_http_x"></a>
-### Nested Schema for `config.forbid_http_x`
-
-Required:
-
-- `protocol` (String) Protocol to forbid access, optional values are http,https
-
-
-<a id="nestedblock--config--forward_status"></a>
-### Nested Schema for `config.forward_status`
-
-Required:
-
-- `codes` (List of Number) Required field, parameter type for continued redirection; 301: 301 redirect; 302: 302 redirect, 301 and 302 are int type
 
 
 <a id="nestedblock--config--head_control"></a>
@@ -400,12 +231,6 @@ Required:
 
 - `list` (List of String) IP blacklist. IP format supports /8, /16, /24 subnet formats, IPs between subnets cannot overlap; maximum 500 IP formats can be set, multiple IP formats separated by commas; IP blacklist cannot coexist with IP whitelist, setting IP blacklist will clear IP whitelist functionality.
 
-Optional:
-
-- `mode` (String) IP list mode: 
-append: Append mode 
-cover: Cover mode, default cover
-
 
 <a id="nestedblock--config--ip_white_list"></a>
 ### Nested Schema for `config.ip_white_list`
@@ -413,30 +238,6 @@ cover: Cover mode, default cover
 Required:
 
 - `list` (List of String) IP whitelist. IP format supports /8, /16, /24 subnet formats, IPs between subnets cannot overlap; maximum 500 IP formats can be set, multiple IP formats separated by commas; IP whitelist cannot coexist with IP blacklist, setting IP whitelist will clear IP blacklist functionality.
-
-Optional:
-
-- `mode` (String) IP list mode: 
-append: Append mode 
-cover: Cover mode, default cover
-
-
-<a id="nestedblock--config--new_origin"></a>
-### Nested Schema for `config.new_origin`
-
-Required:
-
-- `origin` (String) Required field, origin server address
-
-Optional:
-
-- `connect_time` (Number) Optional, TCP connection time, TCP connection time refers to the TCP connection timeout when going back to origin, default 15 seconds, can be set to positive integers between 3~60 seconds
-- `host` (String) Optional, origin host; default value "", must be in domain format; when origin host is not set, the origin host header will be consistent with the accelerated domain
-- `isp` (String) Optional, ISP, specify ISP for origin; optional values [default.dx.lt.yd]; default value default; Note: when this configuration is set, the default source default value must be set; For example, if an accelerated domain sets Telecom source A, then default source B must be set, Telecom requests go to A origin server, other requests go to B origin server;
-- `level` (Number) Optional, primary-backup level, higher values have higher priority; optional values [10, 20]; default value 20; Note: when multiple origin servers have the same primary-backup level, they are all primary sources; if multiple origin servers have different primary-backup levels, the one with the highest value is the primary source, others are backup sources, and among backup sources, higher primary-backup level values have higher priority; For example, if an accelerated domain has 4 origin IPs configured, A and B both have level 20, C has level 15, D has level 10, then when A and B sources are normal, priority goes to AB sources; when both A and B are abnormal, priority goes to C source; when A, B, C are all abnormal, goes to D source
-- `port` (Number) Optional, origin port, determined by protocol parameter when not specified, protocol=http uses port=80; protocol=https uses port=443; protocol=default ignores port value and fixes to 0, parameter range (0, 65535)
-- `protocol` (String) Optional, origin protocol; optional values [default,http,https]; default value default; default: follow request port and protocol for origin (request xx port uses origin xx port, https request uses https protocol for origin); http: origin fixed to use http protocol; https: origin fixed to use https protocol
-- `weight_level` (Number) Optional, weight level; optional values [1, 10000]; default value 1; Note: higher weight level values mean greater weight, when primary-backup levels are the same, origin requests are distributed based on weight ratio; For example: if an accelerated domain has 2 origin servers configured, both A and B sources have primary-backup level 20, A source has weight level 60, B source has weight level 40, then A source's origin request count is approximately 60% of the domain's total origin requests, B source's origin request count is approximately 40% of the domain's total origin requests
 
 
 <a id="nestedblock--config--origin"></a>
@@ -458,8 +259,8 @@ http: Origin with http protocol on port 80
 https: Origin with https protocol on port 443 
 custom: Origin with custom protocol(ori_https) and port(port) 
 Default value is default when not specified.
-- `port` (String) This value needs to be set when origin_mode=custom. 
-Origin port, valid value range (0-65535).
+- `port` (Number) This value needs to be set when origin_mode=custom. 
+Origin port, valid value range (1-65535).
 
 
 <a id="nestedblock--config--origin_host"></a>
@@ -470,35 +271,17 @@ Required:
 - `host` (String) Origin HOST
 
 
-<a id="nestedblock--config--post_upload_size_limit"></a>
-### Nested Schema for `config.post_upload_size_limit`
-
-Required:
-
-- `limit_value` (Number) Required field, limit size value, value range 1<=x<=1024, unit M
-
-
-<a id="nestedblock--config--qiniu_origin_auth"></a>
-### Nested Schema for `config.qiniu_origin_auth`
-
-Required:
-
-- `auth_url` (String) Required field, only supports URLs starting with http protocol, e.g. http://test.com/
-
-Optional:
-
-- `match_method` (String) Optional, default [default], [default] all, [ext] only matches corresponding suffix, [regex] only matches regex content
-- `pattern` (String) Optional, default empty matches all, when match_method=ext, suffix separated by commas is required, when match_method=regex, regex matching is required
-
-
 <a id="nestedblock--config--rate_limit"></a>
 ### Nested Schema for `config.rate_limit`
 
 Required:
 
+- `max_rate_count` (Number) Required field, rate limit value
+
+Optional:
+
 - `leading_flow_count` (Number) Required field, how many bytes at the beginning are not rate limited
 - `leading_flow_unit` (String) Required field, unit for how many bytes at the beginning are not rate limited
-- `max_rate_count` (Number) Required field, rate limit value
 - `max_rate_unit` (String) Required field, rate limit unit
 
 
@@ -515,15 +298,6 @@ Required:
 Optional:
 
 - `allow_empty` (Boolean) Whether to allow empty referer, default value is true, optional parameters: true,false
-
-
-<a id="nestedblock--config--source_url_rewrite"></a>
-### Nested Schema for `config.source_url_rewrite`
-
-Required:
-
-- `origin_url` (String) Required field, original Path regex before rewriting. Note: starts with /, matches original client access path + request parameters, and requires using regular expressions (e.g.: /test/a.jpg?a=1), regex special characters can be escaped. You can also specify groups in the regex, groups are wrapped by (). These groups can be referenced using $n in the target origin path. For example, /aaa/bbb/(.*) represents all directories and files under path /aaa/bbb/. This example contains one group.
-- `target_url` (String) Required field, target Path regex after rewriting. Note: starts with /, contains origin path + request parameters, (e.g.: /newtest/b.jpg?a=1). Example: if the origin path to be rewritten is set to /test/(.*)/(.*).jpg, and the target origin path is set to /newtest/$1/$2.apk, then when user accesses with origin path /test/a/b.jpg, $1 will capture the content of the first regex parentheses, which is a; $2 will capture the content of the second regex parentheses, which is b, so the actual origin path will be rewritten to /newtest/a/b.apk.
 
 
 <a id="nestedblock--config--speed_limit"></a>
@@ -557,97 +331,3 @@ all: all
 Required:
 
 - `time` (String) Required field, timeout duration, unit s, value range: [5-300]
-
-
-<a id="nestedblock--config--tos_origin"></a>
-### Nested Schema for `config.tos_origin`
-
-Required:
-
-- `group_sort` (Number) Required field, primary-backup order, value range 1~10
-- `ips` (List of String) Required field, origin server, can configure IP or domain name, note: same configuration [] can only have one origin type
-- `isp` (String) Required field, ISP, must be default ISP default, optional range: [default, dx, lt, yd]
-
-Optional:
-
-- `auth_access_key` (String) Optional, access_key credential
-- `auth_bucket_name` (String) Optional, bucket_name storage bucket name
-- `auth_cdn_tag` (String) Optional, cdn_tag identifier
-- `auth_expire` (Number) Optional, expire expiration time, e.g.: 300 expires in five minutes
-- `auth_secret_key` (String) Optional, secret_key credential
-- `auth_type` (String) Optional, authentication type default is default (no authentication), optional range: [default, oss, tos], note: selecting oss allows configuring [auth_bucket_name], selecting tos allows configuring [auth_expire, auth_cdn_tag], common authentication parameters auth_secret_key, auth_access_key
-- `host` (String) Optional, origin host
-- `host_mode` (String) Optional, origin host mode default is default, optional range: [default, custom], note: selecting custom allows customizing origin host
-- `origin_mode` (String) Optional, origin mode default is default, optional range: [default, http, https, custom], note: selecting custom allows customizing origin protocol and port
-- `parse_priority` (String) Optional, origin priority resolution setting default is default, optional range: [default, v4, v4v6, v6v4, v6], note: v4v6 means v4 first then v6
-- `port` (Number) Optional, origin port
-- `protocol` (String) Optional, origin protocol
-- `weight` (Number) Optional, weight, value range 1~10000
-
-
-<a id="nestedblock--config--user_agent"></a>
-### Nested Schema for `config.user_agent`
-
-Required:
-
-- `allow_empty_ua` (String) Required field, allow empty User-Agent, value range [yes, no]
-- `ua_case_insensitive` (String) Required field, User-Agent case insensitive, value range [yes, no]
-- `ua_list` (String) Required field, User-Agent list
-- `ua_match_type` (String) Required field, User-Agent match mode, value range [pattern(fuzzy match), exact(exact match)]
-- `ua_type` (String) Required field, User-Agent blacklist/whitelist type, value range [black(UA blacklist mode), white(UA whitelist mode)]
-- `url_case_insensitive` (String) Required field, URL case insensitive, value range [yes, no]
-- `url_match_type` (String) Required field, URL match type, value range [all(all), ext(suffix), dir(directory), route(path), regex(regular expression)]
-- `url_pattern` (String) Required field, URL rule
-
-
-<a id="nestedblock--config--video_drag"></a>
-### Nested Schema for `config.video_drag`
-
-Required:
-
-- `end` (String) End parameter, e.g.: end, parameter name allowed characters: 'letters, numbers, underscore, and cannot start with a number'
-- `flv` (String) Whether to enable FLV seeking, optional values are on,off
-- `mp4` (String) Whether to enable MP4 seeking, optional values are on,off
-- `start` (String) Start parameter, e.g.: start, parameter name allowed characters: 'letters, numbers, underscore, and cannot start with a number'
-- `url` (String) Matching URL rules, e.g.: (mp4 flv f4v m4v)
-
-
-<a id="nestedblock--config--visit_areas_limit"></a>
-### Nested Schema for `config.visit_areas_limit`
-
-Required:
-
-- `country_list` (String) Required field, country list, multiple countries separated by English comma (,)
-- `limit_type` (String) Required field, limit type, value range [white(whitelist), black(blacklist)]
-
-
-<a id="nestedblock--config--visit_deny_whitelist"></a>
-### Nested Schema for `config.visit_deny_whitelist`
-
-Required:
-
-- `turn_on` (Boolean) Optional values: true, false, true=enable current URL whitelist, false=remove current URL anti-hotlinking whitelist setting
-- `url` (String) Required field, set URL path: /user/get?index
-
-
-<a id="nestedblock--config--visit_timestamp"></a>
-### Nested Schema for `config.visit_timestamp`
-
-Required:
-
-- `deadtime` (Number) URL lifetime, e.g. 3600, parameter must be greater than 0, unit is seconds(s), URLs are considered invalid after this time
-- `key` (String) Secret key for generating signature, multiple keys separated by spaces
-- `pattern` (String) Regular expression for matching URLs, URL format is $scheme://$domain/$uri?$args, regex should be set according to the URL to be matched, e.g. .*, matches all accessed URL addresses
-- `req_uri_type` (Number) URL matching pattern, currently 4 URL patterns: 
-1: $scheme://$domain/$uri?$args&{keyname}=$key&{timename}=$time&$args 
-2: $scheme://$domain/$uri?$args&{timename}=$time&{keyname}=$key&$args 
-3: $scheme://$domain/$time/$key/$uri?$args 
-4: $scheme://$domain/$key/$time/$uri?$args
-- `time_format` (String) Time format, optional values are timestamp_hex(hexadecimal timestamp), date_minute(date, format YYYYmmddHHii, e.g. 201805211010), timestamp(decimal timestamp)
-
-Optional:
-
-- `keyname` (String) Default value is key, generate signature using md5 with (path,key,time), passed through parameter name in URL
-- `origin_type` (Number) Whether origin request carries parameters, optional values are 1,2, default is 1, 1 means origin request without encryption string, 2: origin request with encryption string
-- `style` (String) Parameter encryption sorting combination, $ourkey$uri$time, changing the order can rearrange the ($ourkey,$uri,$time) three variables, additional fields and information are not currently supported
-- `timename` (String) Default value is time, parameter name used for passing parameters in URL, only needed when passing parameters through ?

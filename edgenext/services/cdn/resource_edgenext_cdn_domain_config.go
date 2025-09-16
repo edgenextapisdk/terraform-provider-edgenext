@@ -3,11 +3,41 @@ package cdn
 import (
 	"fmt"
 	"log"
-	"reflect"
+	"strings"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
+	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/helper"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+// Define single Map configuration items that need to be converted to List (MaxItems: 1)
+var singleMapConfigs = map[string]bool{
+	"origin":            true,
+	"origin_host":       true,
+	"referer":           true,
+	"ip_black_list":     true,
+	"ip_white_list":     true,
+	"add_response_head": true,
+	"https":             true,
+	"compress_response": true,
+	"rate_limit":        true,
+	"cache_share":       true,
+	"head_control":      true,
+	"timeout":           true,
+	"connect_timeout":   true,
+	"deny_url":          true,
+}
+
+// Define Map array configuration items (maintain array format)
+var arrayMapConfigs = map[string]bool{
+	"cache_rule":           true,
+	"cache_rule_list":      true,
+	"add_back_source_head": true,
+	"speed_limit":          true,
+}
+
+// Define all configuration items
+var allConfigs = helper.MergeStringBoolMaps(singleMapConfigs, arrayMapConfigs)
 
 func isEmpty(value interface{}) bool {
 	return !isNonEmpty(value)
@@ -35,18 +65,31 @@ func isNonEmpty(value interface{}) bool {
 	}
 }
 
+// getNonEmptyConfigItemsFromResource extracts non-empty configuration item names from Terraform resource configuration
+func getNonEmptyConfigItemsFromResource(d *schema.ResourceData) []string {
+	var configItems []string
+	if config, ok := d.GetOk("config.0"); ok {
+		configMap := config.(map[string]interface{})
+
+		// Check if each configuration item is non-empty
+		for key, value := range configMap {
+			if isNonEmpty(value) {
+				configItems = append(configItems, key)
+			}
+		}
+	}
+
+	return configItems
+}
+
 // getConfigItemsFromResource extracts configuration item names from Terraform resource configuration
 func getConfigItemsFromResource(d *schema.ResourceData) []string {
 	var configItems []string
 
 	if config, ok := d.GetOk("config.0"); ok {
 		configMap := config.(map[string]interface{})
-
-		// Check if each configuration item is defined in the resource
-		for key, value := range configMap {
-			if isNonEmpty(value) {
-				configItems = append(configItems, key)
-			}
+		for key, _ := range configMap {
+			configItems = append(configItems, key)
 		}
 	}
 
@@ -64,12 +107,10 @@ func buildConfigFromResource(d *schema.ResourceData) map[string]interface{} {
 
 		// Only include non-empty configuration items
 		for key, value := range configMap {
-			// if isNonEmpty(value) {
 			convertedValue := convertListTypeConfig(key, value)
 			if convertedValue != nil {
 				config[key] = convertedValue
 			}
-			// }
 		}
 	}
 
@@ -82,51 +123,12 @@ func convertListTypeConfig(key string, value interface{}) interface{} {
 	if isEmpty(value) {
 		return nil
 	}
+	log.Printf("DEBUG convertListTypeConfig key:%s,value:%+v", key, value)
 
 	// Determine if it is a List type
 	list, ok := value.([]interface{})
 	if !ok || len(list) == 0 {
 		return value // Non-List type returns directly
-	}
-
-	// Define configuration items that need to be converted to a single Map (MaxItems: 1)
-	singleMapConfigs := map[string]bool{
-		"origin":                 true,
-		"origin_host":            true,
-		"referer":                true,
-		"ip_black_list":          true,
-		"ip_white_list":          true,
-		"add_response_head":      true,
-		"https":                  true,
-		"visit_timestamp":        true,
-		"forbid_http_x":          true,
-		"cache_error_code":       true,
-		"video_drag":             true,
-		"compress_response":      true,
-		"extend":                 true,
-		"rate_limit":             true,
-		"cache_share":            true,
-		"head_control":           true,
-		"timeout":                true,
-		"connect_timeout":        true,
-		"qiniu_origin_auth":      true,
-		"forward_status":         true,
-		"error_page_rewrite":     true,
-		"post_upload_size_limit": true,
-		"deny_url":               true,
-		"tos_origin":             true,
-	}
-
-	// Define configuration items that need to be converted to Map array
-	arrayMapConfigs := map[string]bool{
-		"cache_rule":           true,
-		"cache_rule_list":      true,
-		"add_back_source_head": true,
-		"speed_limit":          true,
-		"visit_deny_whitelist": true,
-		"new_origin":           true,
-		"source_url_rewrite":   true,
-		"combined_ban":         true,
 	}
 
 	if singleMapConfigs[key] {
@@ -175,37 +177,6 @@ func convertListTypeConfig(key string, value interface{}) interface{} {
 	return nil
 }
 
-// convertMapToOriginItem converts map to OriginItem struct
-func convertMapToOriginItem(originMap interface{}) OriginItem {
-	if originMap == nil {
-		return OriginItem{}
-	}
-
-	m, ok := originMap.(map[string]interface{})
-	if !ok {
-		return OriginItem{}
-	}
-
-	origin := OriginItem{}
-	if v, ok := m["default_master"].(string); ok {
-		origin.DefaultMaster = v
-	}
-	if v, ok := m["default_slave"].(string); ok {
-		origin.DefaultSlave = v
-	}
-	if v, ok := m["origin_mode"].(string); ok {
-		origin.OriginMode = v
-	}
-	if v, ok := m["ori_https"].(string); ok {
-		origin.OriHttps = v
-	}
-	if v, ok := m["port"].(string); ok {
-		origin.Port = v
-	}
-
-	return origin
-}
-
 // isStringList checks if it is a string list
 func isStringList(list []interface{}) bool {
 	if len(list) == 0 {
@@ -220,51 +191,14 @@ func isStringList(list []interface{}) bool {
 func convertAPIConfigToTerraform(apiConfig map[string]interface{}) map[string]interface{} {
 	terraformConfig := make(map[string]interface{})
 
-	// Define single Map configuration items that need to be converted to List (MaxItems: 1)
-	singleMapConfigs := map[string]bool{
-		"origin":                 true,
-		"origin_host":            true,
-		"referer":                true,
-		"ip_black_list":          true,
-		"ip_white_list":          true,
-		"add_response_head":      true,
-		"https":                  true,
-		"visit_timestamp":        true,
-		"forbid_http_x":          true,
-		"cache_error_code":       true,
-		"video_drag":             true,
-		"compress_response":      true,
-		"extend":                 true,
-		"rate_limit":             true,
-		"cache_share":            true,
-		"head_control":           true,
-		"timeout":                true,
-		"connect_timeout":        true,
-		"qiniu_origin_auth":      true,
-		"forward_status":         true,
-		"error_page_rewrite":     true,
-		"post_upload_size_limit": true,
-		"deny_url":               true,
-		"tos_origin":             true,
-	}
-
-	// Define Map array configuration items (maintain array format)
-	arrayMapConfigs := map[string]bool{
-		"cache_rule":           true,
-		"cache_rule_list":      true,
-		"add_back_source_head": true,
-		"speed_limit":          true,
-		"visit_deny_whitelist": true,
-		"new_origin":           true,
-		"source_url_rewrite":   true,
-		"combined_ban":         true,
-	}
-
 	for key, value := range apiConfig {
 		if value == nil {
 			continue
 		}
-
+		// If the configuration item is not defined, skip
+		if !allConfigs[key] {
+			continue
+		}
 		if singleMapConfigs[key] {
 			// Convert Map to List format (MaxItems: 1)
 			if configMap, ok := value.(map[string]interface{}); ok && len(configMap) > 0 {
@@ -329,23 +263,20 @@ func convertAPINestedConfig(apiConfig map[string]interface{}) map[string]interfa
 }
 
 // compareAndUpdateConfig compares current configuration and desired configuration, executes necessary updates
-func compareAndUpdateConfig(service *CdnService, domain string, currentConfig, desiredConfig map[string]interface{}) error {
-	// 1. Find configuration items that need to be deleted (in current config but not in desired config)
+func compareAndUpdateConfig(service *CdnService, d *schema.ResourceData, domain string, desiredConfig map[string]interface{}) error {
 	var toDelete []string
-	for key := range currentConfig {
-		if _, exists := desiredConfig[key]; !exists {
-			toDelete = append(toDelete, key)
-		}
-	}
-
-	// 2. Find configuration items that need to be set/updated
 	toSet := make(map[string]interface{})
-	for key, desiredValue := range desiredConfig {
-		currentValue, exists := currentConfig[key]
-
-		// If configuration item doesn't exist or value has changed, it needs to be set
-		if !exists || !reflect.DeepEqual(currentValue, desiredValue) {
-			toSet[key] = desiredValue
+	configItem := getConfigItemsFromResource(d)
+	for _, item := range configItem {
+		key := fmt.Sprintf("config.0.%s", item)
+		// desireValue, ok := d.GetOk(key)
+		// log.Printf("DEBUG key:%s,item:%s,value:%+v,HasChange:%+v,ok:%+v,desireValue:%+v", key, item, d.Get(key), d.HasChange(key), ok, desireValue)
+		if d.HasChange(key) {
+			if _, ok := d.GetOk(key); ok {
+				toSet[item] = desiredConfig[item]
+			} else {
+				toDelete = append(toDelete, item)
+			}
 		}
 	}
 
@@ -364,7 +295,7 @@ func compareAndUpdateConfig(service *CdnService, domain string, currentConfig, d
 
 	// 4. Then set the required configuration items
 	if len(toSet) > 0 {
-		log.Printf("[INFO] Setting configuration items: %v", toSet)
+		log.Printf("[INFO] Setting configuration items: %+v", toSet)
 		_, err := service.SetDomainConfig(domain, toSet)
 		if err != nil {
 			return fmt.Errorf("failed to set configuration items: %w", err)
@@ -373,6 +304,52 @@ func compareAndUpdateConfig(service *CdnService, domain string, currentConfig, d
 
 	return nil
 }
+
+// compareAndUpdateConfig compares current configuration and desired configuration, executes necessary updates
+// func compareAndUpdateConfig(service *CdnService, domain string, currentConfig, desiredConfig map[string]interface{}) error {
+// 	// 1. Find configuration items that need to be deleted (in current config but not in desired config)
+// 	var toDelete []string
+// 	for key := range currentConfig {
+// 		if _, exists := desiredConfig[key]; !exists {
+// 			toDelete = append(toDelete, key)
+// 		}
+// 	}
+
+// 	// 2. Find configuration items that need to be set/updated
+// 	toSet := make(map[string]interface{})
+// 	for key, desiredValue := range desiredConfig {
+// 		currentValue, exists := currentConfig[key]
+
+// 		// If configuration item doesn't exist or value has changed, it needs to be set
+// 		if !exists || !reflect.DeepEqual(currentValue, desiredValue) {
+// 			toSet[key] = desiredValue
+// 		}
+// 	}
+
+// 	// 3. First delete unnecessary configuration items
+// 	if len(toDelete) > 0 {
+// 		log.Printf("[INFO] Deleting configuration items: %v", toDelete)
+// 		deleteReq := DeleteDomainConfigRequest{
+// 			Domains: domain,
+// 			Config:  toDelete,
+// 		}
+// 		err := service.DeleteDomainConfig(deleteReq)
+// 		if err != nil {
+// 			return fmt.Errorf("failed to delete configuration items: %w", err)
+// 		}
+// 	}
+
+// 	// 4. Then set the required configuration items
+// 	if len(toSet) > 0 {
+// 		log.Printf("[INFO] Setting configuration items: %v", toSet)
+// 		_, err := service.SetDomainConfig(domain, toSet)
+// 		if err != nil {
+// 			return fmt.Errorf("failed to set configuration items: %w", err)
+// 		}
+// 	}
+
+// 	return nil
+// }
 
 func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 	return &schema.Resource{
@@ -403,11 +380,6 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: "Domain type: page(web), download(download), video_demand(video on demand), dynamic(dynamic)",
-			},
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Domain ID",
 			},
 			"status": {
 				Type:        schema.TypeString,
@@ -483,16 +455,56 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 									"ori_https": {
 										Type:     schema.TypeString,
 										Optional: true,
+										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+											// 从k中提取origin_mode的路径
+											// 例如: "config.0.origin.0.ori_https" -> "config.0.origin.0.origin_mode"
+											originModePath := strings.Replace(k, ".ori_https", ".origin_mode", 1)
+											originModeValue := d.Get(originModePath)
+											log.Printf("DEBUG ori_https k:%s, DiffSuppressFunc: originModePath=%s, originModeValue=%s", k, originModePath, originModeValue)
+											var originMode string
+											if originModeValue != nil {
+												originMode = originModeValue.(string)
+											}
+											// 当origin_mode不是custom时，忽略ori_https的变化
+											if originMode == "http" || originMode == "https" || originMode == "default" {
+												return true
+											}
+											return old == new
+										},
 										Description: "This value needs to be set when origin_mode=custom. \n" +
 											"HTTPS protocol origin: \n" +
 											"yes: Yes \n" +
 											"no: No",
 									},
 									"port": {
-										Type:     schema.TypeString,
+										Type:     schema.TypeInt,
 										Optional: true,
+										ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+											v := val.(int)
+											if v < 1 || v > 65535 {
+												errs = append(errs, fmt.Errorf("%q must be between 1 and 65535, got: %d", key, v))
+											}
+											return
+										},
+										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+											// 从k中提取origin_mode的路径
+											// 例如: "config.0.origin.0.port" -> "config.0.origin.0.origin_mode"
+											originModePath := strings.Replace(k, ".port", ".origin_mode", 1)
+											originModeValue := d.Get(originModePath)
+											log.Printf("DEBUG port k:%s, DiffSuppressFunc: originModePath=%s, originModeValue=%s", k, originModePath, originModeValue)
+
+											var originMode string
+											if originModeValue != nil {
+												originMode = originModeValue.(string)
+											}
+											// 当origin_mode不是custom时，忽略port的变化
+											if originMode == "http" || originMode == "https" || originMode == "default" {
+												return true
+											}
+											return old == new
+										},
 										Description: "This value needs to be set when origin_mode=custom. \n" +
-											"Origin port, valid value range (0-65535).",
+											"Origin port, valid value range (1-65535).",
 									},
 								},
 							},
@@ -609,17 +621,13 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 									"query_params_op": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										Default:     "do_nothing",
 										Description: "Query parameter operation mode, default value is no, optional parameters: no,yes,customer",
 									},
 									"priority": {
 										Type:        schema.TypeInt,
 										Optional:    true,
 										Description: "Sort value, lower priority value means higher priority, duplicates are not allowed",
-									},
-									"cache_or_not": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Whether to cache, optional values: ['yes','no'], if not passed, defaults to determining cache based on expire",
 									},
 									"query_params_op_way": {
 										Type:        schema.TypeString,
@@ -685,13 +693,14 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 											Type: schema.TypeString,
 										},
 									},
-									"mode": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Description: "IP list mode: \n" +
-											"append: Append mode \n" +
-											"cover: Cover mode, default cover",
-									},
+									// "mode": {
+									// 	Type:      schema.TypeString,
+									// 	Optional:  true,
+									// 	WriteOnly: true,
+									// 	Description: "IP list mode: \n" +
+									// 		"append: Append mode \n" +
+									// 		"cover: Cover mode, default cover",
+									// },
 								},
 							},
 						},
@@ -710,13 +719,14 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 											Type: schema.TypeString,
 										},
 									},
-									"mode": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Description: "IP list mode: \n" +
-											"append: Append mode \n" +
-											"cover: Cover mode, default cover",
-									},
+									// "mode": {
+									// 	Type:      schema.TypeString,
+									// 	Optional:  true,
+									// 	WriteOnly: true,
+									// 	Description: "IP list mode: \n" +
+									// 		"append: Append mode \n" +
+									// 		"cover: Cover mode, default cover",
+									// },
 								},
 							},
 						},
@@ -748,9 +758,21 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 												},
 												"value": {
 													Type:        schema.TypeString,
-													Optional:    true,
+													Required:    true,
 													Description: "Response header value",
 												},
+												// "cover": {
+												// 	Type:        schema.TypeString,
+												// 	Computed:    true,
+												// 	Description: "on or off",
+												// },
+												// "only_hit": {
+												// 	Type:     schema.TypeString,
+												// 	Computed: true,
+												// 	Description: "Only hit mode: \n" +
+												// 		"on: On \n" +
+												// 		"off: Off",
+												// },
 											},
 										},
 									},
@@ -776,6 +798,7 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 									"write_when_exists": {
 										Type:     schema.TypeString,
 										Optional: true,
+										Default:  "yes",
 										Description: "Whether to overwrite when the same request header exists \n" +
 											"yes: Overwrite \n" +
 											"no: Do not overwrite \n" +
@@ -826,358 +849,6 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
-									},
-								},
-							},
-						},
-						"visit_timestamp": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Timestamp anti-hotlinking",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"pattern": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Regular expression for matching URLs, URL format is $scheme://$domain/$uri?$args, regex should be set according to the URL to be matched, e.g. .*, matches all accessed URL addresses",
-									},
-									"time_format": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Time format, optional values are timestamp_hex(hexadecimal timestamp), date_minute(date, format YYYYmmddHHii, e.g. 201805211010), timestamp(decimal timestamp)",
-									},
-									"key": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Secret key for generating signature, multiple keys separated by spaces",
-									},
-									"deadtime": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "URL lifetime, e.g. 3600, parameter must be greater than 0, unit is seconds(s), URLs are considered invalid after this time",
-									},
-									"req_uri_type": {
-										Type:     schema.TypeInt,
-										Required: true,
-										Description: "URL matching pattern, currently 4 URL patterns: \n" +
-											"1: $scheme://$domain/$uri?$args&{keyname}=$key&{timename}=$time&$args \n" +
-											"2: $scheme://$domain/$uri?$args&{timename}=$time&{keyname}=$key&$args \n" +
-											"3: $scheme://$domain/$time/$key/$uri?$args \n" +
-											"4: $scheme://$domain/$key/$time/$uri?$args",
-									},
-									"origin_type": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "Whether origin request carries parameters, optional values are 1,2, default is 1, 1 means origin request without encryption string, 2: origin request with encryption string",
-									},
-									"style": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Parameter encryption sorting combination, $ourkey$uri$time, changing the order can rearrange the ($ourkey,$uri,$time) three variables, additional fields and information are not currently supported",
-									},
-									"timename": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Default value is time, parameter name used for passing parameters in URL, only needed when passing parameters through ?",
-									},
-									"keyname": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Default value is key, generate signature using md5 with (path,key,time), passed through parameter name in URL",
-									},
-								},
-							},
-						},
-						"forbid_http_x": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Forbid HTTP or HTTPS access",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"protocol": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Protocol to forbid access, optional values are http,https",
-									},
-								},
-							},
-						},
-						"cache_error_code": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Cache error codes",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"code": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "Status code list, multiple values can be set separated by commas, optional values are 400,403,404,414,500,501,502,503,504,506,5xx, where 5xx includes 500,501,502,503,504,506.",
-									},
-									"bcache": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Whether to enable caching, optional values are on,off",
-									},
-									"cache_time": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "Cache time, used with cache_unit, maximum time not exceeding 2 years, note: this parameter is required when bcache=on",
-									},
-									"cache_unit": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Cache time unit, optional values are (year:year,month:month,day:day,hour:hour,minute:minute,second:second) note: this parameter is required when bcache=on",
-									},
-								},
-							},
-						},
-						"video_drag": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Video seeking",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"url": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Matching URL rules, e.g.: (mp4 flv f4v m4v)",
-									},
-									"mp4": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Whether to enable MP4 seeking, optional values are on,off",
-									},
-									"flv": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Whether to enable FLV seeking, optional values are on,off",
-									},
-									"start": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Start parameter, e.g.: start, parameter name allowed characters: 'letters, numbers, underscore, and cannot start with a number'",
-									},
-									"end": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "End parameter, e.g.: end, parameter name allowed characters: 'letters, numbers, underscore, and cannot start with a number'",
-									},
-								},
-							},
-						},
-						"compress_response": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Compress response",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"content_type": {
-										Type:        schema.TypeList,
-										Required:    true,
-										Description: "Corresponding headers, e.g.: ['text/plain','application/x-javascript']",
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
-									},
-									"min_size": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "Minimum size, used with min_size_unit, indicates the minimum file size to start compression",
-									},
-									"min_size_unit": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Minimum size unit, optional values are (KB,MB) note: this parameter is required when min_size=0",
-									},
-								},
-							},
-						},
-						"speed_limit": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "Speed limit",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"type": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Description: "URL matching type,\n" +
-											"ext: file extension,\n" +
-											"dir: directory,\n" +
-											"route: full path matching,\n" +
-											"regex: regular expression,\n" +
-											"all: all",
-									},
-									"pattern": {
-										Type:     schema.TypeString,
-										Required: true,
-										Description: "URL matching rules, multiple separated by commas, e.g.: \n" +
-											"When type=all: only supports .* \n" +
-											"When type=ext: jpg,png,gif \n" +
-											"When type=dir: /product/index,/test/index,/user/index \n" +
-											"When type=route: /index.html,/test/*.jpg,/user/get?index \n" +
-											"When type=regex: set the corresponding regex, after setting regex, match the request URL against the regex, if matched then use this speed limit rule.",
-									},
-									"speed": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Speed limit value, unit Kbps, actual effect will be converted to KB",
-									},
-									"begin_time": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Speed limit effective start time, format HH:ii, e.g. (08:30) 24-hour format",
-									},
-									"end_time": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Speed limit effective end time, format HH:ii, e.g. (08:30) 24-hour format",
-									},
-								},
-							},
-						},
-						"visit_deny_whitelist": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "Anti-hotlinking whitelist",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"url": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, set URL path: /user/get?index",
-									},
-									"turn_on": {
-										Type:        schema.TypeBool,
-										Required:    true,
-										Description: "Optional values: true, false, true=enable current URL whitelist, false=remove current URL anti-hotlinking whitelist setting",
-									},
-								},
-							},
-						},
-						"range_back_source": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Range back-to-source. Default enables range back-to-source, configure off to disable range back-to-source. Note: configuring on will not display in domain details, configuring off can be displayed in domain details",
-						},
-						"extend": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Squid extended configuration",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"squid": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, Squid extended configuration",
-									},
-								},
-							},
-						},
-						"rate_limit": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Rate limit",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"max_rate_count": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "Required field, rate limit value",
-									},
-									"leading_flow_count": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "Required field, how many bytes at the beginning are not rate limited",
-									},
-									"leading_flow_unit": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, unit for how many bytes at the beginning are not rate limited",
-									},
-									"max_rate_unit": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, rate limit unit",
-									},
-								},
-							},
-						},
-						"new_origin": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "Domain origin (new)",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"origin": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, origin server address",
-									},
-									"port": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "Optional, origin port, determined by protocol parameter when not specified, protocol=http uses port=80; protocol=https uses port=443; protocol=default ignores port value and fixes to 0, parameter range (0, 65535)",
-									},
-									"protocol": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, origin protocol; optional values [default,http,https]; default value default; default: follow request port and protocol for origin (request xx port uses origin xx port, https request uses https protocol for origin); http: origin fixed to use http protocol; https: origin fixed to use https protocol",
-									},
-									"host": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, origin host; default value \"\", must be in domain format; when origin host is not set, the origin host header will be consistent with the accelerated domain",
-									},
-									"level": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "Optional, primary-backup level, higher values have higher priority; optional values [10, 20]; default value 20; Note: when multiple origin servers have the same primary-backup level, they are all primary sources; if multiple origin servers have different primary-backup levels, the one with the highest value is the primary source, others are backup sources, and among backup sources, higher primary-backup level values have higher priority; For example, if an accelerated domain has 4 origin IPs configured, A and B both have level 20, C has level 15, D has level 10, then when A and B sources are normal, priority goes to AB sources; when both A and B are abnormal, priority goes to C source; when A, B, C are all abnormal, goes to D source",
-									},
-									"weight_level": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "Optional, weight level; optional values [1, 10000]; default value 1; Note: higher weight level values mean greater weight, when primary-backup levels are the same, origin requests are distributed based on weight ratio; For example: if an accelerated domain has 2 origin servers configured, both A and B sources have primary-backup level 20, A source has weight level 60, B source has weight level 40, then A source's origin request count is approximately 60% of the domain's total origin requests, B source's origin request count is approximately 40% of the domain's total origin requests",
-									},
-									"isp": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, ISP, specify ISP for origin; optional values [default.dx.lt.yd]; default value default; Note: when this configuration is set, the default source default value must be set; For example, if an accelerated domain sets Telecom source A, then default source B must be set, Telecom requests go to A origin server, other requests go to B origin server;",
-									},
-									"connect_time": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "Optional, TCP connection time, TCP connection time refers to the TCP connection timeout when going back to origin, default 15 seconds, can be set to positive integers between 3~60 seconds",
-									},
-								},
-							},
-						},
-						"cache_share": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Shared cache",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"share_way": {
-										Type:     schema.TypeString,
-										Required: true,
-										Description: "Required field, sharing method, value range: [inner_share,cross_single_share,cross_all_share] \n" +
-											"inner_share: HTTP and HTTPS share cache within this domain; \n" +
-											"cross_single_share: HTTP and HTTPS separately share cache between different domains \n" +
-											"cross_all_share: HTTP and HTTPS all share cache between different domains",
-									},
-									"domain": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, domain to be shared, this item only takes effect when share_way is cross_single_share and cross_all_share",
 									},
 								},
 							},
@@ -1260,283 +931,25 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 								},
 							},
 						},
-						"qiniu_origin_auth": {
+						"cache_share": {
 							Type:        schema.TypeList,
 							Optional:    true,
 							MaxItems:    1,
-							Description: "Qiniu origin authentication",
+							Description: "Shared cache",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"auth_url": {
+									"share_way": {
+										Type:     schema.TypeString,
+										Required: true,
+										Description: "Required field, sharing method, value range: [inner_share,cross_single_share,cross_all_share] \n" +
+											"inner_share: HTTP and HTTPS share cache within this domain; \n" +
+											"cross_single_share: HTTP and HTTPS separately share cache between different domains \n" +
+											"cross_all_share: HTTP and HTTPS all share cache between different domains",
+									},
+									"domain": {
 										Type:        schema.TypeString,
 										Required:    true,
-										Description: "Required field, only supports URLs starting with http protocol, e.g. http://test.com/",
-									},
-									"match_method": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, default [default], [default] all, [ext] only matches corresponding suffix, [regex] only matches regex content",
-									},
-									"pattern": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, default empty matches all, when match_method=ext, suffix separated by commas is required, when match_method=regex, regex matching is required",
-									},
-								},
-							},
-						},
-						"forward_status": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Continue to fetch content after redirect",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"codes": {
-										Type:        schema.TypeList,
-										Required:    true,
-										Description: "Required field, parameter type for continued redirection; 301: 301 redirect; 302: 302 redirect, 301 and 302 are int type",
-										Elem: &schema.Schema{
-											Type: schema.TypeInt,
-										},
-									},
-								},
-							},
-						},
-						"error_page_rewrite": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Custom error page",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"error_status_code": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "Required field, error status code, value range 400<=x<=599",
-									},
-									"redirect_status_code": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "Required field, redirect status code, value range 301,302",
-									},
-									"redirect_url": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, redirect URL, must start with http:// or https://, and conform to URL format",
-									},
-								},
-							},
-						},
-						"post_upload_size_limit": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "POST upload size limit",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"limit_value": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "Required field, limit size value, value range 1<=x<=1024, unit M",
-									},
-								},
-							},
-						},
-						"source_url_rewrite": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "Origin URL rewrite",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"origin_url": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, original Path regex before rewriting. Note: starts with /, matches original client access path + request parameters, and requires using regular expressions (e.g.: /test/a.jpg?a=1), regex special characters can be escaped. You can also specify groups in the regex, groups are wrapped by (). These groups can be referenced using $n in the target origin path. For example, /aaa/bbb/(.*) represents all directories and files under path /aaa/bbb/. This example contains one group.",
-									},
-									"target_url": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, target Path regex after rewriting. Note: starts with /, contains origin path + request parameters, (e.g.: /newtest/b.jpg?a=1). Example: if the origin path to be rewritten is set to /test/(.*)/(.*).jpg, and the target origin path is set to /newtest/$1/$2.apk, then when user accesses with origin path /test/a/b.jpg, $1 will capture the content of the first regex parentheses, which is a; $2 will capture the content of the second regex parentheses, which is b, so the actual origin path will be rewritten to /newtest/a/b.apk.",
-									},
-								},
-							},
-						},
-						"combined_ban": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "Combined-Ban combined blocking",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"action": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, default: ban, note currently only supports ban method",
-									},
-									"configs": {
-										Type:        schema.TypeList,
-										Required:    true,
-										MaxItems:    1,
-										Description: "Required field, rule group configuration info key",
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"method": {
-													Type:     schema.TypeList,
-													Optional: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"is_match": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: "Optional, whether to match, if not matched then treated as non-range, default: yes, options: yes, no",
-															},
-															"case_insensitive": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: "Optional, whether to ignore case, default: yes, options: yes, no",
-															},
-															"method_type": {
-																Type:        schema.TypeString,
-																Required:    true,
-																Description: "Required field, blocking type key, currently only supports method, ip, referer, url, ua",
-															},
-															"list": {
-																Type:        schema.TypeList,
-																Required:    true,
-																Description: "Required field, blocked URL list",
-																Elem: &schema.Schema{
-																	Type: schema.TypeString,
-																},
-															},
-														},
-													},
-												},
-												"ip": {
-													Type:     schema.TypeList,
-													Optional: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"is_match": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: "Optional, whether to match, if not matched then treated as non-range, default: yes, options: yes, no",
-															},
-															"case_insensitive": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: "Optional, whether to ignore case, default: yes, options: yes, no",
-															},
-															"method_type": {
-																Type:        schema.TypeString,
-																Required:    true,
-																Description: "Required field, blocking type key, currently only supports method, ip, referer, url, ua",
-															},
-															"list": {
-																Type:        schema.TypeList,
-																Required:    true,
-																Description: "Required field, blocked URL list",
-																Elem: &schema.Schema{
-																	Type: schema.TypeString,
-																},
-															},
-														},
-													},
-												},
-												"referer": {
-													Type:     schema.TypeList,
-													Optional: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"is_match": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: "Optional, whether to match, if not matched then treated as non-range, default: yes, options: yes, no",
-															},
-															"case_insensitive": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: "Optional, whether to ignore case, default: yes, options: yes, no",
-															},
-															"method_type": {
-																Type:        schema.TypeString,
-																Required:    true,
-																Description: "Required field, blocking type key, currently only supports method, ip, referer, url, ua",
-															},
-															"list": {
-																Type:        schema.TypeList,
-																Required:    true,
-																Description: "Required field, blocked URL list",
-																Elem: &schema.Schema{
-																	Type: schema.TypeString,
-																},
-															},
-														},
-													},
-												},
-												"url": {
-													Type:     schema.TypeList,
-													Optional: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"is_match": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: "Optional, whether to match, if not matched then treated as non-range, default: yes, options: yes, no",
-															},
-															"case_insensitive": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: "Optional, whether to ignore case, default: yes, options: yes, no",
-															},
-															"method_type": {
-																Type:        schema.TypeString,
-																Required:    true,
-																Description: "Required field, blocking type key, currently only supports method, ip, referer, url, ua",
-															},
-															"list": {
-																Type:        schema.TypeList,
-																Required:    true,
-																Description: "Required field, blocked URL list",
-																Elem: &schema.Schema{
-																	Type: schema.TypeString,
-																},
-															},
-														},
-													},
-												},
-												"ua": {
-													Type:     schema.TypeList,
-													Optional: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"is_match": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: "Optional, whether to match, if not matched then treated as non-range, default: yes, options: yes, no",
-															},
-															"case_insensitive": {
-																Type:        schema.TypeString,
-																Optional:    true,
-																Description: "Optional, whether to ignore case, default: yes, options: yes, no",
-															},
-															"method_type": {
-																Type:        schema.TypeString,
-																Required:    true,
-																Description: "Required field, blocking type key, currently only supports method, ip, referer, url, ua",
-															},
-															"list": {
-																Type:        schema.TypeList,
-																Required:    true,
-																Description: "Required field, blocked URL list",
-																Elem: &schema.Schema{
-																	Type: schema.TypeString,
-																},
-															},
-														},
-													},
-												},
-											},
-										},
+										Description: "Required field, domain to be shared, this item only takes effect when share_way is cross_single_share and cross_all_share",
 									},
 								},
 							},
@@ -1559,180 +972,104 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 								},
 							},
 						},
-						"tos_origin": {
+						"speed_limit": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Speed limit",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"type": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Description: "URL matching type,\n" +
+											"ext: file extension,\n" +
+											"dir: directory,\n" +
+											"route: full path matching,\n" +
+											"regex: regular expression,\n" +
+											"all: all",
+									},
+									"pattern": {
+										Type:     schema.TypeString,
+										Required: true,
+										Description: "URL matching rules, multiple separated by commas, e.g.: \n" +
+											"When type=all: only supports .* \n" +
+											"When type=ext: jpg,png,gif \n" +
+											"When type=dir: /product/index,/test/index,/user/index \n" +
+											"When type=route: /index.html,/test/*.jpg,/user/get?index \n" +
+											"When type=regex: set the corresponding regex, after setting regex, match the request URL against the regex, if matched then use this speed limit rule.",
+									},
+									"speed": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Speed limit value, unit Kbps, actual effect will be converted to KB",
+									},
+									"begin_time": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Speed limit effective start time, format HH:ii, e.g. (08:30) 24-hour format",
+									},
+									"end_time": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Speed limit effective end time, format HH:ii, e.g. (08:30) 24-hour format",
+									},
+								},
+							},
+						},
+						"rate_limit": {
 							Type:        schema.TypeList,
 							Optional:    true,
 							MaxItems:    1,
-							Description: "TOS domain origin",
+							Description: "Rate limit",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"isp": {
-										Type:        schema.TypeString,
+									"max_rate_count": {
+										Type:        schema.TypeInt,
 										Required:    true,
-										Description: "Required field, ISP, must be default ISP default, optional range: [default, dx, lt, yd]",
+										Description: "Required field, rate limit value",
 									},
-									"ips": {
+									"leading_flow_count": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: "Required field, how many bytes at the beginning are not rate limited",
+									},
+									"leading_flow_unit": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Required field, unit for how many bytes at the beginning are not rate limited",
+									},
+									"max_rate_unit": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Required field, rate limit unit",
+									},
+								},
+							},
+						},
+						"compress_response": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Compress response",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"content_type": {
 										Type:        schema.TypeList,
 										Required:    true,
-										Description: "Required field, origin server, can configure IP or domain name, note: same configuration [] can only have one origin type",
+										Description: "Corresponding headers, e.g.: ['text/plain','application/x-javascript']",
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
 									},
-									"group_sort": {
+									"min_size": {
 										Type:        schema.TypeInt,
 										Required:    true,
-										Description: "Required field, primary-backup order, value range 1~10",
+										Description: "Minimum size, used with min_size_unit, indicates the minimum file size to start compression",
 									},
-									"weight": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "Optional, weight, value range 1~10000",
-									},
-									"origin_mode": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, origin mode default is default, optional range: [default, http, https, custom], note: selecting custom allows customizing origin protocol and port",
-									},
-									"protocol": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, origin protocol",
-									},
-									"port": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "Optional, origin port",
-									},
-									"host_mode": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, origin host mode default is default, optional range: [default, custom], note: selecting custom allows customizing origin host",
-									},
-									"host": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, origin host",
-									},
-									"auth_type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, authentication type default is default (no authentication), optional range: [default, oss, tos], note: selecting oss allows configuring [auth_bucket_name], selecting tos allows configuring [auth_expire, auth_cdn_tag], common authentication parameters auth_secret_key, auth_access_key",
-									},
-									"auth_secret_key": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, secret_key credential",
-									},
-									"auth_access_key": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, access_key credential",
-									},
-									"auth_bucket_name": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, bucket_name storage bucket name",
-									},
-									"auth_expire": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "Optional, expire expiration time, e.g.: 300 expires in five minutes",
-									},
-									"auth_cdn_tag": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, cdn_tag identifier",
-									},
-									"parse_priority": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Optional, origin priority resolution setting default is default, optional range: [default, v4, v4v6, v6v4, v6], note: v4v6 means v4 first then v6",
-									},
-								},
-							},
-						},
-						"client_real_ip": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Client real IP",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"head": {
+									"min_size_unit": {
 										Type:        schema.TypeString,
 										Required:    true,
-										Description: "Required field, client real IP header",
-									},
-								},
-							},
-						},
-						"user_agent": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "User-Agent blacklist/whitelist",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"ua_list": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, User-Agent list",
-									},
-									"url_pattern": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, URL rule",
-									},
-									"url_case_insensitive": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, URL case insensitive, value range [yes, no]",
-									},
-									"allow_empty_ua": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, allow empty User-Agent, value range [yes, no]",
-									},
-									"ua_case_insensitive": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, User-Agent case insensitive, value range [yes, no]",
-									},
-									"url_match_type": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, URL match type, value range [all(all), ext(suffix), dir(directory), route(path), regex(regular expression)]",
-									},
-									"ua_type": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, User-Agent blacklist/whitelist type, value range [black(UA blacklist mode), white(UA whitelist mode)]",
-									},
-									"ua_match_type": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, User-Agent match mode, value range [pattern(fuzzy match), exact(exact match)]",
-									},
-								},
-							},
-						},
-						"visit_areas_limit": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							MaxItems:    1,
-							Description: "Access area blacklist/whitelist",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"limit_type": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, limit type, value range [white(whitelist), black(blacklist)]",
-									},
-									"country_list": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Required field, country list, multiple countries separated by English comma (,)",
+										Description: "Minimum size unit, optional values are (KB,MB) note: this parameter is required when min_size=0",
 									},
 								},
 							},
@@ -1748,19 +1085,15 @@ func resourceDomainConfigCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*connectivity.Client)
 	service := NewCdnService(client)
 
-	// 1. Create domain
-	var originConfig OriginItem
-	if originData := d.Get("config.0.origin.0"); originData != nil {
-		originConfig = convertMapToOriginItem(originData)
-	}
+	domain := d.Get("domain").(string)
+	config := buildConfigFromResource(d)
 
+	// 1. Create domain
 	req := DomainCreateRequest{
-		Domain: d.Get("domain").(string),
+		Domain: domain,
 		Area:   d.Get("area").(string),
 		Type:   d.Get("type").(string),
-		Config: DomainConfig{
-			Origin: originConfig,
-		},
+		Config: config,
 	}
 
 	log.Printf("[INFO] Creating CDN domain: %s", req.Domain)
@@ -1770,18 +1103,13 @@ func resourceDomainConfigCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// 2. Set configuration items
-	domain := d.Get("domain").(string)
-	config := buildConfigFromResource(d)
-
 	log.Printf("[INFO] Creating domain configuration: %s, config: %v", domain, config)
-
-	if len(config) == 0 {
-		return fmt.Errorf("at least one configuration item must be specified")
-	}
 
 	// Set all configuration items directly when creating
 	_, err = service.SetDomainConfig(domain, config)
 	if err != nil {
+		// Delete domain if configuration creation fails
+		_ = service.DeleteDomain(domain)
 		return fmt.Errorf("failed to create domain configuration: %w", err)
 	}
 
@@ -1800,28 +1128,11 @@ func resourceDomainConfigUpdate(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] Updating domain configuration: %s", domain)
 
-	// 1. Get current configuration state
-	// managedConfigItems := getConfigItemsFromResource(d)
-	// currentResponse, err := service.GetDomainConfig(domain, managedConfigItems)
-	currentResponse, err := service.GetDomainConfig(domain, nil)
-	if err != nil {
-		return fmt.Errorf("failed to get current configuration: %w", err)
-	}
-
-	var currentConfig map[string]interface{}
-	if len(currentResponse.Data) > 0 {
-		currentConfig = currentResponse.Data[0].Config
-	} else {
-		currentConfig = make(map[string]interface{})
-	}
-	currentConfig = convertAPIConfigToTerraform(currentConfig)
-	log.Printf("[DEBUG] Current configuration: %+v", currentConfig)
-
 	// 2. Get desired configuration
 	desiredConfig := buildConfigFromResource(d)
 
 	// 3. Intelligent comparison and update
-	err = compareAndUpdateConfig(service, domain, currentConfig, desiredConfig)
+	err := compareAndUpdateConfig(service, d, domain, desiredConfig)
 	if err != nil {
 		return fmt.Errorf("failed to update domain configuration: %w", err)
 	}
@@ -1852,9 +1163,6 @@ func resourceDomainConfigRead(d *schema.ResourceData, m interface{}) error {
 	domainData := response.Data[0]
 
 	// Set all computed fields
-	if err := d.Set("id", domainData.ID); err != nil {
-		return fmt.Errorf("error setting id: %w", err)
-	}
 	if err := d.Set("domain", domainData.Domain); err != nil {
 		return fmt.Errorf("error setting domain: %w", err)
 	}
@@ -1888,13 +1196,8 @@ func resourceDomainConfigRead(d *schema.ResourceData, m interface{}) error {
 
 	// 2. Get domain configuration
 	log.Printf("[INFO] Reading domain configuration: %s", domain)
-
-	// Get the list of configuration items managed by the resource
-	// managedConfigItems := getConfigItemsFromResource(d)
-
-	// Query current configuration (only query the configuration items managed by the resource)
-	// response2, err := service.GetDomainConfig(domain, managedConfigItems)
-	response2, err := service.GetDomainConfig(domain, nil)
+	configItem := getNonEmptyConfigItemsFromResource(d)
+	response2, err := service.GetDomainConfig(domain, configItem)
 	if err != nil {
 		return fmt.Errorf("failed to read domain configuration: %w", err)
 	}
@@ -1907,9 +1210,9 @@ func resourceDomainConfigRead(d *schema.ResourceData, m interface{}) error {
 
 	// Set resource ID
 	d.SetId(domain)
-	// Build configuration list, only including configuration items managed by the resource
-	// Need to convert API returned configuration to the format expected by Terraform schema
+
 	apiConfig := response2.Data[0].Config
+	// Need to convert API returned configuration to the format expected by Terraform schema
 	terraformConfig := convertAPIConfigToTerraform(apiConfig)
 	configList := []map[string]interface{}{terraformConfig}
 	if err := d.Set("config", configList); err != nil {

@@ -32,7 +32,7 @@ description: |-
 - `https` (Number) HTTPS
 - `icp_num` (String) ICP filing number
 - `icp_status` (String) ICP filing status
-- `id` (String) Domain ID
+- `id` (String) The ID of this resource.
 - `status` (String) Domain status
 - `type` (String) Domain type: page (web page), download (download), video_demand (video on demand), dynamic (dynamic)
 - `update_time` (String) Update time
@@ -44,40 +44,22 @@ Read-Only:
 
 - `add_back_source_head` (List of Object) (see [below for nested schema](#nestedobjatt--config--add_back_source_head))
 - `add_response_head` (List of Object) (see [below for nested schema](#nestedobjatt--config--add_response_head))
-- `cache_error_code` (List of Object) (see [below for nested schema](#nestedobjatt--config--cache_error_code))
 - `cache_rule` (List of Object) (see [below for nested schema](#nestedobjatt--config--cache_rule))
 - `cache_rule_list` (List of Object) (see [below for nested schema](#nestedobjatt--config--cache_rule_list))
 - `cache_share` (List of Object) (see [below for nested schema](#nestedobjatt--config--cache_share))
-- `client_real_ip` (List of Object) (see [below for nested schema](#nestedobjatt--config--client_real_ip))
-- `combined_ban` (List of Object) (see [below for nested schema](#nestedobjatt--config--combined_ban))
 - `compress_response` (List of Object) (see [below for nested schema](#nestedobjatt--config--compress_response))
 - `connect_timeout` (List of Object) (see [below for nested schema](#nestedobjatt--config--connect_timeout))
 - `deny_url` (List of Object) (see [below for nested schema](#nestedobjatt--config--deny_url))
-- `error_page_rewrite` (List of Object) (see [below for nested schema](#nestedobjatt--config--error_page_rewrite))
-- `extend` (List of Object) (see [below for nested schema](#nestedobjatt--config--extend))
-- `forbid_http_x` (List of Object) (see [below for nested schema](#nestedobjatt--config--forbid_http_x))
-- `forward_status` (List of Object) (see [below for nested schema](#nestedobjatt--config--forward_status))
 - `head_control` (List of Object) (see [below for nested schema](#nestedobjatt--config--head_control))
 - `https` (List of Object) (see [below for nested schema](#nestedobjatt--config--https))
 - `ip_black_list` (List of Object) (see [below for nested schema](#nestedobjatt--config--ip_black_list))
 - `ip_white_list` (List of Object) (see [below for nested schema](#nestedobjatt--config--ip_white_list))
-- `new_origin` (List of Object) (see [below for nested schema](#nestedobjatt--config--new_origin))
 - `origin` (List of Object) (see [below for nested schema](#nestedobjatt--config--origin))
 - `origin_host` (List of Object) (see [below for nested schema](#nestedobjatt--config--origin_host))
-- `post_upload_size_limit` (List of Object) (see [below for nested schema](#nestedobjatt--config--post_upload_size_limit))
-- `qiniu_origin_auth` (List of Object) (see [below for nested schema](#nestedobjatt--config--qiniu_origin_auth))
-- `range_back_source` (String)
 - `rate_limit` (List of Object) (see [below for nested schema](#nestedobjatt--config--rate_limit))
 - `referer` (List of Object) (see [below for nested schema](#nestedobjatt--config--referer))
-- `source_url_rewrite` (List of Object) (see [below for nested schema](#nestedobjatt--config--source_url_rewrite))
 - `speed_limit` (List of Object) (see [below for nested schema](#nestedobjatt--config--speed_limit))
 - `timeout` (List of Object) (see [below for nested schema](#nestedobjatt--config--timeout))
-- `tos_origin` (List of Object) (see [below for nested schema](#nestedobjatt--config--tos_origin))
-- `user_agent` (List of Object) (see [below for nested schema](#nestedobjatt--config--user_agent))
-- `video_drag` (List of Object) (see [below for nested schema](#nestedobjatt--config--video_drag))
-- `visit_areas_limit` (List of Object) (see [below for nested schema](#nestedobjatt--config--visit_areas_limit))
-- `visit_deny_whitelist` (List of Object) (see [below for nested schema](#nestedobjatt--config--visit_deny_whitelist))
-- `visit_timestamp` (List of Object) (see [below for nested schema](#nestedobjatt--config--visit_timestamp))
 
 <a id="nestedobjatt--config--add_back_source_head"></a>
 ### Nested Schema for `config.add_back_source_head`
@@ -95,27 +77,17 @@ Read-Only:
 Read-Only:
 
 - `list` (List of Object) (see [below for nested schema](#nestedobjatt--config--add_response_head--list))
-- `type` (String)
 
 <a id="nestedobjatt--config--add_response_head--list"></a>
 ### Nested Schema for `config.add_response_head.list`
 
 Read-Only:
 
+- `cover` (String)
 - `name` (String)
+- `only_hit` (String)
 - `value` (String)
 
-
-
-<a id="nestedobjatt--config--cache_error_code"></a>
-### Nested Schema for `config.cache_error_code`
-
-Read-Only:
-
-- `bcache` (String)
-- `cache_time` (Number)
-- `cache_unit` (String)
-- `code` (Number)
 
 
 <a id="nestedobjatt--config--cache_rule"></a>
@@ -137,7 +109,6 @@ Read-Only:
 
 Read-Only:
 
-- `cache_or_not` (String)
 - `case_ignore` (String)
 - `expire` (Number)
 - `expire_unit` (String)
@@ -159,90 +130,6 @@ Read-Only:
 
 - `domain` (String)
 - `share_way` (String)
-
-
-<a id="nestedobjatt--config--client_real_ip"></a>
-### Nested Schema for `config.client_real_ip`
-
-Read-Only:
-
-- `head` (String)
-
-
-<a id="nestedobjatt--config--combined_ban"></a>
-### Nested Schema for `config.combined_ban`
-
-Read-Only:
-
-- `action` (String)
-- `configs` (List of Object) (see [below for nested schema](#nestedobjatt--config--combined_ban--configs))
-
-<a id="nestedobjatt--config--combined_ban--configs"></a>
-### Nested Schema for `config.combined_ban.configs`
-
-Read-Only:
-
-- `ip` (List of Object) (see [below for nested schema](#nestedobjatt--config--combined_ban--configs--ip))
-- `method` (List of Object) (see [below for nested schema](#nestedobjatt--config--combined_ban--configs--method))
-- `referer` (List of Object) (see [below for nested schema](#nestedobjatt--config--combined_ban--configs--referer))
-- `ua` (List of Object) (see [below for nested schema](#nestedobjatt--config--combined_ban--configs--ua))
-- `url` (List of Object) (see [below for nested schema](#nestedobjatt--config--combined_ban--configs--url))
-
-<a id="nestedobjatt--config--combined_ban--configs--ip"></a>
-### Nested Schema for `config.combined_ban.configs.ip`
-
-Read-Only:
-
-- `case_insensitive` (String)
-- `is_match` (String)
-- `list` (List of String)
-- `method_type` (String)
-
-
-<a id="nestedobjatt--config--combined_ban--configs--method"></a>
-### Nested Schema for `config.combined_ban.configs.method`
-
-Read-Only:
-
-- `case_insensitive` (String)
-- `is_match` (String)
-- `list` (List of String)
-- `method_type` (String)
-
-
-<a id="nestedobjatt--config--combined_ban--configs--referer"></a>
-### Nested Schema for `config.combined_ban.configs.referer`
-
-Read-Only:
-
-- `case_insensitive` (String)
-- `is_match` (String)
-- `list` (List of String)
-- `method_type` (String)
-
-
-<a id="nestedobjatt--config--combined_ban--configs--ua"></a>
-### Nested Schema for `config.combined_ban.configs.ua`
-
-Read-Only:
-
-- `case_insensitive` (String)
-- `is_match` (String)
-- `list` (List of String)
-- `method_type` (String)
-
-
-<a id="nestedobjatt--config--combined_ban--configs--url"></a>
-### Nested Schema for `config.combined_ban.configs.url`
-
-Read-Only:
-
-- `case_insensitive` (String)
-- `is_match` (String)
-- `list` (List of String)
-- `method_type` (String)
-
-
 
 
 <a id="nestedobjatt--config--compress_response"></a>
@@ -269,40 +156,6 @@ Read-Only:
 Read-Only:
 
 - `urls` (List of String)
-
-
-<a id="nestedobjatt--config--error_page_rewrite"></a>
-### Nested Schema for `config.error_page_rewrite`
-
-Read-Only:
-
-- `error_status_code` (Number)
-- `redirect_status_code` (Number)
-- `redirect_url` (String)
-
-
-<a id="nestedobjatt--config--extend"></a>
-### Nested Schema for `config.extend`
-
-Read-Only:
-
-- `squid` (String)
-
-
-<a id="nestedobjatt--config--forbid_http_x"></a>
-### Nested Schema for `config.forbid_http_x`
-
-Read-Only:
-
-- `protocol` (String)
-
-
-<a id="nestedobjatt--config--forward_status"></a>
-### Nested Schema for `config.forward_status`
-
-Read-Only:
-
-- `codes` (List of Number)
 
 
 <a id="nestedobjatt--config--head_control"></a>
@@ -343,7 +196,6 @@ Read-Only:
 Read-Only:
 
 - `list` (List of String)
-- `mode` (String)
 
 
 <a id="nestedobjatt--config--ip_white_list"></a>
@@ -352,22 +204,6 @@ Read-Only:
 Read-Only:
 
 - `list` (List of String)
-- `mode` (String)
-
-
-<a id="nestedobjatt--config--new_origin"></a>
-### Nested Schema for `config.new_origin`
-
-Read-Only:
-
-- `connect_time` (Number)
-- `host` (String)
-- `isp` (String)
-- `level` (Number)
-- `origin` (String)
-- `port` (Number)
-- `protocol` (String)
-- `weight_level` (Number)
 
 
 <a id="nestedobjatt--config--origin"></a>
@@ -379,7 +215,7 @@ Read-Only:
 - `default_slave` (String)
 - `ori_https` (String)
 - `origin_mode` (String)
-- `port` (String)
+- `port` (Number)
 
 
 <a id="nestedobjatt--config--origin_host"></a>
@@ -388,24 +224,6 @@ Read-Only:
 Read-Only:
 
 - `host` (String)
-
-
-<a id="nestedobjatt--config--post_upload_size_limit"></a>
-### Nested Schema for `config.post_upload_size_limit`
-
-Read-Only:
-
-- `limit_value` (Number)
-
-
-<a id="nestedobjatt--config--qiniu_origin_auth"></a>
-### Nested Schema for `config.qiniu_origin_auth`
-
-Read-Only:
-
-- `auth_url` (String)
-- `match_method` (String)
-- `pattern` (String)
 
 
 <a id="nestedobjatt--config--rate_limit"></a>
@@ -429,15 +247,6 @@ Read-Only:
 - `type` (Number)
 
 
-<a id="nestedobjatt--config--source_url_rewrite"></a>
-### Nested Schema for `config.source_url_rewrite`
-
-Read-Only:
-
-- `origin_url` (String)
-- `target_url` (String)
-
-
 <a id="nestedobjatt--config--speed_limit"></a>
 ### Nested Schema for `config.speed_limit`
 
@@ -456,87 +265,3 @@ Read-Only:
 Read-Only:
 
 - `time` (String)
-
-
-<a id="nestedobjatt--config--tos_origin"></a>
-### Nested Schema for `config.tos_origin`
-
-Read-Only:
-
-- `auth_access_key` (String)
-- `auth_bucket_name` (String)
-- `auth_cdn_tag` (String)
-- `auth_expire` (Number)
-- `auth_secret_key` (String)
-- `auth_type` (String)
-- `group_sort` (Number)
-- `host` (String)
-- `host_mode` (String)
-- `ips` (List of String)
-- `isp` (String)
-- `origin_mode` (String)
-- `parse_priority` (String)
-- `port` (Number)
-- `protocol` (String)
-- `weight` (Number)
-
-
-<a id="nestedobjatt--config--user_agent"></a>
-### Nested Schema for `config.user_agent`
-
-Read-Only:
-
-- `allow_empty_ua` (String)
-- `ua_case_insensitive` (String)
-- `ua_list` (String)
-- `ua_match_type` (String)
-- `ua_type` (String)
-- `url_case_insensitive` (String)
-- `url_match_type` (String)
-- `url_pattern` (String)
-
-
-<a id="nestedobjatt--config--video_drag"></a>
-### Nested Schema for `config.video_drag`
-
-Read-Only:
-
-- `end` (String)
-- `flv` (String)
-- `mp4` (String)
-- `start` (String)
-- `url` (String)
-
-
-<a id="nestedobjatt--config--visit_areas_limit"></a>
-### Nested Schema for `config.visit_areas_limit`
-
-Read-Only:
-
-- `country_list` (String)
-- `limit_type` (String)
-
-
-<a id="nestedobjatt--config--visit_deny_whitelist"></a>
-### Nested Schema for `config.visit_deny_whitelist`
-
-Read-Only:
-
-- `turn_on` (Boolean)
-- `url` (String)
-
-
-<a id="nestedobjatt--config--visit_timestamp"></a>
-### Nested Schema for `config.visit_timestamp`
-
-Read-Only:
-
-- `deadtime` (Number)
-- `key` (String)
-- `keyname` (String)
-- `origin_type` (Number)
-- `pattern` (String)
-- `req_uri_type` (Number)
-- `style` (String)
-- `time_format` (String)
-- `timename` (String)

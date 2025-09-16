@@ -35,11 +35,11 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 				Computed:    true,
 				Description: "Domain type: page (web page), download (download), video_demand (video on demand), dynamic (dynamic)",
 			},
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Domain ID",
-			},
+			// "id": {
+			// 	Type:        schema.TypeString,
+			// 	Computed:    true,
+			// 	Description: "Domain ID",
+			// },
 			"status": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -103,7 +103,7 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 										Computed: true,
 									},
 									"port": {
-										Type:     schema.TypeString,
+										Type:     schema.TypeInt,
 										Computed: true,
 									},
 								},
@@ -198,10 +198,6 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 										Type:     schema.TypeInt,
 										Computed: true,
 									},
-									"cache_or_not": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
 									"query_params_op_way": {
 										Type:     schema.TypeString,
 										Computed: true,
@@ -252,10 +248,6 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 											Type: schema.TypeString,
 										},
 									},
-									"mode": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
 								},
 							},
 						},
@@ -271,10 +263,6 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 											Type: schema.TypeString,
 										},
 									},
-									"mode": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
 								},
 							},
 						},
@@ -283,10 +271,6 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"type": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
 									"list": {
 										Type:     schema.TypeList,
 										Computed: true,
@@ -297,6 +281,14 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 													Computed: true,
 												},
 												"value": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"cover": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"only_hit": {
 													Type:     schema.TypeString,
 													Computed: true,
 												},
@@ -344,117 +336,6 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 										Computed: true,
 									},
 									"ocsp": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"visit_timestamp": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"pattern": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"time_format": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"key": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"deadtime": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"req_uri_type": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"origin_type": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"style": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"timename": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"keyname": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"forbid_http_x": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"protocol": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"cache_error_code": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"code": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"bcache": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"cache_time": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"cache_unit": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"video_drag": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"url": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"mp4": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"flv": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"start": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"end": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
@@ -513,39 +394,6 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 								},
 							},
 						},
-						"visit_deny_whitelist": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"url": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"turn_on": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"range_back_source": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"extend": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"squid": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
 						"rate_limit": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -571,46 +419,6 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 								},
 							},
 						},
-						"new_origin": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"origin": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"port": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"protocol": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"host": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"level": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"weight_level": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"isp": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"connect_time": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-								},
-							},
-						},
 						"cache_share": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -631,7 +439,6 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 						"head_control": {
 							Type:     schema.TypeList,
 							Computed: true,
-
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"list": {
@@ -695,249 +502,6 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 								},
 							},
 						},
-						"qiniu_origin_auth": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"auth_url": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"match_method": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"pattern": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"forward_status": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"codes": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeInt,
-										},
-									},
-								},
-							},
-						},
-						"error_page_rewrite": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"error_status_code": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"redirect_status_code": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"redirect_url": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"post_upload_size_limit": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"limit_value": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"source_url_rewrite": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"origin_url": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"target_url": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"combined_ban": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"action": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"configs": {
-										Type:     schema.TypeList,
-										Computed: true,
-
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"method": {
-													Type:     schema.TypeList,
-													Computed: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"is_match": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"case_insensitive": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"method_type": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"list": {
-																Type:     schema.TypeList,
-																Computed: true,
-																Elem: &schema.Schema{
-																	Type: schema.TypeString,
-																},
-															},
-														},
-													},
-												},
-												"ip": {
-													Type:     schema.TypeList,
-													Computed: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"is_match": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"case_insensitive": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"method_type": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"list": {
-																Type:     schema.TypeList,
-																Computed: true,
-																Elem: &schema.Schema{
-																	Type: schema.TypeString,
-																},
-															},
-														},
-													},
-												},
-												"referer": {
-													Type:     schema.TypeList,
-													Computed: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"is_match": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"case_insensitive": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"method_type": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"list": {
-																Type:     schema.TypeList,
-																Computed: true,
-																Elem: &schema.Schema{
-																	Type: schema.TypeString,
-																},
-															},
-														},
-													},
-												},
-												"url": {
-													Type:     schema.TypeList,
-													Computed: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"is_match": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"case_insensitive": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"method_type": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"list": {
-																Type:     schema.TypeList,
-																Computed: true,
-																Elem: &schema.Schema{
-																	Type: schema.TypeString,
-																},
-															},
-														},
-													},
-												},
-												"ua": {
-													Type:     schema.TypeList,
-													Computed: true,
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"is_match": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"case_insensitive": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"method_type": {
-																Type:     schema.TypeString,
-																Computed: true,
-															},
-															"list": {
-																Type:     schema.TypeList,
-																Computed: true,
-																Elem: &schema.Schema{
-																	Type: schema.TypeString,
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
 						"deny_url": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -950,153 +514,6 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
-									},
-								},
-							},
-						},
-						"tos_origin": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"isp": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"ips": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
-									},
-									"group_sort": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"weight": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"origin_mode": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"protocol": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"port": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"host_mode": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"host": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"auth_type": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"auth_secret_key": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"auth_access_key": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"auth_bucket_name": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"auth_expire": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-									"auth_cdn_tag": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"parse_priority": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"client_real_ip": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"head": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"user_agent": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"ua_list": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"url_pattern": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"url_case_insensitive": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"allow_empty_ua": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"ua_case_insensitive": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"url_match_type": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"ua_type": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"ua_match_type": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-						},
-						"visit_areas_limit": {
-							Type:     schema.TypeList,
-							Computed: true,
-
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"limit_type": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"country_list": {
-										Type:     schema.TypeString,
-										Computed: true,
 									},
 								},
 							},
@@ -1140,9 +557,6 @@ func dataSourceDomainConfigRead(d *schema.ResourceData, m interface{}) error {
 	domainData := response.Data[0]
 
 	// Set all computed fields
-	if err := d.Set("id", domainData.ID); err != nil {
-		return fmt.Errorf("error setting id: %w", err)
-	}
 	if err := d.Set("domain", domainData.Domain); err != nil {
 		return fmt.Errorf("error setting domain: %w", err)
 	}
