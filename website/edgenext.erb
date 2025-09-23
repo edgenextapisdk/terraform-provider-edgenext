@@ -1,0 +1,83 @@
+
+<% wrap_layout :inner do %>
+    <% content_for :sidebar do %>
+        <div class="docs-sidebar hidden-print affix-top" role="complementary">
+            <ul class="nav docs-sidenav">
+                <li>
+                    <a href="/docs/providers/index.html">All Providers</a>
+                </li>
+                <li>
+                    <a href="/docs/providers/edgenext/index.html">EdgeNext Provider</a>
+                </li>
+                
+                <li>
+                    <a href="#">Content Delivery Network(CDN)</a>
+                    <ul class="nav">
+                        <li>
+                            <a href="#">Data Sources</a>
+                            <ul class="nav nav-auto-expand">
+                                <li>
+                                    <a href="/docs/providers/edgenext/d/cdn_domain.html">edgenext_cdn_domain</a>
+                                </li>
+                                <li>
+                                    <a href="/docs/providers/edgenext/d/cdn_domains.html">edgenext_cdn_domains</a>
+                                </li>
+                                <li>
+                                    <a href="/docs/providers/edgenext/d/cdn_push.html">edgenext_cdn_push</a>
+                                </li>
+                                <li>
+                                    <a href="/docs/providers/edgenext/d/cdn_pushes.html">edgenext_cdn_pushes</a>
+                                </li>
+                                <li>
+                                    <a href="/docs/providers/edgenext/d/cdn_purge.html">edgenext_cdn_purge</a>
+                                </li>
+                                <li>
+                                    <a href="/docs/providers/edgenext/d/cdn_purges.html">edgenext_cdn_purges</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">Resources</a>
+                            <ul class="nav nav-auto-expand">
+                                <li>
+                                    <a href="/docs/providers/edgenext/r/cdn_domain.html">edgenext_cdn_domain</a>
+                                </li>
+                                <li>
+                                    <a href="/docs/providers/edgenext/r/cdn_push.html">edgenext_cdn_push</a>
+                                </li>
+                                <li>
+                                    <a href="/docs/providers/edgenext/r/cdn_purge.html">edgenext_cdn_purge</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">SSL Certificate Management(SSL)</a>
+                    <ul class="nav">
+                        <li>
+                            <a href="#">Data Sources</a>
+                            <ul class="nav nav-auto-expand">
+                                <li>
+                                    <a href="/docs/providers/edgenext/d/ssl_certificate.html">edgenext_ssl_certificate</a>
+                                </li>
+                                <li>
+                                    <a href="/docs/providers/edgenext/d/ssl_certificates.html">edgenext_ssl_certificates</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">Resources</a>
+                            <ul class="nav nav-auto-expand">
+                                <li>
+                                    <a href="/docs/providers/edgenext/r/ssl_certificate.html">edgenext_ssl_certificate</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    <% end %>
+    <%= yield %>
+<% end %>
