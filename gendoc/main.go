@@ -19,6 +19,12 @@ import (
 	edgenext "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext"
 )
 
+// ensureDir creates directories if they don't exist
+func ensureDir(filePath string) error {
+	dir := filepath.Dir(filePath)
+	return os.MkdirAll(dir, 0755)
+}
+
 const (
 	cloudMark      = "edgenext"
 	cloudTitle     = "EdgeNext"
@@ -107,6 +113,10 @@ func genIdx(filePath string) (prods []Product) {
 	}
 
 	filename = filepath.Join(docRoot, "..", fmt.Sprintf("%s.erb", cloudMark))
+	if err := ensureDir(filename); err != nil {
+		message("[FAIL!]create directory for %s failed: %s", filename, err)
+		os.Exit(1)
+	}
 	fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		message("[FAIL!]open file %s failed: %s", filename, err)
@@ -135,6 +145,10 @@ func genMainPage(filePath string, products []Product) {
 	}
 
 	filename := filepath.Join(docRoot, "index.html.markdown")
+	if err := ensureDir(filename); err != nil {
+		message("[FAIL!]create directory for %s failed: %s", filename, err)
+		os.Exit(1)
+	}
 	fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		message("[FAIL!]open file %s failed: %s", filename, err)
@@ -373,6 +387,10 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 
 	filename = filepath.Join(docRoot, dtype[:1], fmt.Sprintf("%s.html.markdown", data["resource"]))
 
+	if err := ensureDir(filename); err != nil {
+		message("[FAIL!]create directory for %s failed: %s", filename, err)
+		os.Exit(1)
+	}
 	fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		message("[FAIL!]open file %s failed: %s", filename, err)
