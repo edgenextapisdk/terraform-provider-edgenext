@@ -68,7 +68,18 @@ make doc-with-bin
 
 ## How It Works
 
-### 1. Source Files
+### 1. Automatic Directory Creation
+
+The documentation generator automatically creates the required directory structure:
+
+- `website/` - Root website directory
+- `website/docs/` - Documentation root
+- `website/docs/r/` - Resources documentation
+- `website/docs/d/` - Data sources documentation
+
+No manual directory setup is required. The tool uses `os.MkdirAll()` to ensure all parent directories exist before creating files.
+
+### 2. Source Files
 
 The documentation generator reads from:
 
@@ -77,7 +88,7 @@ The documentation generator reads from:
 - `edgenext/services/{service}/resource_en_{name}.md` - Resource descriptions
 - Go source code schemas for parameter documentation
 
-### 2. Generated Files
+### 3. Generated Files
 
 The tool generates:
 
@@ -86,7 +97,7 @@ The tool generates:
 - `website/docs/r/{resource}.html.markdown` - Resource documentation
 - `website/edgenext.erb` - Sidebar navigation template
 
-### 3. Documentation Structure
+### 4. Documentation Structure
 
 Each generated documentation file includes:
 
