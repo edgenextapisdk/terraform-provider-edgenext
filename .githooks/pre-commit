@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Pre-commit hook for terraform-provider-edgenext
+# This script runs before each commit to ensure code quality
+
+echo "Running pre-commit checks..."
+
+# Run format check
+echo "==> Checking code format..."
+if ! make fmtcheck; then
+    echo "Error: Code format check failed. Please run 'make fmt' to fix formatting issues."
+    exit 1
+fi
+
+# Check if documentation needs to be updated
+echo "==> Checking documentation..."
+if [ -d "gendoc" ]; then
+    # Generate documentation
+    if ! make doc; then
+        echo "Error: Documentation generation failed."
+        exit 1
+    fi
+    
+    # Check if there are any changes in website/ directory
+    if git diff --cached --quiet website/; then
+        echo "Documentation is up to date."
+    else
+        echo "Warning: Documentation has been updated. Please review and add the changes to your commit."
+        echo "Modified files:"
+        git diff --cached --name-only website/
+        echo ""
+        echo "To add documentation changes to your commit, run:"
+        echo "  git add website/"
+        echo ""
+        echo "If you want to proceed without documentation changes, run:"
+        echo "  git commit --no-verify"
+        exit 1
+    fi
+fi
+
+# Run linting if available
+if command -v golangci-lint &> /dev/null; then
+    echo "==> Running linter..."
+    if ! make lint; then
+        echo "Warning: Linting found issues. Please review and fix them."
+        # Don't fail the commit for linting issues, just warn
+    fi
+fi
+
+echo "All pre-commit checks passed!"
+exit 0
