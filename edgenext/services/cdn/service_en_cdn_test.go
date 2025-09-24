@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
@@ -227,7 +228,7 @@ func handleGetDomainConfig(w http.ResponseWriter, r *http.Request) {
 					Origin: &OriginItem{
 						DefaultMaster: "origin.example.com",
 						OriginMode:    "https",
-						Port:          443,
+						Port:          FlexibleInt(443),
 					},
 					CacheRule: []*CacheRuleItem{
 						{
@@ -1230,5 +1231,133 @@ func TestCdnServiceErrorScenarios(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestFlexibleInt(t *testing.T) {
+	tests := []struct {
+		name          string
+		jsonInput     string
+		expectedValue int
+		expectedError bool
+	}{
+		{
+			name:          "Parse integer value",
+			jsonInput:     "443",
+			expectedValue: 443,
+			expectedError: false,
+		},
+		{
+			name:          "Parse string value",
+			jsonInput:     "\"80\"",
+			expectedValue: 80,
+			expectedError: false,
+		},
+		{
+			name:          "Parse zero integer",
+			jsonInput:     "0",
+			expectedValue: 0,
+			expectedError: false,
+		},
+		{
+			name:          "Parse empty string",
+			jsonInput:     "\"\"",
+			expectedValue: 0,
+			expectedError: false,
+		},
+		{
+			name:          "Parse invalid string",
+			jsonInput:     "\"invalid\"",
+			expectedValue: 0,
+			expectedError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var fi FlexibleInt
+			err := json.Unmarshal([]byte(tt.jsonInput), &fi)
+
+			if tt.expectedError {
+				if err == nil {
+					t.Errorf("Expected error but got none")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Unexpected error: %v", err)
+				}
+				if fi.Int() != tt.expectedValue {
+					t.Errorf("Expected %d, got %d", tt.expectedValue, fi.Int())
+				}
+			}
+		})
+	}
+}
+
+func TestFlexibleIntMarshal(t *testing.T) {
+	fi := FlexibleInt(443)
+	data, err := json.Marshal(fi)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	expected := "443"
+	if string(data) != expected {
+		t.Errorf("Expected %s, got %s", expected, string(data))
+	}
+}
+
+func TestOriginItemWithFlexibleIntPort(t *testing.T) {
+	// Test unmarshaling with int port
+	jsonWithIntPort := `{
+		"default_master": "origin.example.com",
+		"origin_mode": "https",
+		"port": 443
+	}`
+
+	var origin1 OriginItem
+	err := json.Unmarshal([]byte(jsonWithIntPort), &origin1)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if origin1.DefaultMaster != "origin.example.com" {
+		t.Errorf("Expected origin.example.com, got %s", origin1.DefaultMaster)
+	}
+	if origin1.OriginMode != "https" {
+		t.Errorf("Expected https, got %s", origin1.OriginMode)
+	}
+	if origin1.Port.Int() != 443 {
+		t.Errorf("Expected 443, got %d", origin1.Port.Int())
+	}
+
+	// Test unmarshaling with string port
+	jsonWithStringPort := `{
+		"default_master": "origin.example.com",
+		"origin_mode": "http",
+		"port": "80"
+	}`
+
+	var origin2 OriginItem
+	err = json.Unmarshal([]byte(jsonWithStringPort), &origin2)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	if origin2.DefaultMaster != "origin.example.com" {
+		t.Errorf("Expected origin.example.com, got %s", origin2.DefaultMaster)
+	}
+	if origin2.OriginMode != "http" {
+		t.Errorf("Expected http, got %s", origin2.OriginMode)
+	}
+	if origin2.Port.Int() != 80 {
+		t.Errorf("Expected 80, got %d", origin2.Port.Int())
+	}
+
+	// Test marshaling - should always output as int
+	data, err := json.Marshal(origin2)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	jsonString := string(data)
+	if !strings.Contains(jsonString, `"port":80`) {
+		t.Errorf("Expected JSON to contain port:80, got %s", jsonString)
 	}
 }

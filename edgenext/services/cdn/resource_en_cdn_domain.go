@@ -613,12 +613,12 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 										Description: "Cache time unit, default value is s. \n" +
-											"	- Y year \n" +
-											"	- M month \n" +
-											"	- D day \n" +
-											"	- h hour \n" +
-											"	- i minute \n" +
-											"	- s second",
+											"	- Y: year \n" +
+											"	- M: month \n" +
+											"	- D: day \n" +
+											"	- h: hour \n" +
+											"	- i: minute \n" +
+											"	- s: second",
 									},
 									"ignore_no_cache_headers": {
 										Type:     schema.TypeString,
@@ -1274,7 +1274,7 @@ func readDomainConfig(d *schema.ResourceData, service *CdnService, domain string
 		origin["default_slave"] = apiConfig.Origin.DefaultSlave
 		origin["origin_mode"] = apiConfig.Origin.OriginMode
 		origin["ori_https"] = apiConfig.Origin.OriHttps
-		origin["port"] = apiConfig.Origin.Port
+		origin["port"] = apiConfig.Origin.Port.Int()
 		config["origin"] = []map[string]interface{}{origin}
 	}
 

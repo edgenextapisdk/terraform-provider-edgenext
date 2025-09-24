@@ -147,7 +147,7 @@ func DataSourceEdgenextCdnPurges() *schema.Resource {
 			"url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "URL to query purge status for",
+				Description: "URL",
 			},
 			"page_number": {
 				Type:        schema.TypeString,

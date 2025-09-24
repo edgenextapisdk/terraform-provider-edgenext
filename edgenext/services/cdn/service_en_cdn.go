@@ -4,9 +4,50 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 )
+
+// FlexibleInt is a custom type that can unmarshal both int and string values as int
+type FlexibleInt int
+
+// UnmarshalJSON implements json.Unmarshaler interface to handle both int and string values
+func (fi *FlexibleInt) UnmarshalJSON(data []byte) error {
+	// Try to unmarshal as int first
+	var intVal int
+	if err := json.Unmarshal(data, &intVal); err == nil {
+		*fi = FlexibleInt(intVal)
+		return nil
+	}
+
+	// If that fails, try to unmarshal as string and convert to int
+	var strVal string
+	if err := json.Unmarshal(data, &strVal); err == nil {
+		if strVal == "" {
+			*fi = FlexibleInt(0)
+			return nil
+		}
+		intVal, err := strconv.Atoi(strVal)
+		if err != nil {
+			return fmt.Errorf("cannot convert string '%s' to int: %v", strVal, err)
+		}
+		*fi = FlexibleInt(intVal)
+		return nil
+	}
+
+	return fmt.Errorf("cannot unmarshal %s into FlexibleInt", string(data))
+}
+
+// MarshalJSON implements json.Marshaler interface to always marshal as int
+func (fi FlexibleInt) MarshalJSON() ([]byte, error) {
+	return json.Marshal(int(fi))
+}
+
+// Int returns the int value
+func (fi FlexibleInt) Int() int {
+	return int(fi)
+}
 
 // CdnService CDN domain service
 type CdnService struct {
@@ -261,11 +302,11 @@ func (c *ConfigItem) UnmarshalJSON(data []byte) error {
 
 // OriginItem origin configuration
 type OriginItem struct {
-	DefaultMaster string `json:"default_master,omitempty"`
-	DefaultSlave  string `json:"default_slave,omitempty"`
-	OriginMode    string `json:"origin_mode,omitempty"`
-	OriHttps      string `json:"ori_https,omitempty"`
-	Port          int    `json:"port,omitempty"`
+	DefaultMaster string      `json:"default_master,omitempty"`
+	DefaultSlave  string      `json:"default_slave,omitempty"`
+	OriginMode    string      `json:"origin_mode,omitempty"`
+	OriHttps      string      `json:"ori_https,omitempty"`
+	Port          FlexibleInt `json:"port,omitempty"`
 }
 
 // OriginHostItem origin HOST configuration
