@@ -45,7 +45,7 @@ The following arguments are supported:
 * `page_number` - (Optional, String) Page number to retrieve, default 1
 * `page_size` - (Optional, String) Page size, default 50, range 1-500
 * `result_output_file` - (Optional, String) Used to save results.
-* `url` - (Optional, String) URL to query purge status for
+* `url` - (Optional, String) URL
 
 ## Attributes Reference
 

@@ -147,12 +147,12 @@ The `cache_rule_list` object of `config` supports the following:
 	- yes: Ignore 
 	- no: Do not ignore
 * `expire_unit` - (Optional, String) Cache time unit, default value is s. 
-	- Y year 
-	- M month 
-	- D day 
-	- h hour 
-	- i minute 
-	- s second
+	- Y: year 
+	- M: month 
+	- D: day 
+	- h: hour 
+	- i: minute 
+	- s: second
 * `follow_expired` - (Optional, String) Whether to follow origin server cache time, default value is no. 
 	- yes
 	- no
