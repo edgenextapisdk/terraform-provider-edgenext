@@ -43,7 +43,7 @@ The following arguments are supported:
 * `result_output_file` - (Optional, String) Used to save results.
 * `start_time` - (Optional, String) Start time, format: YYYY-MM-DD, used together with end_time
 * `task_id` - (Optional, String) Task ID for querying the refresh status of a specific task
-* `url` - (Optional, String) URL to query refresh status for
+* `url` - (Optional, String) URL
 
 ## Attributes Reference
 
