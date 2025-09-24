@@ -38,7 +38,7 @@ func DataSourceEdgenextCdnPush() *schema.Resource {
 			"url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "URL to query refresh status for",
+				Description: "URL",
 			},
 			"page_number": {
 				Type:        schema.TypeString,
@@ -180,7 +180,7 @@ func DataSourceEdgenextCdnPushes() *schema.Resource {
 			"url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "URL to query refresh status for",
+				Description: "URL",
 			},
 			"result_output_file": {
 				Type:        schema.TypeString,
