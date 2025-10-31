@@ -1,0 +1,15 @@
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://api.edgenextscdn.com"
+
+preheat_url = [
+  "http://www.example.com/a.jpg",
+  "http://www.example.com/b.jpg",
+  "http://www.example.com/c.jpg"
+]
+
+# Optional: Group-based refresh
+# group_id = 0
+# protocol = "http"
+# port     = ""
+

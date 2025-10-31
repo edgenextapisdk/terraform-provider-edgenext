@@ -1,0 +1,121 @@
+access_key   = "your_access_key"
+secret_key   = "your_secret_key"
+endpoint     = "https://api.edgenextscdn.com"
+business_id  = 1246
+business_type = "tpl"
+
+# ============================================================================
+# All Network Speed Configuration Groups
+# ============================================================================
+
+# Domain proxy configuration
+domain_proxy_conf = {
+  proxy_connect_timeout = 30
+  fails_timeout         = 10
+  keep_new_src_time     = 30
+  max_fails             = 30
+  proxy_keepalive       = 0
+}
+
+# Upstream redirect configuration (301/302 follow)
+upstream_redirect = {
+  status = "off"
+}
+
+# Customized request headers configuration
+customized_req_headers = {
+  status = "off"
+}
+
+# Response headers configuration
+resp_headers = {
+  status = "off"
+}
+
+# Upstream URI change configuration
+upstream_uri_change = {
+  status = "on"
+}
+
+# Source site protection configuration
+source_site_protect = {
+  status  = "off"
+  num     = 1000
+  second  = 10
+}
+
+# Range request configuration
+slice = {
+  status = "off"
+}
+
+# HTTPS configuration
+https_config = {
+  status                   = "on"
+  http2https               = "off"
+  http2https_port          = 443
+  http2                    = "off"
+  hsts                     = "off"
+  ocsp_stapling            = "off"
+  min_version              = "TLSv1.2"
+  ciphers_preset           = "default"
+  custom_encrypt_algorithm = [
+    "ECDHE-ECDSA",
+    "ECDHE-RSA",
+    "DHE-RSA",
+    "EECDH+CHACHA20",
+    "EECDH+AES128",
+    "EECDH+AES256",
+    "RSA+AES128",
+    "RSA+AES256",
+    "EECDH+3DES",
+    "RSA+3DES"
+  ]
+}
+
+# Page Gzip configuration
+page_gzip = {
+  status = "on"
+}
+
+# WebP format configuration
+webp = {
+  status = "off"
+}
+
+# Upload file configuration
+upload_file = {
+  upload_size      = 100
+  upload_size_unit = "MB"
+}
+
+# WebSocket configuration
+websocket = {
+  status = "off"
+}
+
+# Mobile jump configuration
+# Note: jump_url is required when status is "on"
+mobile_jump = {
+  status   = "off"
+  jump_url = ""  # Required if status is "on", example: "https://example.com"
+}
+
+# Custom page configuration
+custom_page = {
+  status = "off"
+}
+
+# Upstream check configuration (health check)
+# Note: When type is "http", op and path are required
+upstream_check = {
+  status  = "on"
+  fails   = 3
+  intval  = 10
+  rise    = 2
+  timeout = 5
+  type    = "http"
+  op      = "GET"      # Required when type is "http": "HEAD", "GET", or "AUTO"
+  path    = "/health"  # Required when type is "http", must start with "/"
+}
+

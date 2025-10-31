@@ -1,0 +1,8 @@
+access_key    = "your_access_key_here"
+secret_key    = "your_secret_key_here"
+endpoint      = "https://api.edgenextscdn.com"
+template_id   = "123"
+template_name = "updated-template-name"
+description   = "Updated template description"
+app_type      = "network_speed"
+

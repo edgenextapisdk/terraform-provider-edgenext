@@ -1,0 +1,43 @@
+# EdgeNext API Credentials
+access_key = "your_access_key_here"
+secret_key = "your_secret_key_here"
+endpoint   = "https://api.edgenextscdn.com"
+
+# ============================================================================
+# Resource IDs to Import
+# ============================================================================
+# Get these IDs from EdgeNext console or API
+# Only set the IDs for resources you want to import
+
+# Domain ID to import
+# Example: domain_id_to_import = 102008
+domain_id_to_import = null
+
+# Origin Group ID to import
+# Example: origin_group_id_to_import = 85
+origin_group_id_to_import = null
+
+# Certificate ID to import
+# Example: certificate_id_to_import = 456
+certificate_id_to_import = null
+
+# Origin ID to import
+# Example: origin_id_to_import = 789
+origin_id_to_import = null
+
+# Certificate Binding (requires both domain_id and certificate_id)
+# Example: domain_id_for_cert_binding = 123
+domain_id_for_cert_binding = null
+
+# Example: certificate_id_for_binding = 456
+certificate_id_for_binding = null
+
+# ============================================================================
+# Import Instructions
+# ============================================================================
+# 1. Set the resource IDs above for resources you want to import
+# 2. Run: terraform init
+# 3. Import each resource using the commands shown in main.tf or README.md
+# 4. Run: terraform show (to verify import)
+# 5. Run: terraform plan (to check configuration consistency)
+

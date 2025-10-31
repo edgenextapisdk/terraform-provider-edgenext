@@ -8,6 +8,15 @@ import (
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/cdn"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/oss"
+	scdncache "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cache"
+	scdncacheoperate "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cache_operate"
+	scdncert "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cert"
+	scdndomain "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/domain"
+	scdnlogdownload "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/log_download"
+	scdnnetworkspeed "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/network_speed"
+	scdnorigingroup "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/origin_group"
+	scdnsecurityprotect "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/security_protect"
+	scdntemplate "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/template"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/ssl"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -16,6 +25,183 @@ import (
 
 // Provider returns the EdgeNext CDN Terraform Provider
 func Provider() *schema.Provider {
+	// Initialize domain module resources and data sources
+	domainResources := scdndomain.Resources()
+	domainDataSources := scdndomain.DataSources()
+
+	// Initialize cert module resources and data sources
+	certResources := scdncert.Resources()
+	certDataSources := scdncert.DataSources()
+
+	// Initialize template module resources and data sources
+	templateResources := scdntemplate.Resources()
+	templateDataSources := scdntemplate.DataSources()
+
+	// Initialize network speed module resources and data sources
+	networkSpeedResources := scdnnetworkspeed.Resources()
+	networkSpeedDataSources := scdnnetworkspeed.DataSources()
+
+	// Initialize cache module resources and data sources
+	cacheResources := scdncache.Resources()
+	cacheDataSources := scdncache.DataSources()
+
+	// Initialize security protection module resources and data sources
+	securityProtectResources := scdnsecurityprotect.Resources()
+	securityProtectDataSources := scdnsecurityprotect.DataSources()
+
+	// Initialize origin group module resources and data sources
+	originGroupResources := scdnorigingroup.Resources()
+	originGroupDataSources := scdnorigingroup.DataSources()
+
+	// Initialize cache operate module resources and data sources
+	cacheOperateResources := scdncacheoperate.Resources()
+	cacheOperateDataSources := scdncacheoperate.DataSources()
+
+	// Initialize log download module resources and data sources
+	logDownloadResources := scdnlogdownload.Resources()
+	logDownloadDataSources := scdnlogdownload.DataSources()
+
+	// Build resources map
+	ResourcesMap := map[string]*schema.Resource{
+		// CDN domain and configuration management resources
+		"edgenext_cdn_domain": cdn.ResourceEdgenextCdnDomainConfig(),
+
+		// CDN cache purge and file push resources
+		"edgenext_cdn_push":  cdn.ResourceEdgenextCdnPush(),
+		"edgenext_cdn_purge": cdn.ResourceEdgenextCdnPurge(),
+
+		// SSL certificate management resources
+		"edgenext_ssl_certificate": ssl.ResourceEdgenextSslCertificate(),
+
+		// OSS object storage resources
+		"edgenext_oss_bucket": oss.ResourceOSSBucket(),
+		// OSS object management resources
+		"edgenext_oss_object":      oss.ResourceOSSObject(),
+		"edgenext_oss_object_copy": oss.ResourceOSSObjectCopy(),
+
+		// SCDN domain management resources (from domain module)
+		// Note: These resources are organized under scdn/domain/ for better module management
+	}
+
+	// Add domain module resources dynamically
+	for k, v := range domainResources {
+		ResourcesMap[k] = v
+	}
+
+	// Add cert module resources dynamically
+	for k, v := range certResources {
+		ResourcesMap[k] = v
+	}
+
+	// Add template module resources dynamically
+	for k, v := range templateResources {
+		ResourcesMap[k] = v
+	}
+
+	// Add network speed module resources dynamically
+	for k, v := range networkSpeedResources {
+		ResourcesMap[k] = v
+	}
+
+	// Add cache module resources dynamically
+	for k, v := range cacheResources {
+		ResourcesMap[k] = v
+	}
+
+	// Add security protection module resources dynamically
+	for k, v := range securityProtectResources {
+		ResourcesMap[k] = v
+	}
+
+	// Add origin group module resources dynamically
+	for k, v := range originGroupResources {
+		ResourcesMap[k] = v
+	}
+
+	// Add cache operate module resources dynamically
+	for k, v := range cacheOperateResources {
+		ResourcesMap[k] = v
+	}
+
+	// Add log download module resources dynamically
+	for k, v := range logDownloadResources {
+		ResourcesMap[k] = v
+	}
+
+	// Build data sources map
+	DataSourcesMap := map[string]*schema.Resource{
+		// CDN domain and configuration data sources
+		"edgenext_cdn_domain":  cdn.DataSourceEdgenextCdnDomainConfig(),
+		"edgenext_cdn_domains": cdn.DataSourceEdgenextCdnDomains(),
+
+		// CDN cache push data sources
+		"edgenext_cdn_push":   cdn.DataSourceEdgenextCdnPush(),
+		"edgenext_cdn_pushes": cdn.DataSourceEdgenextCdnPushes(),
+
+		// CDN file purge data sources
+		"edgenext_cdn_purge":  cdn.DataSourceEdgenextCdnPurge(),
+		"edgenext_cdn_purges": cdn.DataSourceEdgenextCdnPurges(),
+
+		// SSL certificate data sources
+		"edgenext_ssl_certificate":  ssl.DataSourceEdgenextSslCertificate(),
+		"edgenext_ssl_certificates": ssl.DataSourceEdgenextSslCertificates(),
+
+		// OSS bucket management data sources
+		"edgenext_oss_buckets": oss.DataSourceOSSBuckets(),
+		// OSS object management data sources
+		"edgenext_oss_objects": oss.DataSourceOSSObjects(),
+		// OSS object management data sources
+		"edgenext_oss_object": oss.DataSourceOSSObject(),
+
+		// SCDN domain data sources (from domain module)
+		// Note: These data sources are organized under scdn/domain/ for better module management
+	}
+
+	// Add domain module data sources dynamically
+	for k, v := range domainDataSources {
+		DataSourcesMap[k] = v
+	}
+
+	// Add cert module data sources dynamically
+	for k, v := range certDataSources {
+		DataSourcesMap[k] = v
+	}
+
+	// Add template module data sources dynamically
+	for k, v := range templateDataSources {
+		DataSourcesMap[k] = v
+	}
+
+	// Add network speed module data sources dynamically
+	for k, v := range networkSpeedDataSources {
+		DataSourcesMap[k] = v
+	}
+
+	// Add cache module data sources dynamically
+	for k, v := range cacheDataSources {
+		DataSourcesMap[k] = v
+	}
+
+	// Add security protection module data sources dynamically
+	for k, v := range securityProtectDataSources {
+		DataSourcesMap[k] = v
+	}
+
+	// Add origin group module data sources dynamically
+	for k, v := range originGroupDataSources {
+		DataSourcesMap[k] = v
+	}
+
+	// Add cache operate module data sources dynamically
+	for k, v := range cacheOperateDataSources {
+		DataSourcesMap[k] = v
+	}
+
+	// Add log download module data sources dynamically
+	for k, v := range logDownloadDataSources {
+		DataSourcesMap[k] = v
+	}
+
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			// Unified authentication fields
@@ -46,48 +232,8 @@ func Provider() *schema.Provider {
 				Description: "EdgeNext region",
 			},
 		},
-		ResourcesMap: map[string]*schema.Resource{
-			// CDN domain and configuration management resources
-			"edgenext_cdn_domain": cdn.ResourceEdgenextCdnDomainConfig(),
-
-			// CDN cache purge and file push resources
-			"edgenext_cdn_push":  cdn.ResourceEdgenextCdnPush(),
-			"edgenext_cdn_purge": cdn.ResourceEdgenextCdnPurge(),
-
-			// SSL certificate management resources
-			"edgenext_ssl_certificate": ssl.ResourceEdgenextSslCertificate(),
-
-			// OSS object storage resources
-			"edgenext_oss_bucket": oss.ResourceOSSBucket(),
-			// OSS object management resources
-			"edgenext_oss_object":      oss.ResourceOSSObject(),
-			"edgenext_oss_object_copy": oss.ResourceOSSObjectCopy(),
-		},
-		DataSourcesMap: map[string]*schema.Resource{
-
-			// CDN domain and configuration data sources
-			"edgenext_cdn_domain":  cdn.DataSourceEdgenextCdnDomainConfig(),
-			"edgenext_cdn_domains": cdn.DataSourceEdgenextCdnDomains(),
-
-			// CDN cache push data sources
-			"edgenext_cdn_push":   cdn.DataSourceEdgenextCdnPush(),
-			"edgenext_cdn_pushes": cdn.DataSourceEdgenextCdnPushes(),
-
-			// CDN file purge data sources
-			"edgenext_cdn_purge":  cdn.DataSourceEdgenextCdnPurge(),
-			"edgenext_cdn_purges": cdn.DataSourceEdgenextCdnPurges(),
-
-			// SSL certificate data sources
-			"edgenext_ssl_certificate":  ssl.DataSourceEdgenextSslCertificate(),
-			"edgenext_ssl_certificates": ssl.DataSourceEdgenextSslCertificates(),
-
-			// OSS bucket management data sources
-			"edgenext_oss_buckets": oss.DataSourceOSSBuckets(),
-			// OSS object management data sources
-			"edgenext_oss_objects": oss.DataSourceOSSObjects(),
-			// OSS object management data sources
-			"edgenext_oss_object": oss.DataSourceOSSObject(),
-		},
+		ResourcesMap:         ResourcesMap,
+		DataSourcesMap:       DataSourcesMap,
 		ConfigureContextFunc: providerConfigure,
 	}
 }

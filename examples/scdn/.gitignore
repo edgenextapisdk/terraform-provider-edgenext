@@ -1,0 +1,19 @@
+# Terraform state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform lock file
+.terraform.lock.hcl
+
+# Terraform variables (keep example files)
+*.tfvars
+!*.tfvars.example
+
+# Terraform directory
+.terraform/
+
+# Output files
+*.json
+*.xml
+*.log

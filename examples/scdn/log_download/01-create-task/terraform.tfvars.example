@@ -1,0 +1,26 @@
+access_key  = "YOUR_ACCESS_KEY"
+secret_key  = "YOUR_SECRET_KEY"
+endpoint    = "http://apiv5.prxcdn.com:60041"
+
+task_name       = "test-log-download-task"
+is_use_template = 0
+data_source     = "ng"
+download_fields = [
+  "http_host",
+  "city",
+  "country",
+  "province",
+  "remote_addr",
+  "request_url"
+]
+search_terms = [
+  {
+    key   = "http_host"
+    value = "example.com"
+  }
+]
+file_type  = "xls"
+start_time = "2024-01-01 00:00:00"
+end_time   = "2024-01-02 00:00:00"
+lang       = "zh_CN"
+

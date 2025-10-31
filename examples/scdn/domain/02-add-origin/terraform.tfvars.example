@@ -1,0 +1,7 @@
+access_key  = "your-access-key-here"
+secret_key  = "your-secret-key-here"
+endpoint    = "https://api.edgenextscdn.com"
+domain_id   = 12345  # Replace with your domain ID from Example 1
+origin_ip   = "5.6.7.8"
+origin_port = 80
+priority    = 15

@@ -1,0 +1,17 @@
+access_key   = "your_access_key"
+secret_key   = "your_secret_key"
+endpoint     = "https://api.edgenextscdn.com"
+business_id  = 1246
+business_type = "tpl"
+
+# config_group 可选值：
+# - "custom_page": 错误页面定制
+# - "upstream_uri_change_rule": 回源URI改写
+# - "resp_headers_rule": 自定义响应头
+# - "customized_req_headers_rule": 自定义回源请求头
+config_group  = "customized_req_headers_rule"
+
+# Rule IDs to sort (order matters - rules will be sorted in this exact order)
+# Example: If you have rules with IDs [607, 608, 609] and want to reverse the order:
+rule_ids = [609, 608, 607]
+

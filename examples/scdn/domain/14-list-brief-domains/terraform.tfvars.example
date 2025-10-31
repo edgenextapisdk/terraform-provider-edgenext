@@ -1,0 +1,4 @@
+access_key = "your-access-key-here"
+secret_key = "your-secret-key-here"
+endpoint   = "https://api.edgenextscdn.com"
+# domain_ids = [12345, 67890]  # Optional: specify domain IDs, or leave empty to query all

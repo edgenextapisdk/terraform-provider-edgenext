@@ -1,0 +1,11 @@
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://api.edgenextscdn.com"
+
+task_id  = 2085
+page     = 1
+per_page = 20
+
+# Optional filter
+# result = 1
+

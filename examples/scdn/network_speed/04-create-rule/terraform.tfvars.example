@@ -1,0 +1,15 @@
+access_key   = "your_access_key_here"
+secret_key   = "your_secret_key_here"
+endpoint     = "https://api.edgenextscdn.com"
+business_id  = 777
+business_type = "tpl"
+config_group  = "customized_req_headers_rule"
+
+# Customized request headers rule configuration
+customized_req_headers_rule = {
+  type    = "User-Agent"
+  content = "test-content"
+  remark  = "test-remark"
+}
+
+
