@@ -131,3 +131,31 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_oss_object`](data-sources/oss_object) - Query OSS object details
 * [`edgenext_oss_objects`](data-sources/oss_objects) - Query OSS objects
 
+
+### Object Storage Service(OSS)
+
+
+#### Resources
+
+
+* [`edgenext_oss_bucket`](resources/oss_bucket) - Manage OSS buckets
+
+* [`edgenext_oss_object`](resources/oss_object) - Manage OSS objects
+
+* [`edgenext_oss_object_copy`](resources/oss_object_copy) - Manage OSS object copy
+
+
+
+
+#### Data Sources
+
+
+* [`edgenext_oss_buckets`](data-sources/oss_buckets) - Query OSS buckets
+
+* [`edgenext_oss_object`](data-sources/oss_object) - Query OSS object details
+
+* [`edgenext_oss_objects`](data-sources/oss_objects) - Query OSS objects
+
+
+
+
