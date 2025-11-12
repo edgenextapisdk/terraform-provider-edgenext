@@ -22,7 +22,7 @@ func DataSourceEdgenextSslCertificate() *schema.Resource {
 				Required:    true,
 				Description: "Certificate ID",
 			},
-			"result_output_file": {
+			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results.",
@@ -67,7 +67,7 @@ func DataSourceEdgenextSslCertificate() *schema.Resource {
 }
 
 func dataSourceSslCertificateRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewSslCertificateService(client)
 
 	certID := d.Get("cert_id").(string)
@@ -97,7 +97,7 @@ func dataSourceSslCertificateRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("cert_expire_time", foundCert.CertExpireTime)
 
 	// Write result to output file if specified
-	if outputFile := d.Get("result_output_file").(string); outputFile != "" {
+	if outputFile := d.Get("output_file").(string); outputFile != "" {
 		outputData := map[string]interface{}{
 			"cert_id":          foundCert.CertID,
 			"name":             foundCert.Name,
@@ -158,7 +158,7 @@ func DataSourceEdgenextSslCertificates() *schema.Resource {
 					return diags
 				},
 			},
-			"result_output_file": {
+			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results.",
@@ -213,7 +213,7 @@ func DataSourceEdgenextSslCertificates() *schema.Resource {
 }
 
 func dataSourceSslCertificatesRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewSslCertificateService(client)
 
 	log.Printf("[INFO] Querying all SSL certificates")
@@ -250,7 +250,7 @@ func dataSourceSslCertificatesRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	// Write result to output file if specified
-	if outputFile := d.Get("result_output_file").(string); outputFile != "" {
+	if outputFile := d.Get("output_file").(string); outputFile != "" {
 		outputData := map[string]interface{}{
 			"page_number": pageNumber,
 			"page_size":   pageSize,

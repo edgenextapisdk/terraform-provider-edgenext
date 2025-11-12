@@ -20,7 +20,7 @@ func DataSourceEdgenextCdnPush() *schema.Resource {
 				Optional:    true,
 				Description: "Task ID for querying the refresh status of a specific task",
 			},
-			"result_output_file": {
+			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results.",
@@ -101,7 +101,7 @@ func DataSourceEdgenextCdnPush() *schema.Resource {
 }
 
 func dataSourcePushRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	taskID := d.Get("task_id").(string)
@@ -146,7 +146,7 @@ func dataSourcePushRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Write result to output file if specified
-	if outputFile := d.Get("result_output_file").(string); outputFile != "" {
+	if outputFile := d.Get("output_file").(string); outputFile != "" {
 		outputData := map[string]interface{}{
 			"task_id": taskID,
 			"total":   response.Data.Total,
@@ -182,7 +182,7 @@ func DataSourceEdgenextCdnPushes() *schema.Resource {
 				Optional:    true,
 				Description: "URL",
 			},
-			"result_output_file": {
+			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results.",
@@ -248,7 +248,7 @@ func DataSourceEdgenextCdnPushes() *schema.Resource {
 }
 
 func dataSourcePushesRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	startTime := d.Get("start_time").(string)
@@ -294,7 +294,7 @@ func dataSourcePushesRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Write result to output file if specified
-	if outputFile := d.Get("result_output_file").(string); outputFile != "" {
+	if outputFile := d.Get("output_file").(string); outputFile != "" {
 		outputData := map[string]interface{}{
 			"start_time":  startTime,
 			"end_time":    endTime,

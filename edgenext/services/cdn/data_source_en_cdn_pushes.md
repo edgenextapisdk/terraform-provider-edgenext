@@ -8,7 +8,7 @@ Query CDN push tasks by time range
 data "edgenext_cdn_pushes" "example" {
   start_time = "2024-01-01"
   end_time   = "2024-01-31"
-  result_output_file = "push_tasks.json"
+  output_file = "push_tasks.json"
 }
 ```
 
@@ -21,6 +21,6 @@ data "edgenext_cdn_pushes" "example" {
   url         = "https://example.com/static/"
   page_number = "1"
   page_size   = "50"
-  result_output_file = "push_tasks.json"
+  output_file = "push_tasks.json"
 }
 ```

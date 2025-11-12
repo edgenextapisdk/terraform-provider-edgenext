@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/cdn"
+	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/oss"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/ssl"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -18,34 +18,32 @@ import (
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"api_key": {
+			// Unified authentication fields
+			"access_key": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "EdgeNext API key for authentication",
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("EDGENEXT_ACCESS_KEY", nil),
+				Description: "EdgeNext access key for authentication",
 				Sensitive:   true,
 			},
-			"secret": {
+			"secret_key": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "EdgeNext secret for authentication",
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("EDGENEXT_SECRET_KEY", nil),
+				Description: "EdgeNext secret key for authentication",
 				Sensitive:   true,
 			},
 			"endpoint": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("EDGENEXT_ENDPOINT", nil),
 				Description: "EdgeNext API endpoint address",
 			},
-			"timeout": {
-				Type:        schema.TypeInt,
+			"region": {
+				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     300,
-				Description: "API request timeout in seconds",
-			},
-			"retry_count": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     3,
-				Description: "API request retry count",
+				DefaultFunc: schema.EnvDefaultFunc("EDGENEXT_REGION", nil),
+				Description: "EdgeNext region",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -58,6 +56,12 @@ func Provider() *schema.Provider {
 
 			// SSL certificate management resources
 			"edgenext_ssl_certificate": ssl.ResourceEdgenextSslCertificate(),
+
+			// OSS object storage resources
+			"edgenext_oss_bucket": oss.ResourceOSSBucket(),
+			// OSS object management resources
+			"edgenext_oss_object":      oss.ResourceOSSObject(),
+			"edgenext_oss_object_copy": oss.ResourceOSSObjectCopy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 
@@ -76,6 +80,13 @@ func Provider() *schema.Provider {
 			// SSL certificate data sources
 			"edgenext_ssl_certificate":  ssl.DataSourceEdgenextSslCertificate(),
 			"edgenext_ssl_certificates": ssl.DataSourceEdgenextSslCertificates(),
+
+			// OSS bucket management data sources
+			"edgenext_oss_buckets": oss.DataSourceOSSBuckets(),
+			// OSS object management data sources
+			"edgenext_oss_objects": oss.DataSourceOSSObjects(),
+			// OSS object management data sources
+			"edgenext_oss_object": oss.DataSourceOSSObject(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
@@ -86,24 +97,31 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	var diags diag.Diagnostics
 
 	// Get configuration parameters
-	apiKey := d.Get("api_key").(string)
-	secret := d.Get("secret").(string)
+	accessKey := d.Get("access_key").(string)
+	secretKey := d.Get("secret_key").(string)
 	endpoint := d.Get("endpoint").(string)
-	timeout := d.Get("timeout").(int)
-	retryCount := d.Get("retry_count").(int)
+	region := d.Get("region").(string)
 
-	// Validate configuration parameters
-	if err := validateProviderConfig(apiKey, secret, endpoint); err != nil {
+	// Validate that at least access_key and secret_key are provided
+	if accessKey == "" || secretKey == "" || endpoint == "" {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "Provider configuration validation failed",
-			Detail:   err.Error(),
+			Detail:   "access_key, secret_key and endpoint are required",
 		})
 		return nil, diags
 	}
 
-	// Create client instance
-	client, err := createClient(apiKey, secret, endpoint, timeout, retryCount)
+	// Create config
+	config := &connectivity.Config{
+		AccessKey: accessKey,
+		SecretKey: secretKey,
+		Endpoint:  endpoint,
+		Region:    region,
+	}
+
+	// Create client
+	client, err := config.Client()
 	if err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Error,
@@ -113,105 +131,16 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return nil, diags
 	}
 
-	// Test connection
-	// if err := testConnection(ctx, client); err != nil {
-	// 	diags = append(diags, diag.Diagnostic{
-	// 		Severity: diag.Warning,
-	// 		Summary:  "Connection test failed",
-	// 		Detail:   fmt.Sprintf("Unable to connect to EdgeNext API: %v", err),
-	// 	})
-	// 	// Connection test failure doesn't block provider from continuing, only shows warning
-	// }
-
 	return client, diags
 }
 
-// validateProviderConfig validates provider configuration parameters
-func validateProviderConfig(apiKey, secret, endpoint string) error {
-	// Validate API key
-	if strings.TrimSpace(apiKey) == "" {
-		return fmt.Errorf("API key cannot be empty")
-	}
-	if len(apiKey) < 8 {
-		return fmt.Errorf("API key length cannot be less than 8 characters")
-	}
-
-	// Validate secret
-	if strings.TrimSpace(secret) == "" {
-		return fmt.Errorf("secret cannot be empty")
-	}
-	if len(secret) < 8 {
-		return fmt.Errorf("secret length cannot be less than 8 characters")
-	}
-
-	// Validate endpoint
-	if strings.TrimSpace(endpoint) == "" {
-		return fmt.Errorf("API endpoint cannot be empty")
-	}
-	if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
-		return fmt.Errorf("API endpoint must start with http:// or https://")
-	}
-
-	return nil
-}
-
-// createClient creates an EdgeNext client instance
-func createClient(apiKey, secret, endpoint string, timeout, retryCount int) (*connectivity.Client, error) {
-	// Create base client
-	client := connectivity.NewClient(apiKey, secret, endpoint)
-
-	// Configure timeout settings
-	if timeout > 0 {
-		client.SetTimeout(time.Duration(timeout) * time.Second)
-	}
-
-	// Configure retry settings
-	if retryCount > 0 {
-		client.SetRetryCount(retryCount)
-	}
-
-	// Configure retry wait time
-	client.SetRetryWaitTime(1 * time.Second)
-	client.SetRetryMaxWaitTime(10 * time.Second)
-
-	return client, nil
-}
-
-// testConnection tests the connection to EdgeNext API
-func testConnection(ctx context.Context, client *connectivity.Client) error {
-	// Try to send a simple health check request
-	// This can be adjusted based on the actual API endpoint
-	var response interface{}
-	err := client.Get(ctx, "/health", &response)
-	if err != nil {
-		return fmt.Errorf("connection test failed: %w", err)
-	}
-	return nil
-}
-
 // GetClient gets the client instance from provider configuration
-func GetClient(meta interface{}) (*connectivity.Client, error) {
-	client, ok := meta.(*connectivity.Client)
+func GetClient(meta interface{}) (*connectivity.EdgeNextClient, error) {
+	client, ok := meta.(*connectivity.EdgeNextClient)
 	if !ok {
 		return nil, fmt.Errorf("invalid client type: %T", meta)
 	}
 	return client, nil
-}
-
-// GetClientWithContext gets the client instance from provider configuration (with context)
-func GetClientWithContext(ctx context.Context, meta interface{}) (*connectivity.Client, error) {
-	client, err := GetClient(meta)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check if context is cancelled
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	default:
-		return client, nil
-	}
 }
 
 // IsNotFoundError checks if it's a "not found" error

@@ -120,7 +120,7 @@ The generator performs validation on:
 
 - Description format and ending punctuation
 - Required vs optional parameter definitions
-- Data source `result_output_file` parameter requirement
+- Data source `output_file` parameter requirement
 - Schema consistency
 
 ## Template System

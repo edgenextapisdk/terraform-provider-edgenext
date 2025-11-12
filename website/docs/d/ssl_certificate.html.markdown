@@ -1,5 +1,5 @@
 ---
-subcategory: "SSL Certificate Management(SSL)"
+subcategory: "SSL Certificate Management (SSL)"
 layout: "edgenext"
 page_title: "EdgeNext: edgenext_ssl_certificate"
 sidebar_current: "docs-edgenext-datasource-ssl_certificate"
@@ -17,8 +17,8 @@ Use this data source to query detailed information of SSL certificate.
 
 ```hcl
 data "edgenext_ssl_certificate" "example" {
-  cert_id            = "ssl-cert-123456"
-  result_output_file = "ssl_cert.json"
+  cert_id     = "ssl-cert-123456"
+  output_file = "ssl_cert.json"
 }
 ```
 
@@ -35,7 +35,7 @@ data "edgenext_ssl_certificate" "example" {
 The following arguments are supported:
 
 * `cert_id` - (Required, String) Certificate ID
-* `result_output_file` - (Optional, String) Used to save results.
+* `output_file` - (Optional, String) Used to save results.
 
 ## Attributes Reference
 

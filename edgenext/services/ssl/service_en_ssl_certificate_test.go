@@ -151,28 +151,26 @@ func createMockServer() *httptest.Server {
 }
 
 // Helper function to create test service with mock server
-func createTestService() (*SslCertificateService, *httptest.Server) {
-	server := createMockServer()
-
-	// For testing purposes, we'll create the service directly with mock client
-	service := createTestServiceWithMockClient(server)
-
-	return service, server
-}
-
-// createTestServiceWithMockClient creates a service with properly mocked client
-func createTestServiceWithMockClient(server *httptest.Server) *SslCertificateService {
-	// Create a custom connectivity client that uses our test server
-	// We'll create a wrapper around the real client but override its base URL
-	client := connectivity.NewClient("test-key", "test-secret", server.URL)
-
-	return &SslCertificateService{
-		client: client,
+func createTestService(server *httptest.Server) *SslCertificateService {
+	// Create EdgeNextClient with mock API client
+	config := &connectivity.Config{
+		AccessKey: "test-key",
+		SecretKey: "test-secret",
+		Endpoint:  server.URL,
 	}
+
+	client, _ := config.Client()
+
+	return NewSslCertificateService(client)
 }
 
 func TestNewSslCertificateService(t *testing.T) {
-	client := &connectivity.Client{}
+	config := &connectivity.Config{
+		AccessKey: "test-key",
+		SecretKey: "test-secret",
+		Endpoint:  "http://test.example.com",
+	}
+	client, _ := config.Client()
 	service := NewSslCertificateService(client)
 
 	if service == nil {
@@ -188,7 +186,7 @@ func TestCreateOrUpdateSslCertificate(t *testing.T) {
 	server := createMockServer()
 	defer server.Close()
 
-	service := createTestServiceWithMockClient(server)
+	service := createTestService(server)
 
 	t.Run("SuccessfulCreate", func(t *testing.T) {
 		req := SslCertificateRequest{
@@ -250,7 +248,6 @@ func TestCreateOrUpdateSslCertificate(t *testing.T) {
 			t.Fatal("Expected error for invalid certificate, got nil")
 		}
 
-		// Check that error contains expected information about invalid certificate
 		errorMsg := err.Error()
 		if errorMsg == "" {
 			t.Fatal("Expected non-empty error message")
@@ -276,7 +273,7 @@ func TestGetSslCertificate(t *testing.T) {
 	server := createMockServer()
 	defer server.Close()
 
-	service := createTestServiceWithMockClient(server)
+	service := createTestService(server)
 
 	t.Run("SuccessfulGet", func(t *testing.T) {
 		certID := 12345
@@ -311,7 +308,6 @@ func TestGetSslCertificate(t *testing.T) {
 			t.Fatal("Expected error for non-existent certificate, got nil")
 		}
 
-		// Check that error contains expected information about certificate not found
 		errorMsg := err.Error()
 		if errorMsg == "" {
 			t.Fatal("Expected non-empty error message")
@@ -331,7 +327,6 @@ func TestGetSslCertificate(t *testing.T) {
 			t.Fatalf("Expected response code 0, got: %d", response.Code)
 		}
 
-		// Verify certificate data structure
 		if response.Data.Certificate == "" {
 			t.Fatal("Expected certificate content to be populated")
 		}
@@ -354,7 +349,7 @@ func TestListSslCertificates(t *testing.T) {
 	server := createMockServer()
 	defer server.Close()
 
-	service := createTestServiceWithMockClient(server)
+	service := createTestService(server)
 
 	t.Run("SuccessfulList", func(t *testing.T) {
 		pageNumber := 1
@@ -381,7 +376,6 @@ func TestListSslCertificates(t *testing.T) {
 			t.Fatalf("Expected list length to match total number: %d vs %d", len(response.Data.List), response.Data.TotalNumber)
 		}
 
-		// Verify certificate data structure
 		for _, cert := range response.Data.List {
 			if cert.CertID == "" {
 				t.Fatal("Expected certificate ID to be populated")
@@ -448,7 +442,7 @@ func TestDeleteSslCertificate(t *testing.T) {
 	server := createMockServer()
 	defer server.Close()
 
-	service := createTestServiceWithMockClient(server)
+	service := createTestService(server)
 
 	t.Run("SuccessfulDelete", func(t *testing.T) {
 		req := DeleteSslCertificateRequest{
@@ -471,7 +465,6 @@ func TestDeleteSslCertificate(t *testing.T) {
 			t.Fatal("Expected error for non-existent certificate, got nil")
 		}
 
-		// Check that error contains expected information about certificate not found
 		errorMsg := err.Error()
 		if errorMsg == "" {
 			t.Fatal("Expected non-empty error message")
@@ -502,7 +495,7 @@ func BenchmarkCreateOrUpdateSslCertificate(b *testing.B) {
 	server := createMockServer()
 	defer server.Close()
 
-	service := createTestServiceWithMockClient(server)
+	service := createTestService(server)
 
 	req := SslCertificateRequest{
 		Name:        "benchmark-certificate",
@@ -523,7 +516,7 @@ func BenchmarkGetSslCertificate(b *testing.B) {
 	server := createMockServer()
 	defer server.Close()
 
-	service := createTestServiceWithMockClient(server)
+	service := createTestService(server)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -538,7 +531,7 @@ func BenchmarkListSslCertificates(b *testing.B) {
 	server := createMockServer()
 	defer server.Close()
 
-	service := createTestServiceWithMockClient(server)
+	service := createTestService(server)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -553,7 +546,7 @@ func BenchmarkDeleteSslCertificate(b *testing.B) {
 	server := createMockServer()
 	defer server.Close()
 
-	service := createTestServiceWithMockClient(server)
+	service := createTestService(server)
 
 	req := DeleteSslCertificateRequest{
 		CertID: 12345,
@@ -568,54 +561,12 @@ func BenchmarkDeleteSslCertificate(b *testing.B) {
 	}
 }
 
-// Integration-style tests (can be run against real API when available)
-func TestSslCertificateServiceIntegration(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
-	}
-
-	// These tests would run against a real API endpoint
-	// Uncomment and configure when real API is available
-
-	/*
-		client := connectivity.NewClient("real-api-key", "real-secret", "https://real-api-endpoint.com")
-		service := NewSslCertificateService(client)
-
-		t.Run("RealAPICreateAndDelete", func(t *testing.T) {
-			// Test against real API
-			req := SslCertificateRequest{
-				Name:        "integration-test-cert",
-				Certificate: "real-certificate-content",
-				Key:         "real-key-content",
-			}
-
-			// Create certificate
-			response, err := service.CreateOrUpdateSslCertificate(req)
-			if err != nil {
-				t.Fatalf("Failed to create certificate: %v", err)
-			}
-
-			certID, _ := strconv.Atoi(response.Data.CertID)
-
-			// Clean up - delete certificate
-			deleteReq := DeleteSslCertificateRequest{
-				CertID: certID,
-			}
-
-			err = service.DeleteSslCertificate(deleteReq)
-			if err != nil {
-				t.Fatalf("Failed to delete certificate: %v", err)
-			}
-		})
-	*/
-}
-
 // Table-driven tests for error scenarios
 func TestSslCertificateServiceErrorScenarios(t *testing.T) {
 	server := createMockServer()
 	defer server.Close()
 
-	service := createTestServiceWithMockClient(server)
+	service := createTestService(server)
 
 	errorTests := []struct {
 		name        string
@@ -669,8 +620,6 @@ func TestSslCertificateServiceErrorScenarios(t *testing.T) {
 
 			if tt.expectError && err != nil {
 				if tt.errorMsg != "" && err.Error() != "" {
-					// Check if error message contains expected text
-					// (exact match might be too strict due to error wrapping)
 					t.Logf("Error message: %s", err.Error())
 				}
 			}

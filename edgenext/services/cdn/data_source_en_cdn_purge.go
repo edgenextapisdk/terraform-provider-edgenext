@@ -20,7 +20,7 @@ func DataSourceEdgenextCdnPurge() *schema.Resource {
 				Required:    true,
 				Description: "Task ID for querying the purge status of a specific task",
 			},
-			"result_output_file": {
+			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results.",
@@ -69,7 +69,7 @@ func DataSourceEdgenextCdnPurge() *schema.Resource {
 }
 
 func dataSourcePurgeRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	taskID := d.Get("task_id").(string)
@@ -113,7 +113,7 @@ func dataSourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Write result to output file if specified
-	if outputFile := d.Get("result_output_file").(string); outputFile != "" {
+	if outputFile := d.Get("output_file").(string); outputFile != "" {
 		outputData := map[string]interface{}{
 			"task_id": taskID,
 			"total":   response.Data.Total,
@@ -161,7 +161,7 @@ func DataSourceEdgenextCdnPurges() *schema.Resource {
 				Default:     "50",
 				Description: "Page size, default 50, range 1-500",
 			},
-			"result_output_file": {
+			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results.",
@@ -210,7 +210,7 @@ func DataSourceEdgenextCdnPurges() *schema.Resource {
 }
 
 func dataSourcePurgesRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	startTime := d.Get("start_time").(string)
@@ -254,7 +254,7 @@ func dataSourcePurgesRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Write result to output file if specified
-	if outputFile := d.Get("result_output_file").(string); outputFile != "" {
+	if outputFile := d.Get("output_file").(string); outputFile != "" {
 		outputData := map[string]interface{}{
 			"start_time":  startTime,
 			"end_time":    endTime,

@@ -51,11 +51,11 @@ func (fi FlexibleInt) Int() int {
 
 // CdnService CDN domain service
 type CdnService struct {
-	client *connectivity.Client
+	client *connectivity.EdgeNextClient
 }
 
 // NewCdnService creates a new CDN domain service instance
-func NewCdnService(client *connectivity.Client) *CdnService {
+func NewCdnService(client *connectivity.EdgeNextClient) *CdnService {
 	return &CdnService{client: client}
 }
 
@@ -138,7 +138,11 @@ func (c *CdnService) CreateDomain(req DomainCreateRequest) (*DomainResponse, err
 	ctx := context.Background()
 
 	var response DomainResponse
-	err := c.client.Post(ctx, "/v2/domain", req, &response)
+	apiClient, err := c.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create CDN domain: %w", err)
+	}
+	err = apiClient.Post(ctx, "/v2/domain", req, &response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create CDN domain: %w", err)
 	}
@@ -159,7 +163,11 @@ func (c *CdnService) GetDomain(domains string) (*GetDomainResponse, error) {
 	}
 
 	var response GetDomainResponse
-	err := c.client.GetWithQuery(ctx, "/v2/domain", query, &response)
+	apiClient, err := c.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to query domain details: %w", err)
+	}
+	err = apiClient.GetWithQuery(ctx, "/v2/domain", query, &response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query domain details: %w", err)
 	}
@@ -182,7 +190,11 @@ func (c *CdnService) ListDomains(req DomainListRequest) (*DomainListResponse, er
 	}
 
 	var response DomainListResponse
-	err := c.client.GetWithQuery(ctx, "/v2/domain/list", query, &response)
+	apiClient, err := c.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to query domain list: %w", err)
+	}
+	err = apiClient.GetWithQuery(ctx, "/v2/domain/list", query, &response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query domain list: %w", err)
 	}
@@ -201,7 +213,11 @@ func (c *CdnService) DeleteDomain(domains string) error {
 	var response DeleteDomainResponse
 	path := fmt.Sprintf("/v2/domain?domains=%s", domains)
 	// Delete domain API
-	err := c.client.Delete(ctx, path, &response)
+	apiClient, err := c.client.APIClient()
+	if err != nil {
+		return fmt.Errorf("failed to delete domain: %w", err)
+	}
+	err = apiClient.Delete(ctx, path, &response)
 	if err != nil {
 		return fmt.Errorf("failed to delete domain: %w", err)
 	}
@@ -460,7 +476,11 @@ func (c *CdnService) SetDomainConfig(domains string, config map[string]interface
 	}
 
 	var response DomainConfigResponse
-	err := c.client.Post(ctx, "/v2/domain/config", requestBody, &response)
+	apiClient, err := c.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to set domain config: %w", err)
+	}
+	err = apiClient.Post(ctx, "/v2/domain/config", requestBody, &response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to set domain config: %w", err)
 	}
@@ -485,7 +505,14 @@ func (c *CdnService) GetDomainConfig(domains string, config []string) (*GetDomai
 	}
 
 	var response GetDomainConfigResponse
-	err := c.client.Get(ctx, path, &response)
+	apiClient, err := c.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to query domain configuration: %w", err)
+	}
+	err = apiClient.Get(ctx, path, &response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query domain configuration: %w", err)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to query domain configuration: %w", err)
 	}
@@ -502,7 +529,14 @@ func (c *CdnService) DeleteDomainConfig(req DeleteDomainConfigRequest) error {
 	ctx := context.Background()
 
 	var response DeleteDomainConfigResponse
-	err := c.client.DeleteWithBodyAndResult(ctx, "/v2/domain/config", req, &response)
+	apiClient, err := c.client.APIClient()
+	if err != nil {
+		return fmt.Errorf("failed to delete domain configuration: %w", err)
+	}
+	err = apiClient.DeleteWithBodyAndResult(ctx, "/v2/domain/config", req, &response)
+	if err != nil {
+		return fmt.Errorf("failed to delete domain configuration: %w", err)
+	}
 	if err != nil {
 		return fmt.Errorf("failed to delete domain configuration: %w", err)
 	}
@@ -594,7 +628,14 @@ func (c *CdnService) CacheRefresh(urls []string, refreshType string) (*CacheRefr
 	}
 
 	var response CacheRefreshResponse
-	err := c.client.Post(ctx, "/v2/cache/refresh", requestBody, &response)
+	apiClient, err := c.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("cache refresh failed: %w", err)
+	}
+	err = apiClient.Post(ctx, "/v2/cache/refresh", requestBody, &response)
+	if err != nil {
+		return nil, fmt.Errorf("cache refresh failed: %w", err)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("cache refresh failed: %w", err)
 	}
@@ -636,7 +677,14 @@ func (c *CdnService) QueryCacheRefresh(req CacheRefreshQueryRequest) (*CacheRefr
 	}
 
 	var response CacheRefreshQueryResponse
-	err := c.client.GetWithQuery(ctx, "/v2/cache/refresh", query, &response)
+	apiClient, err := c.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to query cache refresh status: %w", err)
+	}
+	err = apiClient.GetWithQuery(ctx, "/v2/cache/refresh", query, &response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query cache refresh status: %w", err)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to query cache refresh status: %w", err)
 	}
@@ -764,7 +812,14 @@ func (c *CdnService) FilePurge(urls []string) (*FilePurgeResponse, error) {
 	}
 
 	var response FilePurgeResponse
-	err := c.client.Post(ctx, "/v2/cache/prefetch", requestBody, &response)
+	apiClient, err := c.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("file purge failed: %w", err)
+	}
+	err = apiClient.Post(ctx, "/v2/cache/prefetch", requestBody, &response)
+	if err != nil {
+		return nil, fmt.Errorf("file purge failed: %w", err)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("file purge failed: %w", err)
 	}
@@ -806,13 +861,17 @@ func (c *CdnService) QueryFilePurge(req FilePurgeQueryRequest) (*FilePurgeQueryR
 	}
 
 	var response FilePurgeQueryResponse
-	err := c.client.GetWithQuery(ctx, "/v2/cache/prefetch", query, &response)
+	apiClient, err := c.client.APIClient()
 	if err != nil {
-		return nil, fmt.Errorf("failed to query file purge status: %w", err)
+		return nil, fmt.Errorf("failed to query file purge: %w", err)
+	}
+	err = apiClient.GetWithQuery(ctx, "/v2/cache/prefetch", query, &response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query file purge: %w", err)
 	}
 
 	if response.Code != 0 {
-		return nil, fmt.Errorf("failed to query file purge status: %s", response.Msg)
+		return nil, fmt.Errorf("failed to query file purge: %s", response.Msg)
 	}
 
 	return &response, nil

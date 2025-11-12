@@ -65,9 +65,9 @@ func MergeMap(dst, src map[string]interface{}) map[string]interface{} {
 	return dst
 }
 
-// WriteToFile writes data to the specified file in JSON format if result_output_file is provided
+// WriteToFile writes data to the specified file in JSON format if output_file is provided
 func WriteToFile(d *schema.ResourceData, data interface{}) error {
-	outputFile := d.Get("result_output_file").(string)
+	outputFile := d.Get("output_file").(string)
 	if outputFile == "" {
 		return nil
 	}

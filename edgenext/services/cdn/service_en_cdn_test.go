@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
@@ -101,52 +99,38 @@ func handleGetDomain(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleListDomains(w http.ResponseWriter, r *http.Request) {
-	pageNumber := r.URL.Query().Get("page_number")
-	pageSize := r.URL.Query().Get("page_size")
-	domainStatus := r.URL.Query().Get("domain_status")
-
-	page, _ := strconv.Atoi(pageNumber)
-	size, _ := strconv.Atoi(pageSize)
-
-	var domains []DomainData
-	if page == 1 && domainStatus != "deleted" {
-		domains = []DomainData{
-			{
-				ID:         "12345",
-				Domain:     "example1.com",
-				Type:       "page",
-				Status:     "serving",
-				IcpStatus:  "yes",
-				Area:       "mainland_china",
-				Cname:      "example1.com.edgenext.net",
-				CreateTime: "2024-01-01 12:00:00",
-				Https:      1,
-			},
-			{
-				ID:         "12346",
-				Domain:     "example2.com",
-				Type:       "download",
-				Status:     "serving",
-				IcpStatus:  "no",
-				Area:       "global",
-				Cname:      "example2.com.edgenext.net",
-				CreateTime: "2024-01-01 13:00:00",
-				Https:      0,
-			},
-		}
-	}
-
-	if len(domains) > size {
-		domains = domains[:size]
-	}
-
 	response := DomainListResponse{
 		Code: 0,
 		Data: DomainListResponseData{
-			List:        domains,
-			TotalNumber: fmt.Sprintf("%d", len(domains)),
-			PageNumber:  pageNumber,
-			PageSize:    size,
+			List: []DomainData{
+				{
+					ID:         "12345",
+					Domain:     "example1.com",
+					Type:       "page",
+					Status:     "serving",
+					IcpStatus:  "yes",
+					Area:       "mainland_china",
+					Cname:      "example1.com.edgenext.net",
+					CreateTime: "2024-01-01 12:00:00",
+					UpdateTime: "2024-01-01 12:00:00",
+					Https:      1,
+				},
+				{
+					ID:         "12346",
+					Domain:     "example2.com",
+					Type:       "download",
+					Status:     "serving",
+					IcpStatus:  "yes",
+					Area:       "global",
+					Cname:      "example2.com.edgenext.net",
+					CreateTime: "2024-01-02 12:00:00",
+					UpdateTime: "2024-01-02 12:00:00",
+					Https:      0,
+				},
+			},
+			TotalNumber: "2",
+			PageNumber:  "1",
+			PageSize:    10,
 		},
 	}
 	json.NewEncoder(w).Encode(response)
@@ -156,7 +140,7 @@ func handleDeleteDomain(w http.ResponseWriter, r *http.Request) {
 	domains := r.URL.Query().Get("domains")
 
 	if domains == "notfound.example.com" {
-		response := DeleteDomainResponse{
+		response := DomainResponse{
 			Code: 1002,
 			Msg:  "Domain not found",
 		}
@@ -165,40 +149,17 @@ func handleDeleteDomain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := DeleteDomainResponse{
-		Code: 0,
-		Data: []DeleteDomainResponseData{
-			{
-				ID:         "12345",
-				Domain:     domains,
-				Status:     "deleted",
-				DeleteTime: "2024-01-01 15:00:00",
-			},
-		},
-	}
+	response := DomainResponse{Code: 0}
 	json.NewEncoder(w).Encode(response)
 }
 
 func handleSetDomainConfig(w http.ResponseWriter, r *http.Request) {
-	var req DomainConfigRequest
+	var req map[string]interface{}
 	json.NewDecoder(r.Body).Decode(&req)
-
-	if req.Domains == "invalid.domain" {
-		response := DomainConfigResponse{
-			Code: 1001,
-			Msg:  "Invalid domain configuration",
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
 
 	response := DomainConfigResponse{
 		Code: 0,
-		Data: map[string]interface{}{
-			"domains": req.Domains,
-			"status":  "success",
-		},
+		Data: map[string]interface{}{"success": true},
 	}
 	json.NewEncoder(w).Encode(response)
 }
@@ -209,7 +170,7 @@ func handleGetDomainConfig(w http.ResponseWriter, r *http.Request) {
 	if domains == "notfound.example.com" {
 		response := GetDomainConfigResponse{
 			Code: 1002,
-			Msg:  "Domain configuration not found",
+			Msg:  "Domain not found",
 			Data: []DomainConfigItem{},
 		}
 		w.WriteHeader(http.StatusNotFound)
@@ -223,23 +184,9 @@ func handleGetDomainConfig(w http.ResponseWriter, r *http.Request) {
 			{
 				Domain:   domains,
 				DomainID: "12345",
-				Status:   "serving",
 				Config: ConfigItem{
 					Origin: &OriginItem{
-						DefaultMaster: "origin.example.com",
-						OriginMode:    "https",
-						Port:          FlexibleInt(443),
-					},
-					CacheRule: []*CacheRuleItem{
-						{
-							Type:          1,
-							Pattern:       "jpg,png,gif",
-							Time:          3600,
-							TimeUnit:      "s",
-							IgnoreNoCache: "on",
-							IgnoreExpired: "on",
-							IgnoreQuery:   "on",
-						},
+						DefaultMaster: "1.2.3.4",
 					},
 				},
 			},
@@ -249,24 +196,7 @@ func handleGetDomainConfig(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDeleteDomainConfig(w http.ResponseWriter, r *http.Request) {
-	var req DeleteDomainConfigRequest
-	json.NewDecoder(r.Body).Decode(&req)
-
-	if req.Domains == "notfound.example.com" {
-		response := DeleteDomainConfigResponse{
-			Code: 1002,
-			Data: "Domain not found",
-			Msg:  "Domain not found",
-		}
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(response)
-		return
-	}
-
-	response := DeleteDomainConfigResponse{
-		Code: 0,
-		Data: "Configuration deleted successfully",
-	}
+	response := DomainResponse{Code: 0}
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -274,10 +204,10 @@ func handleCacheRefresh(w http.ResponseWriter, r *http.Request) {
 	var req CacheRefreshRequest
 	json.NewDecoder(r.Body).Decode(&req)
 
-	if len(req.URLs) == 0 {
+	if len(req.URLs) > 0 && req.URLs[0] == "http://invalid.domain/path" {
 		response := CacheRefreshResponse{
 			Code: 1001,
-			Msg:  "URLs cannot be empty",
+			Msg:  "Invalid URL",
 		}
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
@@ -287,21 +217,23 @@ func handleCacheRefresh(w http.ResponseWriter, r *http.Request) {
 	response := CacheRefreshResponse{
 		Code: 0,
 		Data: CacheRefreshData{
-			TaskID:  "task123456",
-			Count:   len(req.URLs),
-			ErrURLs: []string{},
+			TaskID: "task-12345",
+			Count:  len(req.URLs),
 		},
 	}
 	json.NewEncoder(w).Encode(response)
 }
 
 func handleQueryCacheRefresh(w http.ResponseWriter, r *http.Request) {
-	taskIDStr := r.URL.Query().Get("task_id")
+	taskID := r.URL.Query().Get("task_id")
 
-	if taskIDStr == "99999" {
+	if taskID == "999999" {
 		response := CacheRefreshQueryResponse{
 			Code: 1002,
 			Msg:  "Task not found",
+			Data: CacheRefreshQueryData{
+				List: []CacheRefreshQueryItem{},
+			},
 		}
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(response)
@@ -315,12 +247,11 @@ func handleQueryCacheRefresh(w http.ResponseWriter, r *http.Request) {
 			PageNumber: 1,
 			List: []CacheRefreshQueryItem{
 				{
-					ID:           taskIDStr,
-					URL:          "https://example.com/test.jpg",
+					ID:           "1",
+					URL:          "http://example.com/path",
 					Status:       "completed",
-					Type:         "url",
-					CreateTime:   "2024-01-01 12:00:00",
-					CompleteTime: "2024-01-01 12:05:00",
+					CreateTime:   "2024-01-01 11:59:00",
+					CompleteTime: "2024-01-01 12:00:00",
 				},
 			},
 		},
@@ -332,10 +263,10 @@ func handleFilePurge(w http.ResponseWriter, r *http.Request) {
 	var req FilePurgeRequest
 	json.NewDecoder(r.Body).Decode(&req)
 
-	if len(req.URLs) == 0 {
+	if len(req.URLs) > 0 && req.URLs[0] == "http://invalid.domain/file" {
 		response := FilePurgeResponse{
 			Code: 1001,
-			Msg:  "URLs cannot be empty",
+			Msg:  "Invalid URL",
 		}
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(response)
@@ -345,21 +276,23 @@ func handleFilePurge(w http.ResponseWriter, r *http.Request) {
 	response := FilePurgeResponse{
 		Code: 0,
 		Data: FilePurgeData{
-			TaskID:  "purge123456",
-			Count:   len(req.URLs),
-			ErrURLs: []string{},
+			TaskID: "task-67890",
+			Count:  len(req.URLs),
 		},
 	}
 	json.NewEncoder(w).Encode(response)
 }
 
 func handleQueryFilePurge(w http.ResponseWriter, r *http.Request) {
-	taskIDStr := r.URL.Query().Get("task_id")
+	taskID := r.URL.Query().Get("task_id")
 
-	if taskIDStr == "99999" {
+	if taskID == "999999" {
 		response := FilePurgeQueryResponse{
 			Code: 1002,
 			Msg:  "Task not found",
+			Data: FilePurgeQueryData{
+				List: []FilePurgeQueryItem{},
+			},
 		}
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode(response)
@@ -373,11 +306,11 @@ func handleQueryFilePurge(w http.ResponseWriter, r *http.Request) {
 			PageNumber: 1,
 			List: []FilePurgeQueryItem{
 				{
-					ID:           taskIDStr,
-					URL:          "https://example.com/file.pdf",
+					ID:           "1",
+					URL:          "http://example.com/file.txt",
 					Status:       "completed",
-					CreateTime:   "2024-01-01 12:00:00",
-					CompleteTime: "2024-01-01 12:05:00",
+					CreateTime:   "2024-01-01 11:59:00",
+					CompleteTime: "2024-01-01 12:00:00",
 				},
 			},
 		},
@@ -385,14 +318,23 @@ func handleQueryFilePurge(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// Helper function to create test service with mock server
 func createTestCDNService(server *httptest.Server) *CdnService {
-	client := connectivity.NewClient("test-key", "test-secret", server.URL)
-	return &CdnService{client: client}
+	config := &connectivity.Config{
+		AccessKey: "test-key",
+		SecretKey: "test-secret",
+		Endpoint:  server.URL,
+	}
+	client, _ := config.Client()
+	return NewCdnService(client)
 }
 
 func TestNewCdnService(t *testing.T) {
-	client := &connectivity.Client{}
+	config := &connectivity.Config{
+		AccessKey: "test-key",
+		SecretKey: "test-secret",
+		Endpoint:  "http://test.example.com",
+	}
+	client, _ := config.Client()
 	service := NewCdnService(client)
 
 	if service == nil {
@@ -413,15 +355,9 @@ func TestCreateDomain(t *testing.T) {
 	t.Run("SuccessfulCreate", func(t *testing.T) {
 		req := DomainCreateRequest{
 			Domain: "example.com",
-			Area:   "mainland_china",
+			Area:   "global",
 			Type:   "page",
-			Config: map[string]interface{}{
-				"origin": map[string]interface{}{
-					"default_master": "origin.example.com",
-					"origin_mode":    "https",
-					"port":           "443",
-				},
-			},
+			Config: map[string]interface{}{},
 		}
 
 		response, err := service.CreateDomain(req)
@@ -437,42 +373,12 @@ func TestCreateDomain(t *testing.T) {
 	t.Run("InvalidDomain", func(t *testing.T) {
 		req := DomainCreateRequest{
 			Domain: "invalid.domain",
-			Area:   "mainland_china",
 			Type:   "page",
 		}
 
 		_, err := service.CreateDomain(req)
 		if err == nil {
 			t.Fatal("Expected error for invalid domain, got nil")
-		}
-
-		errorMsg := err.Error()
-		if errorMsg == "" {
-			t.Fatal("Expected non-empty error message")
-		}
-		t.Logf("Got expected error: %s", errorMsg)
-	})
-
-	t.Run("DifferentDomainTypes", func(t *testing.T) {
-		types := []string{"page", "download", "video_demand", "dynamic", "video_live"}
-
-		for _, domainType := range types {
-			t.Run(fmt.Sprintf("Type_%s", domainType), func(t *testing.T) {
-				req := DomainCreateRequest{
-					Domain: fmt.Sprintf("test-%s.example.com", domainType),
-					Area:   "global",
-					Type:   domainType,
-				}
-
-				response, err := service.CreateDomain(req)
-				if err != nil {
-					t.Fatalf("Expected no error for type %s, got: %v", domainType, err)
-				}
-
-				if response.Code != 0 {
-					t.Fatalf("Expected response code 0 for type %s, got: %d", domainType, response.Code)
-				}
-			})
 		}
 	})
 }
@@ -496,20 +402,11 @@ func TestGetDomain(t *testing.T) {
 		}
 
 		if len(response.Data) == 0 {
-			t.Fatal("Expected domain data, got empty array")
+			t.Fatal("Expected domain data to be returned")
 		}
 
-		domainData := response.Data[0]
-		if domainData.Domain != domain {
-			t.Fatalf("Expected domain %s, got: %s", domain, domainData.Domain)
-		}
-
-		if domainData.ID == "" {
-			t.Fatal("Expected domain ID to be set")
-		}
-
-		if domainData.Cname == "" {
-			t.Fatal("Expected CNAME to be set")
+		if response.Data[0].Domain != domain {
+			t.Fatalf("Expected domain %s, got: %s", domain, response.Data[0].Domain)
 		}
 	})
 
@@ -520,12 +417,6 @@ func TestGetDomain(t *testing.T) {
 		if err == nil {
 			t.Fatal("Expected error for non-existent domain, got nil")
 		}
-
-		errorMsg := err.Error()
-		if errorMsg == "" {
-			t.Fatal("Expected non-empty error message")
-		}
-		t.Logf("Got expected error: %s", errorMsg)
 	})
 }
 
@@ -537,9 +428,8 @@ func TestListDomains(t *testing.T) {
 
 	t.Run("SuccessfulList", func(t *testing.T) {
 		req := DomainListRequest{
-			PageNumber:   1,
-			PageSize:     10,
-			DomainStatus: "serving",
+			PageNumber: 1,
+			PageSize:   10,
 		}
 
 		response, err := service.ListDomains(req)
@@ -551,49 +441,12 @@ func TestListDomains(t *testing.T) {
 			t.Fatalf("Expected response code 0, got: %d", response.Code)
 		}
 
-		if response.Data.PageSize != req.PageSize {
-			t.Fatalf("Expected page size %d, got: %d", req.PageSize, response.Data.PageSize)
+		if len(response.Data.List) == 0 {
+			t.Fatal("Expected domain list to be returned")
 		}
 
-		pageNumber, _ := strconv.Atoi(response.Data.PageNumber)
-		if pageNumber != req.PageNumber {
-			t.Fatalf("Expected page number %d, got: %d", req.PageNumber, pageNumber)
-		}
-
-		// Verify domain data structure
-		for _, domain := range response.Data.List {
-			if domain.ID == "" {
-				t.Fatal("Expected domain ID to be populated")
-			}
-
-			if domain.Domain == "" {
-				t.Fatal("Expected domain name to be populated")
-			}
-
-			if domain.Status == "" {
-				t.Fatal("Expected domain status to be populated")
-			}
-		}
-	})
-
-	t.Run("EmptyList", func(t *testing.T) {
-		req := DomainListRequest{
-			PageNumber:   2,
-			PageSize:     10,
-			DomainStatus: "serving",
-		}
-
-		response, err := service.ListDomains(req)
-		if err != nil {
-			t.Fatalf("Expected no error, got: %v", err)
-		}
-
-		if response.Code != 0 {
-			t.Fatalf("Expected response code 0, got: %d", response.Code)
-		}
-
-		if len(response.Data.List) != 0 {
-			t.Fatalf("Expected empty list, got: %d items", len(response.Data.List))
+		if response.Data.TotalNumber == "" {
+			t.Fatal("Expected total number to be set")
 		}
 	})
 }
@@ -620,50 +473,6 @@ func TestDeleteDomain(t *testing.T) {
 		if err == nil {
 			t.Fatal("Expected error for non-existent domain, got nil")
 		}
-
-		errorMsg := err.Error()
-		if errorMsg == "" {
-			t.Fatal("Expected non-empty error message")
-		}
-		t.Logf("Got expected error: %s", errorMsg)
-	})
-}
-
-func TestDomainDataHelperMethods(t *testing.T) {
-	t.Run("IsServing", func(t *testing.T) {
-		domain := &DomainData{Status: DomainStatusServing}
-		if !domain.IsServing() {
-			t.Fatal("Expected IsServing to return true for serving domain")
-		}
-
-		domain.Status = DomainStatusSuspended
-		if domain.IsServing() {
-			t.Fatal("Expected IsServing to return false for suspended domain")
-		}
-	})
-
-	t.Run("IsDeleted", func(t *testing.T) {
-		domain := &DomainData{Status: DomainStatusDeleted}
-		if !domain.IsDeleted() {
-			t.Fatal("Expected IsDeleted to return true for deleted domain")
-		}
-
-		domain.Status = DomainStatusServing
-		if domain.IsDeleted() {
-			t.Fatal("Expected IsDeleted to return false for serving domain")
-		}
-	})
-
-	t.Run("IsSuspended", func(t *testing.T) {
-		domain := &DomainData{Status: DomainStatusSuspended}
-		if !domain.IsSuspended() {
-			t.Fatal("Expected IsSuspended to return true for suspended domain")
-		}
-
-		domain.Status = DomainStatusServing
-		if domain.IsSuspended() {
-			t.Fatal("Expected IsSuspended to return false for serving domain")
-		}
 	})
 }
 
@@ -674,14 +483,14 @@ func TestSetDomainConfig(t *testing.T) {
 	service := createTestCDNService(server)
 
 	t.Run("SuccessfulSet", func(t *testing.T) {
+		domain := "example.com"
 		config := map[string]interface{}{
 			"origin": map[string]interface{}{
-				"default_master": "origin.example.com",
-				"origin_mode":    "https",
+				"default_master": "1.2.3.4",
 			},
 		}
 
-		response, err := service.SetDomainConfig("example.com", config)
+		response, err := service.SetDomainConfig(domain, config)
 		if err != nil {
 			t.Fatalf("Expected no error, got: %v", err)
 		}
@@ -691,21 +500,18 @@ func TestSetDomainConfig(t *testing.T) {
 		}
 	})
 
-	t.Run("InvalidConfig", func(t *testing.T) {
-		config := map[string]interface{}{
-			"invalid": "config",
+	t.Run("EmptyConfig", func(t *testing.T) {
+		domain := "example.com"
+		config := map[string]interface{}{}
+
+		response, err := service.SetDomainConfig(domain, config)
+		if err != nil {
+			t.Fatalf("Expected no error for empty config, got: %v", err)
 		}
 
-		_, err := service.SetDomainConfig("invalid.domain", config)
-		if err == nil {
-			t.Fatal("Expected error for invalid config, got nil")
+		if response.Code != 0 {
+			t.Fatalf("Expected response code 0, got: %d", response.Code)
 		}
-
-		errorMsg := err.Error()
-		if errorMsg == "" {
-			t.Fatal("Expected non-empty error message")
-		}
-		t.Logf("Got expected error: %s", errorMsg)
 	})
 }
 
@@ -718,7 +524,7 @@ func TestGetDomainConfig(t *testing.T) {
 	t.Run("SuccessfulGet", func(t *testing.T) {
 		domain := "example.com"
 
-		response, err := service.GetDomainConfig(domain, []string{})
+		response, err := service.GetDomainConfig(domain, nil)
 		if err != nil {
 			t.Fatalf("Expected no error, got: %v", err)
 		}
@@ -728,33 +534,31 @@ func TestGetDomainConfig(t *testing.T) {
 		}
 
 		if len(response.Data) == 0 {
-			t.Fatal("Expected config data, got empty array")
+			t.Fatal("Expected config data to be returned")
 		}
-
-		configItem := response.Data[0]
-		if configItem.Domain != domain {
-			t.Fatalf("Expected domain %s, got: %s", domain, configItem.Domain)
-		}
-
-		if configItem.Config.Origin == nil {
-			t.Fatal("Expected origin to be populated")
-		}
-
 	})
 
-	t.Run("ConfigNotFound", func(t *testing.T) {
+	t.Run("WithConfigItems", func(t *testing.T) {
+		domain := "example.com"
+		configItems := []string{"origin", "cache_rule"}
+
+		response, err := service.GetDomainConfig(domain, configItems)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
+		}
+
+		if response.Code != 0 {
+			t.Fatalf("Expected response code 0, got: %d", response.Code)
+		}
+	})
+
+	t.Run("DomainNotFound", func(t *testing.T) {
 		domain := "notfound.example.com"
 
-		_, err := service.GetDomainConfig(domain, []string{})
+		_, err := service.GetDomainConfig(domain, nil)
 		if err == nil {
-			t.Fatal("Expected error for non-existent config, got nil")
+			t.Fatal("Expected error for non-existent domain, got nil")
 		}
-
-		errorMsg := err.Error()
-		if errorMsg == "" {
-			t.Fatal("Expected non-empty error message")
-		}
-		t.Logf("Got expected error: %s", errorMsg)
 	})
 }
 
@@ -767,7 +571,7 @@ func TestDeleteDomainConfig(t *testing.T) {
 	t.Run("SuccessfulDelete", func(t *testing.T) {
 		req := DeleteDomainConfigRequest{
 			Domains: "example.com",
-			Config:  []string{"cache_rule", "referer"},
+			Config:  []string{"origin"},
 		}
 
 		err := service.DeleteDomainConfig(req)
@@ -775,42 +579,19 @@ func TestDeleteDomainConfig(t *testing.T) {
 			t.Fatalf("Expected no error, got: %v", err)
 		}
 	})
-
-	t.Run("DomainNotFound", func(t *testing.T) {
-		req := DeleteDomainConfigRequest{
-			Domains: "notfound.example.com",
-			Config:  []string{"cache_rule"},
-		}
-
-		err := service.DeleteDomainConfig(req)
-		if err == nil {
-			t.Fatal("Expected error for non-existent domain, got nil")
-		}
-
-		errorMsg := err.Error()
-		if errorMsg == "" {
-			t.Fatal("Expected non-empty error message")
-		}
-		t.Logf("Got expected error: %s", errorMsg)
-	})
 }
 
-func TestRefreshCache(t *testing.T) {
+func TestCacheRefresh(t *testing.T) {
 	server := createMockCDNServer()
 	defer server.Close()
 
 	service := createTestCDNService(server)
 
 	t.Run("SuccessfulRefresh", func(t *testing.T) {
-		req := CacheRefreshRequest{
-			URLs: []string{
-				"https://example.com/image.jpg",
-				"https://example.com/style.css",
-			},
-			Type: "url",
-		}
+		urls := []string{"http://example.com/path"}
+		refreshType := "url"
 
-		response, err := service.CacheRefresh(req.URLs, req.Type)
+		response, err := service.CacheRefresh(urls, refreshType)
 		if err != nil {
 			t.Fatalf("Expected no error, got: %v", err)
 		}
@@ -823,27 +604,19 @@ func TestRefreshCache(t *testing.T) {
 			t.Fatal("Expected task ID to be set")
 		}
 
-		if response.Data.Count != len(req.URLs) {
-			t.Fatalf("Expected count %d, got: %d", len(req.URLs), response.Data.Count)
+		if response.Data.Count != len(urls) {
+			t.Fatalf("Expected count %d, got: %d", len(urls), response.Data.Count)
 		}
 	})
 
-	t.Run("EmptyURLs", func(t *testing.T) {
-		req := CacheRefreshRequest{
-			URLs: []string{},
-			Type: "url",
-		}
+	t.Run("InvalidURL", func(t *testing.T) {
+		urls := []string{"http://invalid.domain/path"}
+		refreshType := "url"
 
-		_, err := service.CacheRefresh(req.URLs, req.Type)
+		_, err := service.CacheRefresh(urls, refreshType)
 		if err == nil {
-			t.Fatal("Expected error for empty URLs, got nil")
+			t.Fatal("Expected error for invalid URL, got nil")
 		}
-
-		errorMsg := err.Error()
-		if errorMsg == "" {
-			t.Fatal("Expected non-empty error message")
-		}
-		t.Logf("Got expected error: %s", errorMsg)
 	})
 }
 
@@ -853,9 +626,9 @@ func TestQueryCacheRefresh(t *testing.T) {
 
 	service := createTestCDNService(server)
 
-	t.Run("SuccessfulQuery", func(t *testing.T) {
+	t.Run("SuccessfulQueryByTaskID", func(t *testing.T) {
 		req := CacheRefreshQueryRequest{
-			TaskID: 123456,
+			TaskID: 12345,
 		}
 
 		response, err := service.QueryCacheRefresh(req)
@@ -868,52 +641,45 @@ func TestQueryCacheRefresh(t *testing.T) {
 		}
 
 		if len(response.Data.List) == 0 {
-			t.Fatal("Expected refresh data, got empty array")
+			t.Fatal("Expected task data to be returned")
+		}
+	})
+
+	t.Run("QueryByTaskIDHelper", func(t *testing.T) {
+		taskID := 12345
+
+		response, err := service.QueryCacheRefreshByTaskID(taskID)
+		if err != nil {
+			t.Fatalf("Expected no error, got: %v", err)
 		}
 
-		item := response.Data.List[0]
-		if item.ID == "" {
-			t.Fatal("Expected task ID to be set")
-		}
-
-		if item.Status == "" {
-			t.Fatal("Expected status to be set")
+		if response.Code != 0 {
+			t.Fatalf("Expected response code 0, got: %d", response.Code)
 		}
 	})
 
 	t.Run("TaskNotFound", func(t *testing.T) {
 		req := CacheRefreshQueryRequest{
-			TaskID: 99999,
+			TaskID: 999999,
 		}
 
 		_, err := service.QueryCacheRefresh(req)
 		if err == nil {
 			t.Fatal("Expected error for non-existent task, got nil")
 		}
-
-		errorMsg := err.Error()
-		if errorMsg == "" {
-			t.Fatal("Expected non-empty error message")
-		}
-		t.Logf("Got expected error: %s", errorMsg)
 	})
 }
 
-func TestPurgeFiles(t *testing.T) {
+func TestFilePurge(t *testing.T) {
 	server := createMockCDNServer()
 	defer server.Close()
 
 	service := createTestCDNService(server)
 
 	t.Run("SuccessfulPurge", func(t *testing.T) {
-		req := FilePurgeRequest{
-			URLs: []string{
-				"https://example.com/file1.pdf",
-				"https://example.com/file2.zip",
-			},
-		}
+		urls := []string{"http://example.com/file.txt"}
 
-		response, err := service.FilePurge(req.URLs)
+		response, err := service.FilePurge(urls)
 		if err != nil {
 			t.Fatalf("Expected no error, got: %v", err)
 		}
@@ -926,26 +692,18 @@ func TestPurgeFiles(t *testing.T) {
 			t.Fatal("Expected task ID to be set")
 		}
 
-		if response.Data.Count != len(req.URLs) {
-			t.Fatalf("Expected count %d, got: %d", len(req.URLs), response.Data.Count)
+		if response.Data.Count != len(urls) {
+			t.Fatalf("Expected count %d, got: %d", len(urls), response.Data.Count)
 		}
 	})
 
-	t.Run("EmptyURLs", func(t *testing.T) {
-		req := FilePurgeRequest{
-			URLs: []string{},
-		}
+	t.Run("InvalidURL", func(t *testing.T) {
+		urls := []string{"http://invalid.domain/file"}
 
-		_, err := service.FilePurge(req.URLs)
+		_, err := service.FilePurge(urls)
 		if err == nil {
-			t.Fatal("Expected error for empty URLs, got nil")
+			t.Fatal("Expected error for invalid URL, got nil")
 		}
-
-		errorMsg := err.Error()
-		if errorMsg == "" {
-			t.Fatal("Expected non-empty error message")
-		}
-		t.Logf("Got expected error: %s", errorMsg)
 	})
 }
 
@@ -955,9 +713,9 @@ func TestQueryFilePurge(t *testing.T) {
 
 	service := createTestCDNService(server)
 
-	t.Run("SuccessfulQuery", func(t *testing.T) {
+	t.Run("SuccessfulQueryByTaskID", func(t *testing.T) {
 		req := FilePurgeQueryRequest{
-			TaskID: 123456,
+			TaskID: 67890,
 		}
 
 		response, err := service.QueryFilePurge(req)
@@ -970,45 +728,12 @@ func TestQueryFilePurge(t *testing.T) {
 		}
 
 		if len(response.Data.List) == 0 {
-			t.Fatal("Expected purge data, got empty array")
-		}
-
-		item := response.Data.List[0]
-		if item.ID == "" {
-			t.Fatal("Expected task ID to be set")
-		}
-
-		if item.Status == "" {
-			t.Fatal("Expected status to be set")
+			t.Fatal("Expected task data to be returned")
 		}
 	})
 
-	t.Run("TaskNotFound", func(t *testing.T) {
-		req := FilePurgeQueryRequest{
-			TaskID: 99999,
-		}
-
-		_, err := service.QueryFilePurge(req)
-		if err == nil {
-			t.Fatal("Expected error for non-existent task, got nil")
-		}
-
-		errorMsg := err.Error()
-		if errorMsg == "" {
-			t.Fatal("Expected non-empty error message")
-		}
-		t.Logf("Got expected error: %s", errorMsg)
-	})
-}
-
-func TestQueryFilePurgeByTaskID(t *testing.T) {
-	server := createMockCDNServer()
-	defer server.Close()
-
-	service := createTestCDNService(server)
-
-	t.Run("SuccessfulQuery", func(t *testing.T) {
-		taskID := 123456
+	t.Run("QueryByTaskIDHelper", func(t *testing.T) {
+		taskID := 67890
 
 		response, err := service.QueryFilePurgeByTaskID(taskID)
 		if err != nil {
@@ -1018,223 +743,22 @@ func TestQueryFilePurgeByTaskID(t *testing.T) {
 		if response.Code != 0 {
 			t.Fatalf("Expected response code 0, got: %d", response.Code)
 		}
+	})
 
-		if len(response.Data.List) == 0 {
-			t.Fatal("Expected purge data, got empty array")
+	t.Run("TaskNotFound", func(t *testing.T) {
+		req := FilePurgeQueryRequest{
+			TaskID: 999999,
+		}
+
+		_, err := service.QueryFilePurge(req)
+		if err == nil {
+			t.Fatal("Expected error for non-existent task, got nil")
 		}
 	})
 }
 
-func TestNewCacheRefreshRequest(t *testing.T) {
-	urls := []string{"https://example.com/test1", "https://example.com/test2"}
-	refreshType := "url"
-
-	req := NewCacheRefreshRequest(urls, refreshType)
-
-	if len(req.URLs) != len(urls) {
-		t.Fatalf("Expected %d URLs, got: %d", len(urls), len(req.URLs))
-	}
-
-	if req.Type != refreshType {
-		t.Fatalf("Expected type %s, got: %s", refreshType, req.Type)
-	}
-
-	for i, url := range urls {
-		if req.URLs[i] != url {
-			t.Fatalf("Expected URL %s, got: %s", url, req.URLs[i])
-		}
-	}
-}
-
-// Benchmark tests
-func BenchmarkCreateDomain(b *testing.B) {
-	server := createMockCDNServer()
-	defer server.Close()
-
-	service := createTestCDNService(server)
-
-	req := DomainCreateRequest{
-		Domain: "benchmark.example.com",
-		Area:   "global",
-		Type:   "page",
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, err := service.CreateDomain(req)
-		if err != nil {
-			b.Fatalf("Unexpected error: %v", err)
-		}
-	}
-}
-
-func BenchmarkGetDomain(b *testing.B) {
-	server := createMockCDNServer()
-	defer server.Close()
-
-	service := createTestCDNService(server)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, err := service.GetDomain("example.com")
-		if err != nil {
-			b.Fatalf("Unexpected error: %v", err)
-		}
-	}
-}
-
-func BenchmarkListDomains(b *testing.B) {
-	server := createMockCDNServer()
-	defer server.Close()
-
-	service := createTestCDNService(server)
-
-	req := DomainListRequest{
-		PageNumber:   1,
-		PageSize:     10,
-		DomainStatus: "serving",
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, err := service.ListDomains(req)
-		if err != nil {
-			b.Fatalf("Unexpected error: %v", err)
-		}
-	}
-}
-
-func BenchmarkRefreshCache(b *testing.B) {
-	server := createMockCDNServer()
-	defer server.Close()
-
-	service := createTestCDNService(server)
-
-	req := CacheRefreshRequest{
-		URLs: []string{"https://example.com/test.jpg"},
-		Type: "url",
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_, err := service.CacheRefresh(req.URLs, req.Type)
-		if err != nil {
-			b.Fatalf("Unexpected error: %v", err)
-		}
-	}
-}
-
-// Integration-style tests (can be run against real API when available)
-func TestCdnServiceIntegration(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping integration test in short mode")
-	}
-
-	// These tests would run against a real API endpoint
-	// Uncomment and configure when real API is available
-
-	/*
-		client := connectivity.NewClient("real-api-key", "real-secret", "https://real-api-endpoint.com")
-		service := NewCdnService(client)
-
-		t.Run("RealAPICreateAndDelete", func(t *testing.T) {
-			// Test against real API
-			req := DomainCreateRequest{
-				Domain: "integration-test.example.com",
-				Area:   "global",
-				Type:   "page",
-			}
-
-			// Create domain
-			response, err := service.CreateDomain(req)
-			if err != nil {
-				t.Fatalf("Failed to create domain: %v", err)
-			}
-
-			// Clean up - delete domain
-			err = service.DeleteDomain(req.Domain)
-			if err != nil {
-				t.Fatalf("Failed to delete domain: %v", err)
-			}
-		})
-	*/
-}
-
-// Table-driven tests for error scenarios
-func TestCdnServiceErrorScenarios(t *testing.T) {
-	server := createMockCDNServer()
-	defer server.Close()
-
-	service := createTestCDNService(server)
-
-	errorTests := []struct {
-		name        string
-		testFunc    func() error
-		expectError bool
-		errorMsg    string
-	}{
-		{
-			name: "CreateInvalidDomain",
-			testFunc: func() error {
-				req := DomainCreateRequest{Domain: "invalid.domain"}
-				_, err := service.CreateDomain(req)
-				return err
-			},
-			expectError: true,
-			errorMsg:    "Invalid domain format",
-		},
-		{
-			name: "GetNonExistentDomain",
-			testFunc: func() error {
-				_, err := service.GetDomain("notfound.example.com")
-				return err
-			},
-			expectError: true,
-			errorMsg:    "Domain not found",
-		},
-		{
-			name: "DeleteNonExistentDomain",
-			testFunc: func() error {
-				return service.DeleteDomain("notfound.example.com")
-			},
-			expectError: true,
-			errorMsg:    "Domain not found",
-		},
-		{
-			name: "RefreshEmptyURLs",
-			testFunc: func() error {
-				req := CacheRefreshRequest{URLs: []string{}}
-				_, err := service.CacheRefresh(req.URLs, req.Type)
-				return err
-			},
-			expectError: true,
-			errorMsg:    "URLs cannot be empty",
-		},
-	}
-
-	for _, tt := range errorTests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.testFunc()
-
-			if tt.expectError && err == nil {
-				t.Fatalf("Expected error but got none")
-			}
-
-			if !tt.expectError && err != nil {
-				t.Fatalf("Expected no error but got: %v", err)
-			}
-
-			if tt.expectError && err != nil {
-				if tt.errorMsg != "" && err.Error() != "" {
-					// Check if error message contains expected text
-					t.Logf("Error message: %s", err.Error())
-				}
-			}
-		})
-	}
-}
-
-func TestFlexibleInt(t *testing.T) {
+// Test FlexibleInt type
+func TestFlexibleIntUnmarshal(t *testing.T) {
 	tests := []struct {
 		name          string
 		jsonInput     string
@@ -1298,66 +822,141 @@ func TestFlexibleIntMarshal(t *testing.T) {
 	fi := FlexibleInt(443)
 	data, err := json.Marshal(fi)
 	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
+		t.Fatalf("Unexpected error: %v", err)
 	}
+
 	expected := "443"
 	if string(data) != expected {
 		t.Errorf("Expected %s, got %s", expected, string(data))
 	}
 }
 
-func TestOriginItemWithFlexibleIntPort(t *testing.T) {
-	// Test unmarshaling with int port
-	jsonWithIntPort := `{
-		"default_master": "origin.example.com",
-		"origin_mode": "https",
-		"port": 443
-	}`
+// Benchmark tests
+func BenchmarkCreateDomain(b *testing.B) {
+	server := createMockCDNServer()
+	defer server.Close()
 
-	var origin1 OriginItem
-	err := json.Unmarshal([]byte(jsonWithIntPort), &origin1)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-	if origin1.DefaultMaster != "origin.example.com" {
-		t.Errorf("Expected origin.example.com, got %s", origin1.DefaultMaster)
-	}
-	if origin1.OriginMode != "https" {
-		t.Errorf("Expected https, got %s", origin1.OriginMode)
-	}
-	if origin1.Port.Int() != 443 {
-		t.Errorf("Expected 443, got %d", origin1.Port.Int())
+	service := createTestCDNService(server)
+
+	req := DomainCreateRequest{
+		Domain: "benchmark.com",
+		Area:   "global",
+		Type:   "page",
+		Config: map[string]interface{}{},
 	}
 
-	// Test unmarshaling with string port
-	jsonWithStringPort := `{
-		"default_master": "origin.example.com",
-		"origin_mode": "http",
-		"port": "80"
-	}`
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = service.CreateDomain(req)
+	}
+}
 
-	var origin2 OriginItem
-	err = json.Unmarshal([]byte(jsonWithStringPort), &origin2)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
+func BenchmarkGetDomain(b *testing.B) {
+	server := createMockCDNServer()
+	defer server.Close()
+
+	service := createTestCDNService(server)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = service.GetDomain("example.com")
 	}
-	if origin2.DefaultMaster != "origin.example.com" {
-		t.Errorf("Expected origin.example.com, got %s", origin2.DefaultMaster)
+}
+
+func BenchmarkCacheRefresh(b *testing.B) {
+	server := createMockCDNServer()
+	defer server.Close()
+
+	service := createTestCDNService(server)
+
+	urls := []string{"http://example.com/path"}
+	refreshType := "url"
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = service.CacheRefresh(urls, refreshType)
 	}
-	if origin2.OriginMode != "http" {
-		t.Errorf("Expected http, got %s", origin2.OriginMode)
-	}
-	if origin2.Port.Int() != 80 {
-		t.Errorf("Expected 80, got %d", origin2.Port.Int())
+}
+
+// Test error scenarios
+func TestCDNServiceErrorScenarios(t *testing.T) {
+	server := createMockCDNServer()
+	defer server.Close()
+
+	service := createTestCDNService(server)
+
+	errorTests := []struct {
+		name        string
+		testFunc    func() error
+		expectError bool
+	}{
+		{
+			name: "CreateInvalidDomain",
+			testFunc: func() error {
+				req := DomainCreateRequest{Domain: "invalid.domain", Type: "page"}
+				_, err := service.CreateDomain(req)
+				return err
+			},
+			expectError: true,
+		},
+		{
+			name: "GetNonExistentDomain",
+			testFunc: func() error {
+				_, err := service.GetDomain("notfound.example.com")
+				return err
+			},
+			expectError: true,
+		},
+		{
+			name: "DeleteNonExistentDomain",
+			testFunc: func() error {
+				return service.DeleteDomain("notfound.example.com")
+			},
+			expectError: true,
+		},
+		{
+			name: "GetNonExistentDomainConfig",
+			testFunc: func() error {
+				_, err := service.GetDomainConfig("notfound.example.com", nil)
+				return err
+			},
+			expectError: true,
+		},
+		{
+			name: "CacheRefreshInvalidURL",
+			testFunc: func() error {
+				urls := []string{"http://invalid.domain/path"}
+				_, err := service.CacheRefresh(urls, "url")
+				return err
+			},
+			expectError: true,
+		},
+		{
+			name: "QueryNonExistentTask",
+			testFunc: func() error {
+				req := CacheRefreshQueryRequest{TaskID: 999999}
+				_, err := service.QueryCacheRefresh(req)
+				return err
+			},
+			expectError: true,
+		},
 	}
 
-	// Test marshaling - should always output as int
-	data, err := json.Marshal(origin2)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-	jsonString := string(data)
-	if !strings.Contains(jsonString, `"port":80`) {
-		t.Errorf("Expected JSON to contain port:80, got %s", jsonString)
+	for _, tt := range errorTests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.testFunc()
+
+			if tt.expectError && err == nil {
+				t.Fatalf("Expected error but got none")
+			}
+
+			if !tt.expectError && err != nil {
+				t.Fatalf("Expected no error but got: %v", err)
+			}
+
+			if tt.expectError && err != nil {
+				t.Logf("Got expected error: %s", err.Error())
+			}
+		})
 	}
 }

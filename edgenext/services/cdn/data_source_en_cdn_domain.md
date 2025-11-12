@@ -21,6 +21,6 @@ data "edgenext_cdn_domain" "example" {
     "cache_rule",
     "referer"
   ]
-  result_output_file = "domain_config.json"
+  output_file = "domain_config.json"
 }
 ```

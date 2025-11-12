@@ -1,5 +1,5 @@
 ---
-subcategory: "SSL Certificate Management(SSL)"
+subcategory: "SSL Certificate Management (SSL)"
 layout: "edgenext"
 page_title: "EdgeNext: edgenext_ssl_certificates"
 sidebar_current: "docs-edgenext-datasource-ssl_certificates"
@@ -17,9 +17,9 @@ Use this data source to query a list of SSL certificates.
 
 ```hcl
 data "edgenext_ssl_certificates" "example" {
-  page_number        = 1
-  page_size          = 100
-  result_output_file = "ssl_certs.json"
+  page_number = 1
+  page_size   = 100
+  output_file = "ssl_certs.json"
 }
 ```
 
@@ -36,9 +36,9 @@ data "edgenext_ssl_certificates" "example" {
 
 The following arguments are supported:
 
+* `output_file` - (Optional, String) Used to save results.
 * `page_number` - (Optional, Int) Page number, must be greater than 0 if specified
 * `page_size` - (Optional, Int) Number of items per page, range 1-500 if specified
-* `result_output_file` - (Optional, String) Used to save results.
 
 ## Attributes Reference
 

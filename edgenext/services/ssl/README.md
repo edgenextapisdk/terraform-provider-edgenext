@@ -89,7 +89,7 @@ EOT
 ```hcl
 data "edgenext_ssl_certificate" "example" {
   cert_id = "ssl-cert-123456"
-  result_output_file = "ssl_cert.json"
+  output_file = "ssl_cert.json"
 }
 ```
 
@@ -99,7 +99,7 @@ data "edgenext_ssl_certificate" "example" {
 data "edgenext_ssl_certificates" "example" {
   page_number = 1
   page_size   = 100
-  result_output_file = "ssl_certs.json"
+  output_file = "ssl_certs.json"
 }
 ```
 

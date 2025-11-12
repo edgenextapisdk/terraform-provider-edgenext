@@ -15,10 +15,9 @@ terraform {
 }
 
 provider "edgenext" {
-  api_key  = "your-edgenext-api-key-here"
-  secret   = "your-edgenext-api-secret-here"
-  endpoint = "your-edgenext-api-endpoint-here"
-  timeout  = 300
+  access_key  = "your-edgenext-api-key-here"
+  secret_key  = "your-edgenext-api-secret-here"
+  endpoint    = "your-edgenext-api-endpoint-here"
 }
 
 # =============================================================================
@@ -33,8 +32,8 @@ provider "edgenext" {
 # 2. Main website SSL certificate
 resource "edgenext_ssl_certificate" "web_cert" {
   name        = "example_cert"
-  certificate = file("${path.module}/certificates/www.barqplay.com.crt")
-  key         = file("${path.module}/certificates/www.barqplay.com.key")
+  certificate = file("${path.module}/files/www.barqplay.com.crt")
+  key         = file("${path.module}/files/www.barqplay.com.key")
 }
 
 

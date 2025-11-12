@@ -122,7 +122,7 @@ resource "edgenext_cdn_purge" "example" {
 ```hcl
 data "edgenext_cdn_domain" "example" {
   domain = "example.com"
-  result_output_file = "domain_config.json"
+  output_file = "domain_config.json"
 }
 ```
 

@@ -1,5 +1,5 @@
 ---
-subcategory: "Content Delivery Network(CDN)"
+subcategory: "Content Delivery Network (CDN)"
 layout: "edgenext"
 page_title: "EdgeNext: edgenext_cdn_domain"
 sidebar_current: "docs-edgenext-datasource-cdn_domain"
@@ -32,7 +32,7 @@ data "edgenext_cdn_domain" "example" {
     "cache_rule",
     "referer"
   ]
-  result_output_file = "domain_config.json"
+  output_file = "domain_config.json"
 }
 ```
 
@@ -42,7 +42,7 @@ The following arguments are supported:
 
 * `domain` - (Required, String) Domain to query configuration for.
 * `config_item` - (Optional, List: [`String`]) Configuration items.
-* `result_output_file` - (Optional, String) Used to save results.
+* `output_file` - (Optional, String) Used to save results.
 
 ## Attributes Reference
 

@@ -86,7 +86,7 @@ func ResourceEdgenextCdnPush() *schema.Resource {
 }
 
 func resourcePushCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	urlsList := d.Get("urls").([]interface{})
@@ -114,7 +114,7 @@ func resourcePushCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePushRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	taskID := d.Id()
