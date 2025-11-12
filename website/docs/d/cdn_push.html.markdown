@@ -1,5 +1,5 @@
 ---
-subcategory: "Content Delivery Network(CDN)"
+subcategory: "Content Delivery Network (CDN)"
 layout: "edgenext"
 page_title: "EdgeNext: edgenext_cdn_push"
 sidebar_current: "docs-edgenext-datasource-cdn_push"
@@ -17,8 +17,8 @@ Use this data source to query detailed information of CDN cache push task.
 
 ```hcl
 data "edgenext_cdn_push" "example" {
-  task_id            = "push-task-123456"
-  result_output_file = "push_task.json"
+  task_id     = "push-task-123456"
+  output_file = "push_task.json"
 }
 ```
 
@@ -26,10 +26,10 @@ data "edgenext_cdn_push" "example" {
 
 ```hcl
 data "edgenext_cdn_push" "example" {
-  url                = "https://example.com/static/image.jpg"
-  start_time         = "2024-01-01"
-  end_time           = "2024-01-31"
-  result_output_file = "push_tasks.json"
+  url         = "https://example.com/static/image.jpg"
+  start_time  = "2024-01-01"
+  end_time    = "2024-01-31"
+  output_file = "push_tasks.json"
 }
 ```
 
@@ -38,9 +38,9 @@ data "edgenext_cdn_push" "example" {
 The following arguments are supported:
 
 * `end_time` - (Optional, String) End time, format: YYYY-MM-DD, used together with start_time
+* `output_file` - (Optional, String) Used to save results.
 * `page_number` - (Optional, String) Page number to retrieve, default 1
 * `page_size` - (Optional, String) Page size, default 50, range 1-500
-* `result_output_file` - (Optional, String) Used to save results.
 * `start_time` - (Optional, String) Start time, format: YYYY-MM-DD, used together with end_time
 * `task_id` - (Optional, String) Task ID for querying the refresh status of a specific task
 * `url` - (Optional, String) URL

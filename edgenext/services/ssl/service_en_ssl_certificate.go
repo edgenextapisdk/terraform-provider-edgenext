@@ -10,11 +10,11 @@ import (
 
 // SslCertificateService SSL certificate service
 type SslCertificateService struct {
-	client *connectivity.Client
+	client *connectivity.EdgeNextClient
 }
 
 // NewSslCertificateService creates a new SSL certificate service instance
-func NewSslCertificateService(client *connectivity.Client) *SslCertificateService {
+func NewSslCertificateService(client *connectivity.EdgeNextClient) *SslCertificateService {
 	return &SslCertificateService{client: client}
 }
 
@@ -84,7 +84,11 @@ func (s *SslCertificateService) CreateOrUpdateSslCertificate(req SslCertificateR
 	ctx := context.Background()
 
 	var response SslCertificateResponse
-	err := s.client.Post(ctx, "/v2/domain/certificate", req, &response)
+	apiClient, err := s.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create or update SSL certificate: %w", err)
+	}
+	err = apiClient.Post(ctx, "/v2/domain/certificate", req, &response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create or update SSL certificate: %w", err)
 	}
@@ -106,7 +110,11 @@ func (s *SslCertificateService) GetSslCertificate(certID int) (*SslCertificateRe
 	}
 
 	var response SslCertificateResponse
-	err := s.client.GetWithQuery(ctx, "/v2/domain/certificate", query, &response)
+	apiClient, err := s.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to query SSL certificate: %w", err)
+	}
+	err = apiClient.GetWithQuery(ctx, "/v2/domain/certificate", query, &response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query SSL certificate: %w", err)
 	}
@@ -129,7 +137,11 @@ func (s *SslCertificateService) ListSslCertificates(pageNumber int, pageSize int
 	}
 
 	var response SslCertificateListResponse
-	err := s.client.GetWithQuery(ctx, "/v2/domain/certificate", query, &response)
+	apiClient, err := s.client.APIClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to query SSL certificate list: %w", err)
+	}
+	err = apiClient.GetWithQuery(ctx, "/v2/domain/certificate", query, &response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query SSL certificate list: %w", err)
 	}
@@ -146,7 +158,11 @@ func (s *SslCertificateService) ListSslCertificates(pageNumber int, pageSize int
 func (s *SslCertificateService) DeleteSslCertificate(req DeleteSslCertificateRequest) error {
 	ctx := context.Background()
 	var response SslCertificateDeleteResponse
-	err := s.client.DeleteWithBodyAndResult(ctx, "/v2/domain/certificate", req, &response)
+	apiClient, err := s.client.APIClient()
+	if err != nil {
+		return fmt.Errorf("failed to delete SSL certificate: %w", err)
+	}
+	err = apiClient.DeleteWithBodyAndResult(ctx, "/v2/domain/certificate", req, &response)
 	if err != nil {
 		return fmt.Errorf("failed to delete SSL certificate: %w", err)
 	}

@@ -7,7 +7,7 @@ Query CDN push task by task ID
 ```hcl
 data "edgenext_cdn_push" "example" {
   task_id = "push-task-123456"
-  result_output_file = "push_task.json"
+  output_file = "push_task.json"
 }
 ```
 
@@ -18,6 +18,6 @@ data "edgenext_cdn_push" "example" {
   url        = "https://example.com/static/image.jpg"
   start_time = "2024-01-01"
   end_time   = "2024-01-31"
-  result_output_file = "push_tasks.json"
+  output_file = "push_tasks.json"
 }
 ```

@@ -84,7 +84,7 @@ func ResourceEdgenextSslCertificate() *schema.Resource {
 }
 
 func resourceSslCertificateCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewSslCertificateService(client)
 
 	certificate := d.Get("certificate").(string)
@@ -114,7 +114,7 @@ func resourceSslCertificateCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSslCertificateRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewSslCertificateService(client)
 
 	certID := d.Id()
@@ -153,7 +153,7 @@ func resourceSslCertificateRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSslCertificateUpdate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewSslCertificateService(client)
 
 	certificate := d.Get("certificate").(string)
@@ -192,7 +192,7 @@ func resourceSslCertificateUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSslCertificateDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewSslCertificateService(client)
 
 	certID := d.Id()

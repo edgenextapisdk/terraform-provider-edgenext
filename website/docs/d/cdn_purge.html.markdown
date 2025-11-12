@@ -1,5 +1,5 @@
 ---
-subcategory: "Content Delivery Network(CDN)"
+subcategory: "Content Delivery Network (CDN)"
 layout: "edgenext"
 page_title: "EdgeNext: edgenext_cdn_purge"
 sidebar_current: "docs-edgenext-datasource-cdn_purge"
@@ -17,8 +17,8 @@ Use this data source to query detailed information of CDN cache purge task.
 
 ```hcl
 data "edgenext_cdn_purge" "example" {
-  task_id            = "purge-task-123456"
-  result_output_file = "purge_task.json"
+  task_id     = "purge-task-123456"
+  output_file = "purge_task.json"
 }
 ```
 
@@ -26,10 +26,10 @@ data "edgenext_cdn_purge" "example" {
 
 ```hcl
 data "edgenext_cdn_purge" "example" {
-  url                = "https://example.com/static/old-file.jpg"
-  start_time         = "2024-01-01"
-  end_time           = "2024-01-31"
-  result_output_file = "purge_tasks.json"
+  url         = "https://example.com/static/old-file.jpg"
+  start_time  = "2024-01-01"
+  end_time    = "2024-01-31"
+  output_file = "purge_tasks.json"
 }
 ```
 
@@ -38,7 +38,7 @@ data "edgenext_cdn_purge" "example" {
 The following arguments are supported:
 
 * `task_id` - (Required, String) Task ID for querying the purge status of a specific task
-* `result_output_file` - (Optional, String) Used to save results.
+* `output_file` - (Optional, String) Used to save results.
 
 ## Attributes Reference
 

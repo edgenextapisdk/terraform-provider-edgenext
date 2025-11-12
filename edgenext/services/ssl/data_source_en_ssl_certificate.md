@@ -7,7 +7,7 @@ Query SSL certificate by certificate ID
 ```hcl
 data "edgenext_ssl_certificate" "example" {
   cert_id = "ssl-cert-123456"
-  result_output_file = "ssl_cert.json"
+  output_file = "ssl_cert.json"
 }
 ```
 

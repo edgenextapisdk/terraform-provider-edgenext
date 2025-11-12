@@ -1,5 +1,5 @@
 ---
-subcategory: "Content Delivery Network(CDN)"
+subcategory: "Content Delivery Network (CDN)"
 layout: "edgenext"
 page_title: "EdgeNext: edgenext_cdn_purge"
 sidebar_current: "docs-edgenext-resource-cdn_purge"

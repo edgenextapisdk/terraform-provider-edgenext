@@ -19,7 +19,7 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 				Required:    true,
 				Description: "Domain to query configuration for.",
 			},
-			"result_output_file": {
+			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results.",
@@ -550,7 +550,7 @@ func DataSourceEdgenextCdnDomainConfig() *schema.Resource {
 }
 
 func dataSourceDomainConfigRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	var configItem []string
@@ -582,7 +582,7 @@ func dataSourceDomainConfigRead(d *schema.ResourceData, m interface{}) error {
 	d.SetId(domain)
 
 	// Write result to output file if specified
-	if outputFile := d.Get("result_output_file").(string); outputFile != "" {
+	if outputFile := d.Get("output_file").(string); outputFile != "" {
 		outputData := map[string]interface{}{
 			"domain":      d.Get("domain"),
 			"area":        d.Get("area"),
@@ -634,7 +634,7 @@ func DataSourceEdgenextCdnDomains() *schema.Resource {
 					"deleted：Deleted\n" +
 					"Default value is all status domain names when not specified.",
 			},
-			"result_output_file": {
+			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results.",
@@ -708,7 +708,7 @@ func DataSourceEdgenextCdnDomains() *schema.Resource {
 }
 
 func dataSourceDomainsRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	log.Printf("[INFO] Querying CDN domain list")
@@ -741,9 +741,9 @@ func dataSourceDomainsRead(d *schema.ResourceData, m interface{}) error {
 		list = append(list, elemMap)
 		ids = append(ids, elem.ID)
 	}
-	// 设置资源ID
+	// Set resource ID
 	d.SetId(helper.DataResourceIdsHash(ids))
-	// 设置域名列表
+	// Set domain list
 	err = d.Set("list", list)
 	if err != nil {
 		log.Printf("[ERROR] Failed to set domain list: %v", err)
@@ -751,7 +751,7 @@ func dataSourceDomainsRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	// Write result to output file if specified
-	if outputFile := d.Get("result_output_file").(string); outputFile != "" {
+	if outputFile := d.Get("output_file").(string); outputFile != "" {
 		outputData := map[string]interface{}{
 			"page_number":   d.Get("page_number"),
 			"page_size":     d.Get("page_size"),

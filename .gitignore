@@ -33,6 +33,8 @@ crash.*.log
 examples/**/*.json
 examples/**/*.xml
 examples/**/*.log
+examples/**/files/**
+examples/**/images/**
 examples/**/terraform.tfstate.backup
 
 # IDE files
@@ -59,3 +61,6 @@ Thumbs.db
 # Build artifacts
 dist/
 build/
+
+# cursor
+.cursor/

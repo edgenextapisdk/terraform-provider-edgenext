@@ -75,7 +75,7 @@ func ResourceEdgenextCdnPurge() *schema.Resource {
 }
 
 func resourcePurgeCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	urlsList := d.Get("urls").([]interface{})
@@ -102,7 +102,7 @@ func resourcePurgeCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourcePurgeRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	taskID := d.Id()

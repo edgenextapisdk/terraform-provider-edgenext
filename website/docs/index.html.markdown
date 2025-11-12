@@ -136,7 +136,7 @@ The EdgeNext provider supports the following resource types:
 
 
 
-### Content Delivery Network(CDN)
+### Content Delivery Network (CDN)
 
 
 #### Resources
@@ -170,7 +170,7 @@ The EdgeNext provider supports the following resource types:
 
 
 
-### SSL Certificate Management(SSL)
+### SSL Certificate Management (SSL)
 
 
 #### Resources
@@ -187,6 +187,34 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_ssl_certificate`](data-sources/ssl_certificate) - Query SSL certificate details
 
 * [`edgenext_ssl_certificates`](data-sources/ssl_certificates) - Query SSL certificates
+
+
+
+
+
+### Object Storage Service (OSS)
+
+
+#### Resources
+
+
+* [`edgenext_oss_bucket`](resources/oss_bucket) - Manage OSS buckets
+
+* [`edgenext_oss_object`](resources/oss_object) - Manage OSS objects
+
+* [`edgenext_oss_object_copy`](resources/oss_object_copy) - Manage OSS object copy
+
+
+
+
+#### Data Sources
+
+
+* [`edgenext_oss_buckets`](data-sources/oss_buckets) - Query OSS buckets
+
+* [`edgenext_oss_object`](data-sources/oss_object) - Query OSS object details
+
+* [`edgenext_oss_objects`](data-sources/oss_objects) - Query OSS objects
 
 
 

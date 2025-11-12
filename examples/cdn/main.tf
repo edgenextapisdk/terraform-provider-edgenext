@@ -15,10 +15,9 @@ terraform {
 }
 
 provider "edgenext" {
-  api_key  = "your-edgenext-api-key-here"
-  secret   = "your-edgenext-api-secret-here"
+  access_key  = "your-edgenext-api-key-here"
+  secret_key   = "your-edgenext-api-secret-here"
   endpoint = "your-edgenext-api-endpoint-here"
-  timeout  = 300
 }
 
 # =============================================================================

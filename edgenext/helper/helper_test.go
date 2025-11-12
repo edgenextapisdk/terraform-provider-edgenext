@@ -11,12 +11,12 @@ import (
 func TestWriteToFile(t *testing.T) {
 	// Create a test schema.ResourceData
 	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
-		"result_output_file": {
+		"output_file": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},
 	}, map[string]interface{}{
-		"result_output_file": "test_output.json",
+		"output_file": "test_output.json",
 	})
 
 	// Test data
@@ -65,9 +65,9 @@ func TestWriteToFile(t *testing.T) {
 }
 
 func TestWriteToFileNoOutput(t *testing.T) {
-	// Create a test schema.ResourceData without result_output_file
+	// Create a test schema.ResourceData without output_file
 	d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
-		"result_output_file": {
+		"output_file": {
 			Type:     schema.TypeString,
 			Optional: true,
 		},

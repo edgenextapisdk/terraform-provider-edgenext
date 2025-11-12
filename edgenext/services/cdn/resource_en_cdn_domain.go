@@ -642,7 +642,7 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 									"cache_or_not": {
 										Type:     schema.TypeString,
 										Optional: true,
-										// 不传默认按照expire来判断是否开启缓存
+										// If not set, use expire to determine whether to cache
 										Description: "Whether to cache, not set means use expire to determine whether to cache. \n" +
 											"	- yes\n" +
 											"	- no",
@@ -1136,7 +1136,7 @@ func ResourceEdgenextCdnDomainConfig() *schema.Resource {
 }
 
 func resourceDomainConfigCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	domain := d.Get("domain").(string)
@@ -1183,7 +1183,7 @@ func resourceDomainConfigCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceDomainConfigUpdate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	domain := d.Id()
@@ -1507,7 +1507,7 @@ func readDomainConfig(d *schema.ResourceData, service *CdnService, domain string
 }
 
 func resourceDomainConfigRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	// 1. Get domain information
@@ -1531,7 +1531,7 @@ func resourceDomainConfigRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceDomainConfigDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*connectivity.Client)
+	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	domain := d.Id()

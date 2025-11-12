@@ -38,14 +38,14 @@ var (
 	usageMatch        = regexp.MustCompile(`(?s)(?m)^([^ \n].*?)(?:\n{2}|$)(.*)`)
 	bigSymbol         = regexp.MustCompile("([\u007F-\uffff])")
 	productNameRegexp = regexp.MustCompile(`^.*\((.*)\)$`)
-	
+
 	// Command line flags
 	linkFormat = flag.String("link-format", "terraform", "Link format: 'terraform' for Registry or 'github' for GitHub")
 )
 
 func main() {
 	flag.Parse()
-	
+
 	provider := edgenext.Provider()
 	vProvider := runtime.FuncForPC(reflect.ValueOf(edgenext.Provider).Pointer())
 
@@ -205,6 +205,8 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		productDir = "cdn"
 	case "ssl certificate management(ssl)", "ssl certificate management":
 		productDir = "ssl"
+	case "object storage service(oss)", "object storage service":
+		productDir = "oss"
 	}
 
 	filename := fmt.Sprintf("services/%s/%s_%s_%s.md", productDir, dtype, cloudMarkShort, data["resource"])
@@ -253,11 +255,11 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		subStruct    []string
 	)
 
-	if _, ok := resource.Schema["result_output_file"]; dtype == "data_source" && !ok {
+	if _, ok := resource.Schema["output_file"]; dtype == "data_source" && !ok {
 		if resource.DeprecationMessage != "" {
-			message("[SKIP!]argument 'result_output_file' is missing, skip: %s", filename)
+			message("[SKIP!]argument 'output_file' is missing, skip: %s", filename)
 		} else {
-			message("[WARN!]argument 'result_output_file' is missing: %s", filename)
+			message("[WARN!]argument 'output_file' is missing: %s", filename)
 			// Don't exit, just warn for now
 		}
 	}
@@ -647,6 +649,9 @@ func getResourceDesc(resourceName string) string {
 		"edgenext_cdn_push":        "CDN cache push tasks",
 		"edgenext_cdn_purge":       "CDN cache purge tasks",
 		"edgenext_ssl_certificate": "SSL certificates",
+		"edgenext_oss_bucket":      "OSS buckets",
+		"edgenext_oss_object":      "OSS objects",
+		"edgenext_oss_object_copy": "OSS object copy",
 	}
 
 	if desc, ok := descriptions[resourceName]; ok {
@@ -670,6 +675,9 @@ func getDataSourceDesc(dataSourceName string) string {
 		"edgenext_cdn_purges":       "CDN purge tasks",
 		"edgenext_ssl_certificate":  "SSL certificate details",
 		"edgenext_ssl_certificates": "SSL certificates",
+		"edgenext_oss_buckets":      "OSS buckets",
+		"edgenext_oss_object":       "OSS object details",
+		"edgenext_oss_objects":      "OSS objects",
 	}
 
 	if desc, ok := descriptions[dataSourceName]; ok {

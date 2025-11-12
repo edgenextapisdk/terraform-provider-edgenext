@@ -1,5 +1,5 @@
 ---
-subcategory: "Content Delivery Network(CDN)"
+subcategory: "Content Delivery Network (CDN)"
 layout: "edgenext"
 page_title: "EdgeNext: edgenext_cdn_domains"
 sidebar_current: "docs-edgenext-datasource-cdn_domains"
@@ -41,11 +41,11 @@ serving：Serving. When querying with serving, the domain whose "status" is "dep
 suspend：Suspended
 deleted：Deleted
 Default value is all status domain names when not specified.
+* `output_file` - (Optional, String) Used to save results.
 * `page_number` - (Optional, Int) Get the page number. 
 Default value is 1 when not specified.
 * `page_size` - (Optional, Int) Page size, value range: 1-500. 
 Default value is 100 when not specified.
-* `result_output_file` - (Optional, String) Used to save results.
 
 ## Attributes Reference
 

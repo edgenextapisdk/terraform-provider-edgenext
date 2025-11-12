@@ -8,7 +8,7 @@ Query all SSL certificates
 data "edgenext_ssl_certificates" "example" {
   page_number = 1
   page_size   = 100
-  result_output_file = "ssl_certs.json"
+  output_file = "ssl_certs.json"
 }
 ```
 

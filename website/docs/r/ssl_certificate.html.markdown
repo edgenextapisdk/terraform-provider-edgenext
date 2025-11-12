@@ -1,5 +1,5 @@
 ---
-subcategory: "SSL Certificate Management(SSL)"
+subcategory: "SSL Certificate Management (SSL)"
 layout: "edgenext"
 page_title: "EdgeNext: edgenext_ssl_certificate"
 sidebar_current: "docs-edgenext-resource-ssl_certificate"

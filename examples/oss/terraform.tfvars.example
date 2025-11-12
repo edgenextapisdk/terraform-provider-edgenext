@@ -1,0 +1,9 @@
+# EdgeNext OSS Configuration Example
+# Copy this file to terraform.tfvars and fill in your credentials
+
+access_key  = "your-access-key-here"
+secret_key  = "your-secret-key-here"
+endpoint    = "your-edgenext-api-endpoint-here"
+region      = "your-region-here"
+environment = "dev"
+
