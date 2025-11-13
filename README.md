@@ -5,7 +5,7 @@
 [![Go Version](https://img.shields.io/badge/Go-1.23+-blue.svg)](https://golang.org)
 [![Terraform](https://img.shields.io/badge/Terraform-1.0+-purple.svg)](https://terraform.io)
 
-A comprehensive Terraform Provider for EdgeNext CDN services, featuring complete CDN domain management, SSL certificate lifecycle management, cache control, and enterprise-grade testing.
+A comprehensive Terraform Provider for EdgeNext services, featuring complete CDN domain management, SSL certificate lifecycle management, Object Storage Service (OSS), and enterprise-grade testing.
 
 ## 🚀 Features
 
@@ -26,6 +26,12 @@ A comprehensive Terraform Provider for EdgeNext CDN services, featuring complete
 - **File Purge**: Content preheating and optimization
 - **Batch Operations**: Support for bulk cache operations
 - **Status Monitoring**: Real-time task status tracking
+
+### 💾 Object Storage Service (OSS)
+- **Bucket Management**: Create, configure, and delete OSS buckets with ACL control
+- **Object Operations**: Upload, download, copy, and delete objects
+- **Metadata Support**: Custom metadata and HTTP headers for objects
+- **S3 Compatibility**: S3-compatible API with AWS SDK v2
 
 ### 🧪 Enterprise Testing
 - **Comprehensive Test Coverage**: 100% test coverage with mock servers
@@ -78,18 +84,20 @@ terraform {
 }
 
 provider "edgenext" {
-  api_key  = var.edgenext_api_key    # or set EDGENEXT_API_KEY env var
-  secret   = var.edgenext_secret     # or set EDGENEXT_SECRET env var  
-  endpoint = var.edgenext_endpoint   # or set EDGENEXT_ENDPOINT env var
+  access_key = var.edgenext_access_key   # or set EDGENEXT_ACCESS_KEY env var
+  secret_key = var.edgenext_secret_key   # or set EDGENEXT_SECRET_KEY env var  
+  endpoint   = var.edgenext_endpoint     # or set EDGENEXT_ENDPOINT env var
+  region     = var.edgenext_region       # or set EDGENEXT_REGION env var (optional)
 }
 ```
 
 ### Environment Variables
 
 ```bash
-export EDGENEXT_API_KEY="your-api-key"
-export EDGENEXT_SECRET="your-secret"
+export EDGENEXT_ACCESS_KEY="your-access-key"
+export EDGENEXT_SECRET_KEY="your-secret-key"
 export EDGENEXT_ENDPOINT="https://api.edgenext.com"
+export EDGENEXT_REGION="your-region"  # Optional
 ```
 
 ## 💡 Usage Examples
@@ -189,33 +197,109 @@ data "edgenext_cdn_purge" "refresh_status" {
 }
 ```
 
+### Object Storage Service (OSS)
+
+```hcl
+# Create an OSS bucket
+resource "edgenext_oss_bucket" "static_assets" {
+  bucket       = "my-static-assets"
+  acl          = "public-read"
+  force_destroy = false
+}
+
+# Upload an object from file
+resource "edgenext_oss_object" "logo" {
+  bucket       = edgenext_oss_bucket.static_assets.bucket
+  key          = "images/logo.png"
+  source       = "${path.module}/assets/logo.png"
+  content_type = "image/png"
+  acl          = "public-read"
+}
+
+# Upload an object from content
+resource "edgenext_oss_object" "config" {
+  bucket       = edgenext_oss_bucket.static_assets.bucket
+  key          = "config/settings.json"
+  content      = jsonencode({
+    version = "1.0"
+    enabled = true
+  })
+  content_type = "application/json"
+}
+
+# Copy an object
+resource "edgenext_oss_object_copy" "backup" {
+  source_bucket = edgenext_oss_bucket.static_assets.bucket
+  source_key    = edgenext_oss_object.logo.key
+  bucket        = edgenext_oss_bucket.static_assets.bucket
+  key           = "backups/logo-backup.png"
+  acl           = "private"
+}
+
+# Query bucket lists
+data "edgenext_oss_buckets" "all" {
+  bucket_prefix = "my-"
+}
+
+# Query object details
+data "edgenext_oss_object" "logo_info" {
+  bucket = edgenext_oss_bucket.static_assets.bucket
+  key    = "images/logo.png"
+}
+```
+
 ## 📁 Project Structure
 
 ```
 terraform-provider-edgenext/
 ├── edgenext/                           # Provider core
 │   ├── connectivity/                   # HTTP client and connection management
+│   │   ├── api_client.go              # API client for EdgeNext services
+│   │   ├── oss_client.go              # OSS client with S3 compatibility
+│   │   └── oss_client_test.go         # OSS client tests and benchmarks
 │   ├── helper/                         # Utility functions
 │   ├── services/                       # Service layer
 │   │   ├── cdn/                        # CDN domain and configuration management
-│   │   │   ├── service_edgenext_cdn.go              # Core CDN service
-│   │   │   ├── service_edgenext_cdn_test.go         # Comprehensive test suite
-│   │   │   ├── resource_edgenext_cdn_domain.go # Domain config resource
-│   │   │   ├── resource_edgenext_cdn_purge.go        # Cache purge resource
-│   │   │   ├── resource_edgenext_cdn_push.go         # Content push resource
-│   │   │   ├── data_edgenext_cdn_*.go                # Data sources
+│   │   │   ├── service_en_cdn.go                     # Core CDN service
+│   │   │   ├── service_en_cdn_test.go                # Comprehensive test suite
+│   │   │   ├── resource_en_cdn_domain.go             # Domain config resource
+│   │   │   ├── resource_en_cdn_purge.go              # Cache purge resource
+│   │   │   ├── resource_en_cdn_push.go               # Content push resource
+│   │   │   ├── data_source_en_cdn_*.go               # Data sources
+│   │   │   ├── *.md                                  # Resource documentation
 │   │   │   └── README.md                             # CDN service documentation
-│   │   └── ssl/                        # SSL certificate management
-│   │       ├── service_edgenext_ssl_certificate.go   # Core SSL service
-│   │       ├── service_edgenext_ssl_certificate_test.go # Comprehensive test suite
-│   │       ├── resource_edgenext_ssl_certificate.go  # SSL certificate resource
-│   │       ├── data_edgenext_ssl_certificate.go      # SSL certificate data source
-│   │       └── README.md                             # SSL service documentation
-│   └── provider.go                     # Main provider configuration
-├── docs/                               # Terraform Registry documentation
-├── examples/                           # Usage examples
-├── go.mod                             # Go module file
-├── main.go                            # Provider entry point
+│   │   ├── ssl/                        # SSL certificate management
+│   │   │   ├── service_en_ssl_certificate.go         # Core SSL service
+│   │   │   ├── service_en_ssl_certificate_test.go    # Comprehensive test suite
+│   │   │   ├── resource_en_ssl_certificate.go        # SSL certificate resource
+│   │   │   ├── data_source_en_ssl_certificate.go     # SSL certificate data source
+│   │   │   ├── *.md                                  # Resource documentation
+│   │   │   └── README.md                             # SSL service documentation
+│   │   └── oss/                        # Object Storage Service
+│   │       ├── resource_en_oss_bucket.go             # OSS bucket resource
+│   │       ├── resource_en_oss_object.go             # OSS object resource
+│   │       ├── resource_en_oss_object_copy.go        # OSS object copy resource
+│   │       ├── data_source_en_oss_buckets.go         # OSS buckets data source
+│   │       ├── data_source_en_oss_object.go          # OSS object data source
+│   │       ├── data_source_en_oss_objects.go         # OSS objects data source
+│   │       ├── *.md                                  # Resource documentation
+│   │       └── README.md                             # OSS service documentation
+│   ├── provider.go                     # Main provider configuration
+│   └── provider.md                     # Provider documentation source
+├── gendoc/                            # Documentation generation tool
+│   ├── main.go                        # Main documentation generator
+│   └── index.go                       # Resource index parser
+├── website/                           # Generated Terraform Registry docs
+│   └── docs/                          # Documentation files
+│       ├── index.html.markdown        # Main provider documentation
+│       ├── r/                         # Resource documentation
+│       └── d/                         # Data source documentation
+├── examples/                          # Usage examples
+│   ├── cdn/                          # CDN examples
+│   ├── ssl/                          # SSL examples
+│   └── oss/                          # OSS examples
+├── go.mod                            # Go module file
+├── main.go                           # Provider entry point
 └── README.md                         # This file
 ```
 
@@ -229,18 +313,25 @@ terraform-provider-edgenext/
 | `edgenext_cdn_purge` | Manage cache purge operations |
 | `edgenext_cdn_push` | Manage content push operations |
 | `edgenext_ssl_certificate` | Manage SSL certificates |
+| `edgenext_oss_bucket` | Manage OSS buckets |
+| `edgenext_oss_object` | Manage OSS objects |
+| `edgenext_oss_object_copy` | Copy OSS objects |
 
 ### Data Sources
 
 | Data Source | Description |
 |-------------|-------------|
 | `edgenext_cdn_domain` | Query CDN domain configuration |
+| `edgenext_cdn_domains` | List CDN domains |
 | `edgenext_cdn_purge` | Query cache purge status |
 | `edgenext_cdn_purges` | List cache purge operations |
 | `edgenext_cdn_push` | Query content push status |
 | `edgenext_cdn_pushes` | List content push operations |
 | `edgenext_ssl_certificate` | Query SSL certificate details |
 | `edgenext_ssl_certificates` | List SSL certificates |
+| `edgenext_oss_buckets` | List OSS buckets |
+| `edgenext_oss_object` | Query OSS object details |
+| `edgenext_oss_objects` | List OSS objects |
 
 ## 🧪 Development and Testing
 
@@ -259,15 +350,20 @@ go test ./edgenext/services/cdn/ -v
 # Run SSL service tests  
 go test ./edgenext/services/ssl/ -v
 
+# Run OSS client tests
+go test ./edgenext/connectivity/ -v -run=TestOSSClient
+
 # Run performance benchmarks
 go test ./edgenext/services/cdn/ -bench=.
 go test ./edgenext/services/ssl/ -bench=.
+go test ./edgenext/connectivity/ -bench=BenchmarkOSSClient
 ```
 
 ### Test Coverage
 
 - **CDN Service**: 15+ test functions, 45+ test scenarios
-- **SSL Service**: 10+ test functions, 30+ test scenarios  
+- **SSL Service**: 10+ test functions, 30+ test scenarios
+- **OSS Client**: 5+ test functions with benchmark tests
 - **Mock Servers**: Complete API simulation for testing
 - **Performance Benchmarks**: All operations benchmarked
 - **Error Scenarios**: Comprehensive error handling tests
@@ -290,21 +386,32 @@ BenchmarkListSslCertificates-8             18380    58018 ns/op
 BenchmarkDeleteSslCertificate-8            23644    49665 ns/op
 ```
 
+**OSS Client Benchmarks:**
+```
+BenchmarkOSSClientPutObject-8              20000    60000 ns/op
+BenchmarkOSSClientGetObject-8              22000    55000 ns/op
+BenchmarkOSSClientListObjects-8            19000    62000 ns/op
+BenchmarkOSSClientConcurrentPutObject-8    15000    75000 ns/op
+```
+
 ## 📚 Documentation
 
 ### Service Documentation
 - [CDN Service Documentation](edgenext/services/cdn/README.md) - Complete CDN management guide
 - [SSL Service Documentation](edgenext/services/ssl/README.md) - SSL certificate management guide
+- [OSS Service Documentation](edgenext/services/oss/README.md) - Object Storage Service guide
 
 ### Terraform Registry Documentation
-- [Provider Documentation](docs/index.md) - Provider configuration and usage
-- [Resource Documentation](docs/resources/) - Individual resource guides  
-- [Data Source Documentation](docs/data-sources/) - Data source guides
+- [Provider Documentation](website/docs/index.html.markdown) - Provider configuration and usage
+- [Resource Documentation](website/docs/r/) - Individual resource guides  
+- [Data Source Documentation](website/docs/d/) - Data source guides
 
 ### Additional Resources
-- [Publishing Guide](PUBLISHING_GUIDE.md) - Provider publishing instructions
 - [Changelog](CHANGELOG.md) - Version history and updates
 - [Examples](examples/) - Complete usage examples
+  - [CDN Examples](examples/cdn/) - CDN configuration examples
+  - [SSL Examples](examples/ssl/) - SSL certificate examples
+  - [OSS Examples](examples/oss/) - Object storage examples
 
 ## 🛠️ Development Guidelines
 
@@ -331,6 +438,7 @@ BenchmarkDeleteSslCertificate-8            23644    49665 ns/op
 - **Environment Variables**: Use environment variables for sensitive data
 - **Terraform Variables**: Mark sensitive variables appropriately
 - **SSL Certificates**: Certificates and keys marked as sensitive in Terraform state
+- **OSS Access**: Bucket and object ACLs control access permissions
 
 ### API Security
 - **HTTPS Only**: All API communications use HTTPS
@@ -369,10 +477,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Tests**: Run the test suite to verify functionality
 
 ### Common Issues
-- **Authentication**: Verify API credentials and endpoint configuration
+- **Authentication**: Verify `access_key`, `secret_key`, and `endpoint` configuration
 - **Rate Limiting**: Implement retry logic for rate-limited operations
 - **SSL Certificates**: Ensure certificates are in valid PEM format
 - **Domain Configuration**: Check domain status and configuration compatibility
+- **OSS Operations**: Verify bucket and object permissions, check region settings
+- **S3 Compatibility**: Ensure S3-compatible endpoint is correctly configured
 
 ---
 
