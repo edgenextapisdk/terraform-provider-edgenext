@@ -25,12 +25,111 @@ func ensureDir(filePath string) error {
 	return os.MkdirAll(dir, 0755)
 }
 
+// getResourceLink returns the appropriate link format based on the target platform
+func getResourceLink(resourceName string) string {
+	baseName := strings.Replace(resourceName, "edgenext_", "", 1)
+	if *linkFormat == "github" {
+		return "r/" + baseName + ".html.markdown"
+	}
+	return "resources/" + baseName
+}
+
+// getDataSourceLink returns the appropriate link format based on the target platform
+func getDataSourceLink(dataSourceName string) string {
+	baseName := strings.Replace(dataSourceName, "edgenext_", "", 1)
+	if *linkFormat == "github" {
+		return "d/" + baseName + ".html.markdown"
+	}
+	return "data-sources/" + baseName
+}
+
 const (
 	cloudMark      = "edgenext"
 	cloudTitle     = "EdgeNext"
 	cloudPrefix    = cloudMark + "_"
 	cloudMarkShort = "en"
 	docRoot        = "../website/docs"
+
+	// Template for individual resource/data source documentation
+	docTPL = `---
+subcategory: "{{.product}}"
+layout: "{{.cloud_mark}}"
+page_title: "{{.cloud_title}}: {{.name}}"
+sidebar_current: "docs-{{.cloud_mark}}-{{.dtype}}-{{.resource}}"
+description: |-
+  {{.description_short}}
+---
+
+# {{.name}}
+
+{{.description}}
+
+## Example Usage
+
+{{.example}}
+
+## Argument Reference
+
+The following arguments are supported:
+
+{{.arguments}}
+{{if ne .attributes ""}}
+## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+{{.attributes}}
+{{end}}
+{{if ne .import ""}}
+## Import
+
+{{.import}}
+{{end}}
+`
+
+	// Template for sidebar navigation (edgenext.erb)
+	idxTPL = `
+<% wrap_layout :inner do %>
+    <% content_for :sidebar do %>
+        <div class="docs-sidebar hidden-print affix-top" role="complementary">
+            <ul class="nav docs-sidenav">
+                <li>
+                    <a href="/docs/providers/index.html">All Providers</a>
+                </li>
+                <li>
+                    <a href="/docs/providers/{{.cloud_mark}}/index.html">{{.cloud_title}} Provider</a>
+                </li>
+                {{range .Products}}
+                <li>
+                    <a href="#">{{.Name}}</a>
+                    <ul class="nav">{{if eq .Name "Provider Data Sources"}}{{range $Resource := .DataSources}}
+                        <li>
+                            <a href="/docs/providers/{{$.cloud_mark}}/d/{{replace $Resource $.cloudPrefix ""}}.html">{{$Resource}}</a>
+                        </li>{{end}}{{else}}
+                        {{ if .DataSources }}<li>
+                            <a href="#">Data Sources</a>
+                            <ul class="nav nav-auto-expand">{{range $Resource := .DataSources}}
+                                <li>
+                                    <a href="/docs/providers/{{$.cloud_mark}}/d/{{replace $Resource $.cloudPrefix ""}}.html">{{$Resource}}</a>
+                                </li>{{end}}
+                            </ul>
+                        </li>{{ end }}
+                        <li>
+                            <a href="#">Resources</a>
+                            <ul class="nav nav-auto-expand">{{range $Resource := .Resources}}
+                                <li>
+                                    <a href="/docs/providers/{{$.cloud_mark}}/r/{{replace $Resource $.cloudPrefix ""}}.html">{{$Resource}}</a>
+                                </li>{{end}}
+                            </ul>
+                        </li>{{end}}
+                    </ul>
+                </li>{{end}}
+            </ul>
+        </div>
+    <% end %>
+    <%= yield %>
+<% end %>
+`
 )
 
 var (
@@ -136,38 +235,73 @@ func genIdx(filePath string) (prods []Product) {
 	return
 }
 
-// genMainPage generating main page documentation
+// genMainPage generating main page documentation from provider.md
 func genMainPage(filePath string, products []Product) {
-	data := map[string]interface{}{
-		"cloud_mark":  cloudMark,
-		"cloud_title": cloudTitle,
-		"Products":    products,
+	// Read provider.md content
+	providerMdPath := filepath.Join(filePath, "provider.md")
+	raw, err := os.ReadFile(providerMdPath)
+	if err != nil {
+		message("[FAIL!]read provider.md failed: %s", err)
+		os.Exit(1)
 	}
 
+	providerContent := string(raw)
+
+	// Find the "Resources List" section
+	pos := strings.Index(providerContent, "\nResources List\n")
+	if pos == -1 {
+		message("[FAIL!]Resources List section not found in provider.md")
+		os.Exit(1)
+	}
+
+	// Get content before "Resources List"
+	contentBeforeResourcesList := strings.TrimSpace(providerContent[:pos])
+
+	// Generate resources and data sources section
+	var resourcesSection strings.Builder
+	resourcesSection.WriteString("\n\n## Resources and Data Sources\n\n")
+	resourcesSection.WriteString("The EdgeNext provider supports the following resource types:\n\n")
+
+	for _, product := range products {
+		if product.Name == "Provider Data Sources" {
+			continue
+		}
+
+		resourcesSection.WriteString(fmt.Sprintf("### %s\n\n", product.Name))
+
+		if len(product.Resources) > 0 {
+			resourcesSection.WriteString("#### Resources\n\n")
+			for _, resource := range product.Resources {
+				link := getResourceLink(resource)
+				desc := getResourceDesc(resource)
+				resourcesSection.WriteString(fmt.Sprintf("* [`%s`](%s) - Manage %s\n", resource, link, desc))
+			}
+			resourcesSection.WriteString("\n")
+		}
+
+		if len(product.DataSources) > 0 {
+			resourcesSection.WriteString("#### Data Sources\n\n")
+			for _, dataSource := range product.DataSources {
+				link := getDataSourceLink(dataSource)
+				desc := getDataSourceDesc(dataSource)
+				resourcesSection.WriteString(fmt.Sprintf("* [`%s`](%s) - Query %s\n", dataSource, link, desc))
+			}
+			resourcesSection.WriteString("\n")
+		}
+	}
+
+	// Combine content
+	finalContent := contentBeforeResourcesList + resourcesSection.String()
+
+	// Write to index.html.markdown
 	filename := filepath.Join(docRoot, "index.html.markdown")
 	if err := ensureDir(filename); err != nil {
 		message("[FAIL!]create directory for %s failed: %s", filename, err)
 		os.Exit(1)
 	}
-	fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+
+	err = os.WriteFile(filename, []byte(finalContent), 0644)
 	if err != nil {
-		message("[FAIL!]open file %s failed: %s", filename, err)
-		os.Exit(1)
-	}
-
-	defer fd.Close()
-
-	funcMap := template.FuncMap{
-		"replace":           replace,
-		"upper":             strings.ToUpper,
-		"getResourceDesc":   getResourceDesc,
-		"getDataSourceDesc": getDataSourceDesc,
-		"getResourceLink":   getResourceLink,
-		"getDataSourceLink": getDataSourceLink,
-	}
-	tmpl := template.Must(template.New("t").Funcs(funcMap).Parse(mainPageTPL))
-
-	if err := tmpl.Execute(fd, data); err != nil {
 		message("[FAIL!]write file %s failed: %s", filename, err)
 		os.Exit(1)
 	}
