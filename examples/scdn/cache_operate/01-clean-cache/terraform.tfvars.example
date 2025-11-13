@@ -1,0 +1,18 @@
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://api.edgenextscdn.com"
+
+# Option 1: Clean whole site
+wholesite = ["www.example.com", "test.example.com"]
+
+# Option 2: Clean special URLs
+# specialurl = ["http://www.example.com/a", "http://test.example.com/a1"]
+
+# Option 3: Clean special directories
+# specialdir = ["http://www.example.com/a/", "http://test.example.com/a1/a2/"]
+
+# Optional: Group-based refresh
+# group_id = 0
+# protocol = "http"
+# port     = ""
+

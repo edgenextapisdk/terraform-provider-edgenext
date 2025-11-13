@@ -1,0 +1,6 @@
+access_key      = "your-access-key"
+secret_key      = "your-secret-key"
+endpoint        = "https://api.edgenextscdn.com"
+origin_group_id = 1
+domain_id       = 102008
+

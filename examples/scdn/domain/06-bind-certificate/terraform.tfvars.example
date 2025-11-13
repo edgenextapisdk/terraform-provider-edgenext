@@ -1,0 +1,6 @@
+access_key = "your-access-key-here"
+secret_key = "your-secret-key-here"
+endpoint   = "https://api.edgenextscdn.com"
+domain_id  = 12345  # Replace with your domain ID from Example 1
+ca_id      = 67890  # Replace with your SSL certificate ID
+enabled    = true   # Set to true to bind, false to unbind the certificate

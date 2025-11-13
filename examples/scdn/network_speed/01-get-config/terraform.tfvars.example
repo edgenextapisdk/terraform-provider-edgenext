@@ -1,0 +1,7 @@
+access_key   = "your_access_key_here"
+secret_key   = "your_secret_key_here"
+endpoint     = "https://api.edgenextscdn.com"
+business_id  = 777
+business_type = "tpl"
+# config_groups = ["domain_proxy_conf","upstream_redirect","customized_req_headers","source_site_protect","slice","https","page_gzip","webp","upload_file","websocket","mobile_jump","custom_page","upstream_uri_change","resp_headers"]
+

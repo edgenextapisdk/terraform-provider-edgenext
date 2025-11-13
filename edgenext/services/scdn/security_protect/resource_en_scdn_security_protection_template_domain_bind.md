@@ -1,0 +1,30 @@
+Provides a resource to bind domains to an SCDN security protection template.
+
+Example Usage
+
+Bind domains to template
+
+```hcl
+resource "edgenext_scdn_security_protection_template_domain_bind" "example" {
+  business_id = 12345
+  domain_ids  = [67890, 11111]
+}
+```
+
+Bind by group IDs
+
+```hcl
+resource "edgenext_scdn_security_protection_template_domain_bind" "example" {
+  business_id = 12345
+  group_ids   = [1, 2]
+}
+```
+
+Import
+
+SCDN security protection template domain bindings can be imported using the template ID and domain IDs:
+
+```shell
+terraform import edgenext_scdn_security_protection_template_domain_bind.example 12345-67890,11111
+```
+

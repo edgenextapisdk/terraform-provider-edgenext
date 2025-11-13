@@ -1,0 +1,20 @@
+access_key = "your-access-key-here"
+secret_key = "your-secret-key-here"
+endpoint   = "https://api.edgenextscdn.com"
+domain_id  = 12345  # Replace with your domain ID
+
+# Proxy Host Configuration (optional)
+enable_proxy_host = false
+# proxy_host      = "example.com"
+# proxy_host_type = "custom"
+
+# Proxy SNI Configuration (optional)
+enable_proxy_sni = false
+# proxy_sni       = "example.com"
+# proxy_sni_status = "on"
+
+# Domain Redirect Configuration (optional)
+enable_redirect = false
+# redirect_status   = "on"
+# redirect_jump_to  = "https://www.example.com"
+# redirect_jump_type = "301"

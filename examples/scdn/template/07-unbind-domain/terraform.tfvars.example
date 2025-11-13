@@ -1,0 +1,6 @@
+access_key  = "your_access_key_here"
+secret_key  = "your_secret_key_here"
+endpoint    = "https://api.edgenextscdn.com"
+template_id = 123
+domain_ids  = [101753]
+

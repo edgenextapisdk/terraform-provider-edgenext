@@ -1,0 +1,7 @@
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://api.edgenextscdn.com"
+
+certificate_id = "123"
+new_ca_name    = "updated-certificate-name"
+

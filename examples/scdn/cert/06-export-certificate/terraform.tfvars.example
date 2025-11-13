@@ -1,0 +1,13 @@
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://api.edgenextscdn.com"
+
+# Single certificate ID
+certificate_id = "123"
+
+# Or multiple certificate IDs (comma-separated)
+# certificate_id = "123,456,789"
+
+# Optional: product flag
+# product_flag = "your-product-flag"
+

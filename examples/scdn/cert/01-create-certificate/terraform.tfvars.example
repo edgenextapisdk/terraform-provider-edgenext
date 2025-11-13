@@ -1,0 +1,16 @@
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://api.edgenextscdn.com"
+
+ca_name = "example-certificate"
+ca_cert = <<-EOT
+-----BEGIN CERTIFICATE-----
+YOUR_CERTIFICATE_CONTENT_HERE
+-----END CERTIFICATE-----
+EOT
+ca_key = <<-EOT
+-----BEGIN RSA PRIVATE KEY-----
+YOUR_PRIVATE_KEY_CONTENT_HERE
+-----END RSA PRIVATE KEY-----
+EOT
+
