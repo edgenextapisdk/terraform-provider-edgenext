@@ -341,7 +341,7 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		productDir = "ssl"
 	case "object storage service(oss)", "object storage service":
 		productDir = "oss"
-	case "secure content delivery network(scdn)", "secure content delivery network", "scdn":
+	case "security cdn(scdn)", "security cdn", "scdn":
 		productDir = "scdn"
 	}
 

@@ -131,7 +131,7 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_oss_object`](data-sources/oss_object) - Query OSS object details
 * [`edgenext_oss_objects`](data-sources/oss_objects) - Query OSS objects
 
-### Secure Content Delivery Network (SCDN)
+### Security CDN (SCDN)
 
 #### Resources
 
