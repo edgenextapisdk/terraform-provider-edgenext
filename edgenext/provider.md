@@ -120,7 +120,7 @@ edgenext_oss_bucket
 edgenext_oss_object
 edgenext_oss_object_copy
 
-Secure Content Delivery Network (SCDN)
+Security CDN (SCDN)
 Data Source
 edgenext_scdn_domain
 edgenext_scdn_domains

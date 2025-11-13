@@ -1,5 +1,5 @@
 ---
-subcategory: "Secure Content Delivery Network (SCDN)"
+subcategory: "Security CDN (SCDN)"
 layout: "edgenext"
 page_title: "EdgeNext: edgenext_scdn_rule_template_domain_unbind"
 sidebar_current: "docs-edgenext-resource-scdn_rule_template_domain_unbind"

@@ -1,6 +1,6 @@
 # SCDN Service
 
-This package provides Terraform resources and data sources for managing EdgeNext SCDN (Secure Content Delivery Network) domains and related configurations.
+This package provides Terraform resources and data sources for managing EdgeNext SCDN (Security CDN) domains and related configurations.
 
 ## Resources
 
