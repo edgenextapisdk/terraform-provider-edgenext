@@ -1,0 +1,15 @@
+access_key   = "your_access_key"
+secret_key   = "your_secret_key"
+endpoint     = "https://api.edgenextscdn.com"
+business_id  = 1246
+business_type = "tpl"
+
+# List of rule IDs to update status
+rule_ids = [
+  3009,
+  3028
+]
+
+# Status: 1 (enabled) or 2 (disabled)
+status = 1
+

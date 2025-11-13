@@ -1,0 +1,52 @@
+access_key   = "your_access_key"
+secret_key   = "your_secret_key"
+endpoint     = "https://api.edgenextscdn.com"
+business_id  = 1246
+business_type = "tpl"
+rule_id      = 3028
+rule_name    = "updated-cache-rule"
+expr         = "(http.request.postfix in {\"css\" \"js\" \"txt\"})"
+remark       = "Updated cache rule configuration"
+
+conf = {
+  nocache = false
+
+  cache_rule = {
+    cachetime             = 120
+    ignore_cache_time     = true
+    ignore_nocache_header = true
+    no_cache_control_op   = "default"
+    action                = "force"
+  }
+
+  browser_cache_rule = {
+    cachetime        = 60
+    ignore_cache_time = true
+    nocache          = false
+  }
+
+  cache_errstatus = [
+    {
+      cachetime  = 10
+      err_status = [400, 401, 404, 500]
+    }
+  ]
+
+  cache_url_rewrite = {
+    sort_args   = true
+    ignore_case = true
+    queries = {
+      args_method = "SAVE"
+      items       = [""]
+    }
+    cookies = {
+      args_method = "IGNORE"
+      items       = [""]
+    }
+  }
+
+  cache_share = {
+    scheme = "https"
+  }
+}
+

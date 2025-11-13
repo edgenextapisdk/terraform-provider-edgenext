@@ -37,6 +37,11 @@ examples/**/files/**
 examples/**/images/**
 examples/**/terraform.tfstate.backup
 
+# Terraform lock files (should not be committed)
+**/.terraform.lock.hcl
+.terraform.lock.hcl
+terraform.lock.hcl
+
 # IDE files
 .vscode/
 .idea/
@@ -64,3 +69,6 @@ build/
 
 # cursor
 .cursor/
+
+# Test configuration files
+edgenext/**/test_config.json

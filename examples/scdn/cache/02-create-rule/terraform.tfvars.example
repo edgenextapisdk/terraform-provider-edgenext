@@ -1,0 +1,52 @@
+access_key   = "your_access_key"
+secret_key   = "your_secret_key"
+endpoint     = "https://api.edgenextscdn.com"
+business_id  = 1246
+business_type = "tpl"
+
+rule_name = "test-cache-rule"
+expr      = "(http.request.uri.path eq \"/test\")"
+remark    = "Test cache rule"
+
+conf = {
+  nocache = false
+
+  cache_rule = {
+    cachetime             = 60
+    ignore_cache_time     = false
+    ignore_nocache_header = false
+    no_cache_control_op   = "cachetime"
+    action                = "cachetime"
+  }
+
+  browser_cache_rule = {
+    cachetime        = 60
+    ignore_cache_time = true
+    nocache          = false
+  }
+
+  cache_errstatus = [
+    {
+      cachetime  = 10
+      err_status = [400, 401, 404, 500]
+    }
+  ]
+
+  cache_url_rewrite = {
+    sort_args   = true
+    ignore_case = true
+    queries = {
+      args_method = "SAVE"
+      items       = [""]
+    }
+    cookies = {
+      args_method = "IGNORE"
+      items       = [""]
+    }
+  }
+
+  cache_share = {
+    scheme = "http"
+  }
+}
+

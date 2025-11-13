@@ -8,9 +8,7 @@ description: |-
 
 # EdgeNext Provider
 
-The EdgeNext provider is used to interact with the many resources supported by [EdgeNext](https://www.edgenext.com). The provider needs to be configured with the proper credentials before it can be used.
-
-Use the navigation to read about the available resources and data sources.
+The EdgeNext Provider can be used to configure infrastructure in [EdgeNext](https://www.edgenext.com) using the EdgeNext Resource Manager API's. Documentation regarding the Data Sources and Resources supported by the EdgeNext Provider can be found in the navigation to the left.
 
 -> **Note:** This provider requires EdgeNext API credentials (access key and secret key).
 
@@ -121,3 +119,76 @@ Resource
 edgenext_oss_bucket
 edgenext_oss_object
 edgenext_oss_object_copy
+
+Secure Content Delivery Network (SCDN)
+Data Source
+edgenext_scdn_domain
+edgenext_scdn_domains
+edgenext_scdn_origin
+edgenext_scdn_origins
+edgenext_scdn_domain_base_settings
+edgenext_scdn_access_progress
+edgenext_scdn_domain_templates
+edgenext_scdn_brief_domains
+edgenext_scdn_certificate
+edgenext_scdn_certificates
+edgenext_scdn_certificates_by_domains
+edgenext_scdn_certificate_export
+edgenext_scdn_rule_template
+edgenext_scdn_rule_templates
+edgenext_scdn_rule_template_domains
+edgenext_scdn_network_speed_config
+edgenext_scdn_network_speed_rules
+edgenext_scdn_cache_rules
+edgenext_scdn_cache_global_config
+edgenext_scdn_security_protection_ddos_config
+edgenext_scdn_security_protection_waf_config
+edgenext_scdn_security_protection_template
+edgenext_scdn_security_protection_templates
+edgenext_scdn_security_protection_template_domains
+edgenext_scdn_security_protection_template_unbound_domains
+edgenext_scdn_security_protection_member_global_template
+edgenext_scdn_security_protection_iota
+edgenext_scdn_origin_group
+edgenext_scdn_origin_groups
+edgenext_scdn_origin_groups_all
+edgenext_scdn_cache_clean_config
+edgenext_scdn_cache_clean_tasks
+edgenext_scdn_cache_clean_task_detail
+edgenext_scdn_cache_preheat_tasks
+edgenext_scdn_log_download_tasks
+edgenext_scdn_log_download_templates
+edgenext_scdn_log_download_fields
+
+Resource
+edgenext_scdn_domain
+edgenext_scdn_origin
+edgenext_scdn_cert_binding
+edgenext_scdn_domain_base_settings
+edgenext_scdn_domain_status
+edgenext_scdn_domain_node_switch
+edgenext_scdn_domain_access_mode
+edgenext_scdn_certificate
+edgenext_scdn_certificate_apply
+edgenext_scdn_rule_template
+edgenext_scdn_rule_template_domain_bind
+edgenext_scdn_rule_template_domain_unbind
+edgenext_scdn_network_speed_config
+edgenext_scdn_network_speed_rule
+edgenext_scdn_network_speed_rules_sort
+edgenext_scdn_cache_rule
+edgenext_scdn_cache_rule_status
+edgenext_scdn_cache_rules_sort
+edgenext_scdn_security_protection_ddos_config
+edgenext_scdn_security_protection_waf_config
+edgenext_scdn_security_protection_template
+edgenext_scdn_security_protection_template_domain_bind
+edgenext_scdn_security_protection_template_batch_config
+edgenext_scdn_origin_group
+edgenext_scdn_origin_group_domain_bind
+edgenext_scdn_origin_group_domain_copy
+edgenext_scdn_cache_clean_task
+edgenext_scdn_cache_preheat_task
+edgenext_scdn_log_download_task
+edgenext_scdn_log_download_template
+edgenext_scdn_log_download_template_status

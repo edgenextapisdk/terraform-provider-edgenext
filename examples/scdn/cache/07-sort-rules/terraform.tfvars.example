@@ -1,0 +1,13 @@
+access_key   = "your_access_key"
+secret_key   = "your_secret_key"
+endpoint     = "https://api.edgenextscdn.com"
+business_id  = 1246
+business_type = "tpl"
+
+# Provide the rule IDs in the desired order.
+# You can get existing rule IDs using the 01-list-rules example.
+rule_ids_to_sort = [
+  3028,  # Example rule ID 1
+  3009   # Example rule ID 2
+]
+

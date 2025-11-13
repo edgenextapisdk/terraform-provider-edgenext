@@ -131,3 +131,79 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_oss_object`](data-sources/oss_object) - Query OSS object details
 * [`edgenext_oss_objects`](data-sources/oss_objects) - Query OSS objects
 
+### Secure Content Delivery Network (SCDN)
+
+#### Resources
+
+* [`edgenext_scdn_domain`](resources/scdn_domain) - Manage SCDN domain configuration
+* [`edgenext_scdn_origin`](resources/scdn_origin) - Manage SCDN origin servers
+* [`edgenext_scdn_cert_binding`](resources/scdn_cert_binding) - Manage SCDN certificate bindings
+* [`edgenext_scdn_domain_base_settings`](resources/scdn_domain_base_settings) - Manage SCDN domain base settings
+* [`edgenext_scdn_domain_status`](resources/scdn_domain_status) - Manage SCDN domain status management
+* [`edgenext_scdn_domain_node_switch`](resources/scdn_domain_node_switch) - Manage SCDN domain node switching
+* [`edgenext_scdn_domain_access_mode`](resources/scdn_domain_access_mode) - Manage SCDN domain access mode
+* [`edgenext_scdn_certificate`](resources/scdn_certificate) - Manage SCDN certificates
+* [`edgenext_scdn_certificate_apply`](resources/scdn_certificate_apply) - Manage SCDN certificate application
+* [`edgenext_scdn_rule_template`](resources/scdn_rule_template) - Manage SCDN rule templates
+* [`edgenext_scdn_rule_template_domain_bind`](resources/scdn_rule_template_domain_bind) - Manage SCDN rule template domain bindings
+* [`edgenext_scdn_rule_template_domain_unbind`](resources/scdn_rule_template_domain_unbind) - Manage SCDN rule template domain unbindings
+* [`edgenext_scdn_network_speed_config`](resources/scdn_network_speed_config) - Manage SCDN network speed configuration
+* [`edgenext_scdn_network_speed_rule`](resources/scdn_network_speed_rule) - Manage SCDN network speed rules
+* [`edgenext_scdn_network_speed_rules_sort`](resources/scdn_network_speed_rules_sort) - Manage SCDN network speed rules sorting
+* [`edgenext_scdn_cache_rule`](resources/scdn_cache_rule) - Manage SCDN cache rules
+* [`edgenext_scdn_cache_rule_status`](resources/scdn_cache_rule_status) - Manage SCDN cache rule status
+* [`edgenext_scdn_cache_rules_sort`](resources/scdn_cache_rules_sort) - Manage SCDN cache rules sorting
+* [`edgenext_scdn_security_protection_ddos_config`](resources/scdn_security_protection_ddos_config) - Manage SCDN DDoS protection configuration
+* [`edgenext_scdn_security_protection_waf_config`](resources/scdn_security_protection_waf_config) - Manage SCDN WAF protection configuration
+* [`edgenext_scdn_security_protection_template`](resources/scdn_security_protection_template) - Manage SCDN security protection templates
+* [`edgenext_scdn_security_protection_template_domain_bind`](resources/scdn_security_protection_template_domain_bind) - Manage SCDN security protection template domain bindings
+* [`edgenext_scdn_security_protection_template_batch_config`](resources/scdn_security_protection_template_batch_config) - Manage SCDN security protection template batch configuration
+* [`edgenext_scdn_origin_group`](resources/scdn_origin_group) - Manage SCDN origin groups
+* [`edgenext_scdn_origin_group_domain_bind`](resources/scdn_origin_group_domain_bind) - Manage SCDN origin group domain bindings
+* [`edgenext_scdn_origin_group_domain_copy`](resources/scdn_origin_group_domain_copy) - Manage SCDN origin group domain copying
+* [`edgenext_scdn_cache_clean_task`](resources/scdn_cache_clean_task) - Manage SCDN cache clean tasks
+* [`edgenext_scdn_cache_preheat_task`](resources/scdn_cache_preheat_task) - Manage SCDN cache preheat tasks
+* [`edgenext_scdn_log_download_task`](resources/scdn_log_download_task) - Manage SCDN log download tasks
+* [`edgenext_scdn_log_download_template`](resources/scdn_log_download_template) - Manage SCDN log download templates
+* [`edgenext_scdn_log_download_template_status`](resources/scdn_log_download_template_status) - Manage SCDN log download template status
+
+#### Data Sources
+
+* [`edgenext_scdn_domain`](data-sources/scdn_domain) - Query SCDN domain details
+* [`edgenext_scdn_domains`](data-sources/scdn_domains) - Query SCDN domains
+* [`edgenext_scdn_origin`](data-sources/scdn_origin) - Query SCDN origin details
+* [`edgenext_scdn_origins`](data-sources/scdn_origins) - Query SCDN origins
+* [`edgenext_scdn_domain_base_settings`](data-sources/scdn_domain_base_settings) - Query SCDN domain base settings
+* [`edgenext_scdn_access_progress`](data-sources/scdn_access_progress) - Query SCDN access progress options
+* [`edgenext_scdn_domain_templates`](data-sources/scdn_domain_templates) - Query SCDN domain templates
+* [`edgenext_scdn_brief_domains`](data-sources/scdn_brief_domains) - Query SCDN brief domain information
+* [`edgenext_scdn_certificate`](data-sources/scdn_certificate) - Query SCDN certificate details
+* [`edgenext_scdn_certificates`](data-sources/scdn_certificates) - Query SCDN certificates
+* [`edgenext_scdn_certificates_by_domains`](data-sources/scdn_certificates_by_domains) - Query SCDN certificates by domains
+* [`edgenext_scdn_certificate_export`](data-sources/scdn_certificate_export) - Query SCDN certificate export
+* [`edgenext_scdn_rule_template`](data-sources/scdn_rule_template) - Query SCDN rule template details
+* [`edgenext_scdn_rule_templates`](data-sources/scdn_rule_templates) - Query SCDN rule templates
+* [`edgenext_scdn_rule_template_domains`](data-sources/scdn_rule_template_domains) - Query SCDN rule template domains
+* [`edgenext_scdn_network_speed_config`](data-sources/scdn_network_speed_config) - Query SCDN network speed configuration
+* [`edgenext_scdn_network_speed_rules`](data-sources/scdn_network_speed_rules) - Query SCDN network speed rules
+* [`edgenext_scdn_cache_rules`](data-sources/scdn_cache_rules) - Query SCDN cache rules
+* [`edgenext_scdn_cache_global_config`](data-sources/scdn_cache_global_config) - Query SCDN cache global configuration
+* [`edgenext_scdn_security_protection_ddos_config`](data-sources/scdn_security_protection_ddos_config) - Query SCDN DDoS protection configuration
+* [`edgenext_scdn_security_protection_waf_config`](data-sources/scdn_security_protection_waf_config) - Query SCDN WAF protection configuration
+* [`edgenext_scdn_security_protection_template`](data-sources/scdn_security_protection_template) - Query SCDN security protection template details
+* [`edgenext_scdn_security_protection_templates`](data-sources/scdn_security_protection_templates) - Query SCDN security protection templates
+* [`edgenext_scdn_security_protection_template_domains`](data-sources/scdn_security_protection_template_domains) - Query SCDN security protection template domains
+* [`edgenext_scdn_security_protection_template_unbound_domains`](data-sources/scdn_security_protection_template_unbound_domains) - Query SCDN security protection template unbound domains
+* [`edgenext_scdn_security_protection_member_global_template`](data-sources/scdn_security_protection_member_global_template) - Query SCDN security protection member global template
+* [`edgenext_scdn_security_protection_iota`](data-sources/scdn_security_protection_iota) - Query SCDN security protection IOTA
+* [`edgenext_scdn_origin_group`](data-sources/scdn_origin_group) - Query SCDN origin group details
+* [`edgenext_scdn_origin_groups`](data-sources/scdn_origin_groups) - Query SCDN origin groups
+* [`edgenext_scdn_origin_groups_all`](data-sources/scdn_origin_groups_all) - Query SCDN all origin groups
+* [`edgenext_scdn_cache_clean_config`](data-sources/scdn_cache_clean_config) - Query SCDN cache clean configuration
+* [`edgenext_scdn_cache_clean_tasks`](data-sources/scdn_cache_clean_tasks) - Query SCDN cache clean tasks
+* [`edgenext_scdn_cache_clean_task_detail`](data-sources/scdn_cache_clean_task_detail) - Query SCDN cache clean task details
+* [`edgenext_scdn_cache_preheat_tasks`](data-sources/scdn_cache_preheat_tasks) - Query SCDN cache preheat tasks
+* [`edgenext_scdn_log_download_tasks`](data-sources/scdn_log_download_tasks) - Query SCDN log download tasks
+* [`edgenext_scdn_log_download_templates`](data-sources/scdn_log_download_templates) - Query SCDN log download templates
+* [`edgenext_scdn_log_download_fields`](data-sources/scdn_log_download_fields) - Query SCDN log download fields
+

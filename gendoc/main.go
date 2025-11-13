@@ -341,12 +341,41 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		productDir = "ssl"
 	case "object storage service(oss)", "object storage service":
 		productDir = "oss"
+	case "secure content delivery network(scdn)", "secure content delivery network", "scdn":
+		productDir = "scdn"
 	}
 
+	// Try to find the file, first in the main directory, then in subdirectories
 	filename := fmt.Sprintf("services/%s/%s_%s_%s.md", productDir, dtype, cloudMarkShort, data["resource"])
 	message("[START]get description from file: %s\n", filename)
 
-	raw, err := os.ReadFile(filepath.Join(fpath, filename))
+	var raw []byte
+	var err error
+
+	// First try the main directory
+	filePath := filepath.Join(fpath, filename)
+	raw, err = os.ReadFile(filePath)
+
+	// If not found and it's SCDN, try subdirectories
+	if err != nil && productDir == "scdn" {
+		// List subdirectories in scdn
+		scdnPath := filepath.Join(fpath, "services", "scdn")
+		if entries, err2 := os.ReadDir(scdnPath); err2 == nil {
+			for _, entry := range entries {
+				if entry.IsDir() {
+					subDirPath := filepath.Join(scdnPath, entry.Name(), fmt.Sprintf("%s_%s_%s.md", dtype, cloudMarkShort, data["resource"]))
+					if raw2, err2 := os.ReadFile(subDirPath); err2 == nil {
+						raw = raw2
+						err = nil
+						filename = fmt.Sprintf("services/%s/%s/%s_%s_%s.md", productDir, entry.Name(), dtype, cloudMarkShort, data["resource"])
+						message("[INFO]Found file in subdirectory: %s\n", filename)
+						break
+					}
+				}
+			}
+		}
+	}
+
 	if err != nil {
 		message("[FAIL!]get description failed: %s", err)
 		os.Exit(1)
@@ -786,6 +815,38 @@ func getResourceDesc(resourceName string) string {
 		"edgenext_oss_bucket":      "OSS buckets",
 		"edgenext_oss_object":      "OSS objects",
 		"edgenext_oss_object_copy": "OSS object copy",
+		// SCDN resources
+		"edgenext_scdn_domain":                                    "SCDN domain configuration",
+		"edgenext_scdn_origin":                                    "SCDN origin servers",
+		"edgenext_scdn_cert_binding":                              "SCDN certificate bindings",
+		"edgenext_scdn_domain_base_settings":                      "SCDN domain base settings",
+		"edgenext_scdn_domain_status":                             "SCDN domain status management",
+		"edgenext_scdn_domain_node_switch":                        "SCDN domain node switching",
+		"edgenext_scdn_domain_access_mode":                        "SCDN domain access mode",
+		"edgenext_scdn_certificate":                               "SCDN certificates",
+		"edgenext_scdn_certificate_apply":                         "SCDN certificate application",
+		"edgenext_scdn_rule_template":                             "SCDN rule templates",
+		"edgenext_scdn_rule_template_domain_bind":                 "SCDN rule template domain bindings",
+		"edgenext_scdn_rule_template_domain_unbind":               "SCDN rule template domain unbindings",
+		"edgenext_scdn_network_speed_config":                      "SCDN network speed configuration",
+		"edgenext_scdn_network_speed_rule":                        "SCDN network speed rules",
+		"edgenext_scdn_network_speed_rules_sort":                  "SCDN network speed rules sorting",
+		"edgenext_scdn_cache_rule":                                "SCDN cache rules",
+		"edgenext_scdn_cache_rule_status":                         "SCDN cache rule status",
+		"edgenext_scdn_cache_rules_sort":                          "SCDN cache rules sorting",
+		"edgenext_scdn_security_protection_ddos_config":           "SCDN DDoS protection configuration",
+		"edgenext_scdn_security_protection_waf_config":            "SCDN WAF protection configuration",
+		"edgenext_scdn_security_protection_template":              "SCDN security protection templates",
+		"edgenext_scdn_security_protection_template_domain_bind":  "SCDN security protection template domain bindings",
+		"edgenext_scdn_security_protection_template_batch_config": "SCDN security protection template batch configuration",
+		"edgenext_scdn_origin_group":                              "SCDN origin groups",
+		"edgenext_scdn_origin_group_domain_bind":                  "SCDN origin group domain bindings",
+		"edgenext_scdn_origin_group_domain_copy":                  "SCDN origin group domain copying",
+		"edgenext_scdn_cache_clean_task":                          "SCDN cache clean tasks",
+		"edgenext_scdn_cache_preheat_task":                        "SCDN cache preheat tasks",
+		"edgenext_scdn_log_download_task":                         "SCDN log download tasks",
+		"edgenext_scdn_log_download_template":                     "SCDN log download templates",
+		"edgenext_scdn_log_download_template_status":              "SCDN log download template status",
 	}
 
 	if desc, ok := descriptions[resourceName]; ok {
@@ -812,6 +873,44 @@ func getDataSourceDesc(dataSourceName string) string {
 		"edgenext_oss_buckets":      "OSS buckets",
 		"edgenext_oss_object":       "OSS object details",
 		"edgenext_oss_objects":      "OSS objects",
+		// SCDN data sources
+		"edgenext_scdn_domain":                                       "SCDN domain details",
+		"edgenext_scdn_domains":                                      "SCDN domains",
+		"edgenext_scdn_origin":                                       "SCDN origin details",
+		"edgenext_scdn_origins":                                      "SCDN origins",
+		"edgenext_scdn_domain_base_settings":                         "SCDN domain base settings",
+		"edgenext_scdn_access_progress":                              "SCDN access progress options",
+		"edgenext_scdn_domain_templates":                             "SCDN domain templates",
+		"edgenext_scdn_brief_domains":                                "SCDN brief domain information",
+		"edgenext_scdn_certificate":                                  "SCDN certificate details",
+		"edgenext_scdn_certificates":                                 "SCDN certificates",
+		"edgenext_scdn_certificates_by_domains":                      "SCDN certificates by domains",
+		"edgenext_scdn_certificate_export":                           "SCDN certificate export",
+		"edgenext_scdn_rule_template":                                "SCDN rule template details",
+		"edgenext_scdn_rule_templates":                               "SCDN rule templates",
+		"edgenext_scdn_rule_template_domains":                        "SCDN rule template domains",
+		"edgenext_scdn_network_speed_config":                         "SCDN network speed configuration",
+		"edgenext_scdn_network_speed_rules":                          "SCDN network speed rules",
+		"edgenext_scdn_cache_rules":                                  "SCDN cache rules",
+		"edgenext_scdn_cache_global_config":                          "SCDN cache global configuration",
+		"edgenext_scdn_security_protection_ddos_config":              "SCDN DDoS protection configuration",
+		"edgenext_scdn_security_protection_waf_config":               "SCDN WAF protection configuration",
+		"edgenext_scdn_security_protection_template":                 "SCDN security protection template details",
+		"edgenext_scdn_security_protection_templates":                "SCDN security protection templates",
+		"edgenext_scdn_security_protection_template_domains":         "SCDN security protection template domains",
+		"edgenext_scdn_security_protection_template_unbound_domains": "SCDN security protection template unbound domains",
+		"edgenext_scdn_security_protection_member_global_template":   "SCDN security protection member global template",
+		"edgenext_scdn_security_protection_iota":                     "SCDN security protection IOTA",
+		"edgenext_scdn_origin_group":                                 "SCDN origin group details",
+		"edgenext_scdn_origin_groups":                                "SCDN origin groups",
+		"edgenext_scdn_origin_groups_all":                            "SCDN all origin groups",
+		"edgenext_scdn_cache_clean_config":                           "SCDN cache clean configuration",
+		"edgenext_scdn_cache_clean_tasks":                            "SCDN cache clean tasks",
+		"edgenext_scdn_cache_clean_task_detail":                      "SCDN cache clean task details",
+		"edgenext_scdn_cache_preheat_tasks":                          "SCDN cache preheat tasks",
+		"edgenext_scdn_log_download_tasks":                           "SCDN log download tasks",
+		"edgenext_scdn_log_download_templates":                       "SCDN log download templates",
+		"edgenext_scdn_log_download_fields":                          "SCDN log download fields",
 	}
 
 	if desc, ok := descriptions[dataSourceName]; ok {

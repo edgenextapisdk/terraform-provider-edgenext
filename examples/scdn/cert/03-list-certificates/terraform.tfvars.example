@@ -1,0 +1,11 @@
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://api.edgenextscdn.com"
+
+# Optional filters
+domain      = ""
+ca_name     = ""
+binded      = ""
+apply_status = ""
+expiry_time = ""
+

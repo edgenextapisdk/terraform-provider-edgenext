@@ -1,0 +1,6 @@
+access_key = "your-access-key-here"
+secret_key = "your-secret-key-here"
+endpoint   = "https://api.edgenextscdn.com"
+domain_id  = 12345  # Replace with your domain ID
+protect_status = "scdn"  # Valid values: back_source, scdn, exclusive
+# exclusive_resource_id = 123  # Required only if protect_status is "exclusive"

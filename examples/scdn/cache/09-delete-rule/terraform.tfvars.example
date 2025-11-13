@@ -1,0 +1,7 @@
+access_key   = "your_access_key"
+secret_key   = "your_secret_key"
+endpoint     = "https://api.edgenextscdn.com"
+business_id  = 1246
+business_type = "tpl"
+rule_id      = 3009
+

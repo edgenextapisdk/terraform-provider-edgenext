@@ -1,0 +1,7 @@
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://api.edgenextscdn.com"
+name       = ""
+page       = 1
+page_size  = 20
+

@@ -1,0 +1,10 @@
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://api.edgenextscdn.com"
+
+# List of domains to apply for certificate
+domains = [
+  "example.com",
+  "www.example.com"
+]
+

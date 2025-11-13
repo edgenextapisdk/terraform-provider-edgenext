@@ -1,0 +1,25 @@
+access_key  = "YOUR_ACCESS_KEY"
+secret_key  = "YOUR_SECRET_KEY"
+endpoint    = "http://apiv5.prxcdn.com:60041"
+
+template_name     = "test-log-download-template"
+group_name        = "default"
+group_id          = 0
+data_source       = "ng"
+status            = 1
+download_fields   = [
+  "http_host",
+  "city",
+  "country",
+  "province",
+  "remote_addr",
+  "request_url"
+]
+search_terms = [
+  {
+    key   = "http_host"
+    value = "example.com"
+  }
+]
+domain_select_type = 0
+
