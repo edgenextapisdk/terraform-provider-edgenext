@@ -1,4 +1,15 @@
 access_key  = "your-access-key-here"
 secret_key  = "your-secret-key-here"
 endpoint    = "https://api.edgenextscdn.com"
+
+# Query by domain name (Option 1)
 domain_name = "example-scdn.com"
+
+# Query by domain ID (Option 2 - recommended)
+# id = "116038"
+
+# Query by domain_id (Option 3 - deprecated, use id instead)
+# domain_id = "116038"
+
+# Note: You can use either domain_name, id, or domain_id, but at least one must be provided.
+# If multiple are provided, priority is: id > domain_id > domain_name

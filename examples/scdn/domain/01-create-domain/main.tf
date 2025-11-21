@@ -69,7 +69,6 @@ resource "edgenext_scdn_domain" "example" {
   group_id       = var.group_id
   remark         = var.remark
   protect_status = "scdn"
-  app_type       = "web"
 
   origins {
     protocol        = 0  # HTTP

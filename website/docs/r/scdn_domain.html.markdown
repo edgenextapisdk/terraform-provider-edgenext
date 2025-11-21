@@ -100,14 +100,13 @@ resource "edgenext_scdn_domain" "example" {
 The following arguments are supported:
 
 * `domain` - (Required, String, ForceNew) The domain name to be added to SCDN
-* `origins` - (Required, List) The origin server configuration
-* `app_type` - (Optional, String) The application type
 * `exclusive_resource_id` - (Optional, Int) The ID of the exclusive resource package
 * `group_id` - (Optional, Int) The ID of the domain group
+* `origins` - (Optional, List) The origin server configuration
 * `protect_status` - (Optional, String) The edge node type. Valid values: back_source, scdn, exclusive
 * `remark` - (Optional, String) The remark for the domain
 * `tpl_id` - (Optional, Int) The template ID to be applied to the domain
-* `tpl_recommend` - (Optional, String) The template recommendation status
+* `tpl_recommend` - (Optional, String) The recommended configuration. Valid values: large_file (large file download), web_acce (website acceleration). This parameter is mutually exclusive with tpl_id
 
 The `origins` object supports the following:
 
@@ -123,7 +122,7 @@ The `records` object of `origins` supports the following:
 * `port` - (Required, Int) The port of the record
 * `priority` - (Required, Int) The priority of the record
 * `value` - (Required, String) The value of the record (IP address or domain)
-* `view` - (Required, String) The view of the record
+* `view` - (Required, String) The view of the record. Valid values: primary (primary line), backup (backup line)
 
 ## Attributes Reference
 

@@ -40,7 +40,7 @@ func DataSourceEdgenextScdnOrigin() *schema.Resource {
 			"protocol": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The origin protocol",
+				Description: "The origin protocol. Valid values: 0 (HTTP), 1 (HTTPS)",
 			},
 			"listen_port": {
 				Type:        schema.TypeInt,
@@ -50,17 +50,17 @@ func DataSourceEdgenextScdnOrigin() *schema.Resource {
 			"origin_protocol": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The origin protocol",
+				Description: "The origin protocol. Valid values: 0 (HTTP), 1 (HTTPS), 2 (Follow)",
 			},
 			"load_balance": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The load balancing method",
+				Description: "The load balancing method. Valid values: 0 (IP hash), 1 (Round robin), 2 (Cookie)",
 			},
 			"origin_type": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The origin type",
+				Description: "The origin type. Valid values: 0 (IP), 1 (Domain)",
 			},
 			"records": {
 				Type:        schema.TypeList,
@@ -71,12 +71,12 @@ func DataSourceEdgenextScdnOrigin() *schema.Resource {
 						"view": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The view of the record",
+							Description: "The view of the record. Valid values: primary (primary line), backup (backup line)",
 						},
 						"value": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The value of the record",
+							Description: "The value of the record (IP address or domain)",
 						},
 						"port": {
 							Type:        schema.TypeInt,
@@ -87,6 +87,11 @@ func DataSourceEdgenextScdnOrigin() *schema.Resource {
 							Type:        schema.TypeInt,
 							Computed:    true,
 							Description: "The priority of the record",
+						},
+						"host": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The origin host, specifies the Host header when accessing the origin",
 						},
 					},
 				},
@@ -156,6 +161,7 @@ func dataSourceScdnOriginRead(d *schema.ResourceData, m interface{}) error {
 			"value":    record.Value,
 			"port":     record.Port,
 			"priority": record.Priority,
+			"host":     record.Host,
 		}
 	}
 	if err := d.Set("records", records); err != nil {
@@ -226,7 +232,7 @@ func DataSourceEdgenextScdnOrigins() *schema.Resource {
 						"protocol": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The origin protocol",
+							Description: "The origin protocol. Valid values: 0 (HTTP), 1 (HTTPS)",
 						},
 						"listen_port": {
 							Type:        schema.TypeInt,
@@ -236,17 +242,17 @@ func DataSourceEdgenextScdnOrigins() *schema.Resource {
 						"origin_protocol": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The origin protocol",
+							Description: "The origin protocol. Valid values: 0 (HTTP), 1 (HTTPS), 2 (Follow)",
 						},
 						"load_balance": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The load balancing method",
+							Description: "The load balancing method. Valid values: 0 (IP hash), 1 (Round robin), 2 (Cookie)",
 						},
 						"origin_type": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The origin type",
+							Description: "The origin type. Valid values: 0 (IP), 1 (Domain)",
 						},
 						"records": {
 							Type:        schema.TypeList,
@@ -257,12 +263,12 @@ func DataSourceEdgenextScdnOrigins() *schema.Resource {
 									"view": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The view of the record",
+										Description: "The view of the record. Valid values: primary (primary line), backup (backup line)",
 									},
 									"value": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The value of the record",
+										Description: "The value of the record (IP address or domain)",
 									},
 									"port": {
 										Type:        schema.TypeInt,
@@ -273,6 +279,11 @@ func DataSourceEdgenextScdnOrigins() *schema.Resource {
 										Type:        schema.TypeInt,
 										Computed:    true,
 										Description: "The priority of the record",
+									},
+									"host": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The origin host, specifies the Host header when accessing the origin",
 									},
 								},
 							},
@@ -323,6 +334,7 @@ func dataSourceScdnOriginsRead(d *schema.ResourceData, m interface{}) error {
 				"value":    record.Value,
 				"port":     record.Port,
 				"priority": record.Priority,
+				"host":     record.Host,
 			}
 		}
 		originMap["records"] = records

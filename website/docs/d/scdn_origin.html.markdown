@@ -54,14 +54,15 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the origin
 * `listen_port` - The listening port of the origin server
-* `load_balance` - The load balancing method
-* `origin_protocol` - The origin protocol
-* `origin_type` - The origin type
-* `protocol` - The origin protocol
+* `load_balance` - The load balancing method. Valid values: 0 (IP hash), 1 (Round robin), 2 (Cookie)
+* `origin_protocol` - The origin protocol. Valid values: 0 (HTTP), 1 (HTTPS), 2 (Follow)
+* `origin_type` - The origin type. Valid values: 0 (IP), 1 (Domain)
+* `protocol` - The origin protocol. Valid values: 0 (HTTP), 1 (HTTPS)
 * `records` - The origin records
+  * `host` - The origin host, specifies the Host header when accessing the origin
   * `port` - The port of the record
   * `priority` - The priority of the record
-  * `value` - The value of the record
-  * `view` - The view of the record
+  * `value` - The value of the record (IP address or domain)
+  * `view` - The view of the record. Valid values: primary (primary line), backup (backup line)
 
 

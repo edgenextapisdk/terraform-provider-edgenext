@@ -42,7 +42,9 @@ data "edgenext_scdn_domain" "example" {
 
 The following arguments are supported:
 
-* `domain` - (Required, String) The domain name to query
+* `domain_id` - (Optional, String) The ID of the domain to query (deprecated, use id instead)
+* `domain` - (Optional, String) The domain name to query (either domain, id, or domain_id must be provided)
+* `id` - (Optional, String) The ID of the domain to query (either domain, id, or domain_id must be provided). Also returned as the computed ID.
 * `result_output_file` - (Optional, String) Used to save results to a file
 
 ## Attributes Reference
@@ -63,7 +65,6 @@ In addition to all arguments above, the following attributes are exported:
 * `exclusive_resource_id` - The ID of the exclusive resource package
 * `group_id` - The ID of the domain group
 * `has_origin` - Whether the domain has origin configuration
-* `id` - The ID of the domain
 * `origins` - The origin server configuration
   * `id` - The ID of the origin
   * `listen_port` - The listening port of the origin server

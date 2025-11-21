@@ -127,6 +127,7 @@ type OriginRecord struct {
 	Value    string `json:"value"`
 	Port     int    `json:"port"`
 	Priority int    `json:"priority"`
+	Host     string `json:"host,omitempty"`
 }
 
 // DomainCreateResponse domain creation response

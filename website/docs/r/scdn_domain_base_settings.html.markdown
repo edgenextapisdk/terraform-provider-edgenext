@@ -42,25 +42,25 @@ resource "edgenext_scdn_domain_base_settings" "example" {
 The following arguments are supported:
 
 * `domain_id` - (Required, Int, ForceNew) The ID of the domain to update base settings
-* `domain_redirect` - (Optional, List) Domain redirect configuration
-* `proxy_host` - (Optional, List) Proxy host configuration
-* `proxy_sni` - (Optional, List) Proxy SNI configuration
+* `domain_redirect` - (Optional, List) Domain redirect settings
+* `proxy_host` - (Optional, List) Proxy host settings
+* `proxy_sni` - (Optional, List) Proxy SNI settings
 
 The `domain_redirect` object supports the following:
 
-* `jump_to` - (Optional, String) Redirect target URL
-* `jump_type` - (Optional, String) Redirect jump type
-* `status` - (Optional, String) Redirect status (on/off)
+* `jump_to` - (Optional, String) Domain redirect jump to URL
+* `jump_type` - (Optional, String) Explicit/implicit forwarding type. Valid values: explicit, implicit. Required if domain_redirect is present
+* `status` - (Optional, String) Explicit/implicit forwarding status. Valid values: on, off. Required if domain_redirect is present
 
 The `proxy_host` object supports the following:
 
-* `proxy_host_type` - (Optional, String) Proxy host type
+* `proxy_host_type` - (Optional, String) Proxy host type. Valid values: default, off. Required if proxy_host is present
 * `proxy_host` - (Optional, String) Proxy host value
 
 The `proxy_sni` object supports the following:
 
 * `proxy_sni` - (Optional, String) Proxy SNI value
-* `status` - (Optional, String) Proxy SNI status
+* `status` - (Optional, String) Proxy SNI status. Valid values: on, off. Required if proxy_sni is present
 
 ## Attributes Reference
 

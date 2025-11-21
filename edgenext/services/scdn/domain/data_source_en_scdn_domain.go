@@ -19,19 +19,24 @@ func DataSourceEdgenextScdnDomain() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"domain": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The domain name to query",
+				Optional:    true,
+				Description: "The domain name to query (either domain, id, or domain_id must be provided)",
+			},
+			"id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The ID of the domain to query (either domain, id, or domain_id must be provided). Also returned as the computed ID.",
+			},
+			"domain_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of the domain to query (deprecated, use id instead)",
 			},
 			"result_output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results to a file",
-			},
-			// Computed fields
-			"id": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The ID of the domain",
 			},
 			"group_id": {
 				Type:        schema.TypeInt,
@@ -226,31 +231,81 @@ func dataSourceScdnDomainRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*connectivity.EdgeNextClient)
 	service := scdn.NewScdnService(client)
 
-	domain := d.Get("domain").(string)
+	// Get domain, id, and domain_id parameters
+	domain, domainOk := d.GetOk("domain")
+	idStr, idOk := d.GetOk("id")
+	domainIDStr, domainIDOk := d.GetOk("domain_id")
 
-	// Search for the domain by listing domains with the specific domain name
+	// Get the ID value (prefer id over domain_id for backward compatibility)
+	var finalIDStr string
+	if idOk && idStr.(string) != "" {
+		finalIDStr = idStr.(string)
+	} else if domainIDOk && domainIDStr.(string) != "" {
+		finalIDStr = domainIDStr.(string)
+	}
+
+	// Validate that at least one of domain, id, or domain_id is provided
+	if !domainOk && finalIDStr == "" {
+		return fmt.Errorf("either domain, id, or domain_id must be provided")
+	}
+
+	// Build request
 	req := scdn.DomainListRequest{
-		Domain:   domain,
 		Page:     1,
 		PageSize: 100,
 	}
 
-	log.Printf("[INFO] Querying SCDN domain: %s", domain)
+	// Priority: If ID is provided, use it (more precise)
+	// Otherwise, use domain name
+	if finalIDStr != "" {
+		domainID, err := strconv.Atoi(finalIDStr)
+		if err != nil {
+			return fmt.Errorf("invalid domain ID: %w", err)
+		}
+		req.ID = domainID
+		log.Printf("[INFO] Querying SCDN domain by ID: %d", domainID)
+	} else if domainOk && domain.(string) != "" {
+		// Use domain name for query
+		req.Domain = domain.(string)
+		log.Printf("[INFO] Querying SCDN domain by name: %s", domain.(string))
+	} else {
+		return fmt.Errorf("either domain, id, or domain_id must be provided with a non-empty value")
+	}
+
 	response, err := service.ListDomains(req)
 	if err != nil {
 		return fmt.Errorf("failed to query SCDN domain: %w", err)
 	}
 
 	var domainInfo *scdn.DomainInfo
-	for _, domainItem := range response.Data.List {
-		if domainItem.Domain == domain {
-			domainInfo = &domainItem
-			break
+	if len(response.Data.List) > 0 {
+		// If querying by ID, should return exactly one result
+		// If querying by name, find matching domain
+		if req.ID > 0 {
+			// Query by ID - should return the domain with matching ID
+			for _, domainItem := range response.Data.List {
+				if domainItem.ID == req.ID {
+					domainInfo = &domainItem
+					break
+				}
+			}
+		} else {
+			// Query by name - find exact match
+			domainName := req.Domain
+			for _, domainItem := range response.Data.List {
+				if domainItem.Domain == domainName {
+					domainInfo = &domainItem
+					break
+				}
+			}
 		}
 	}
 
 	if domainInfo == nil {
-		return fmt.Errorf("SCDN domain not found: %s", domain)
+		if req.ID > 0 {
+			return fmt.Errorf("SCDN domain not found by ID: %d", req.ID)
+		}
+		return fmt.Errorf("SCDN domain not found: %s", req.Domain)
 	}
 
 	// Set basic fields
@@ -354,8 +409,8 @@ func dataSourceScdnDomainRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	// Set the domain as the resource ID
-	d.SetId(domain)
+	// Set the domain ID as the resource ID
+	d.SetId(strconv.Itoa(domainInfo.ID))
 
 	// Write result to output file if specified
 	if outputFile := d.Get("result_output_file").(string); outputFile != "" {
