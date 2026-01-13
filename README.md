@@ -96,7 +96,7 @@ provider "edgenext" {
 ```bash
 export EDGENEXT_ACCESS_KEY="your-access-key"
 export EDGENEXT_SECRET_KEY="your-secret-key"
-export EDGENEXT_ENDPOINT="https://cdn.api.edgenext.com"
+export EDGENEXT_ENDPOINT="https://cdn.api.edgenext.com" # CDN (https://cdn.api.edgenext.com) / SCDN (https://api.edgenextscdn.com)
 export EDGENEXT_REGION="your-region"  # Optional
 ```
 

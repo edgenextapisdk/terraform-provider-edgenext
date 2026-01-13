@@ -50,8 +50,8 @@ Static credentials can be provided by adding `access_key` and `secret_key` in-li
 provider "edgenext" {
   access_key = "your-access-key"
   secret_key = "your-secret-key"
-  endpoint   = "https://cdn.api.edgenext.com"
-  region     = "us-east-1"
+  endpoint   = "https://cdn.api.edgenext.com"  # CDN (https://cdn.api.edgenext.com) / SCDN (https://api.edgenextscdn.com)
+  region     = "us-east-1" # Optional
 }
 ```
 
