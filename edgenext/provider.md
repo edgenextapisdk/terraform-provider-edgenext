@@ -50,7 +50,7 @@ Static credentials can be provided by adding `access_key` and `secret_key` in-li
 provider "edgenext" {
   access_key = "your-access-key"
   secret_key = "your-secret-key"
-  endpoint   = "https://api.edgenext.com"
+  endpoint   = "https://cdn.api.edgenext.com"
   region     = "us-east-1"
 }
 ```
@@ -68,7 +68,7 @@ Usage:
 ```bash
 export EDGENEXT_ACCESS_KEY="your-access-key"
 export EDGENEXT_SECRET_KEY="your-secret-key"
-export EDGENEXT_ENDPOINT="https://api.edgenext.com"
+export EDGENEXT_ENDPOINT="https://cdn.api.edgenext.com"
 export EDGENEXT_REGION="us-east-1"
 terraform plan
 ```
