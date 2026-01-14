@@ -48,8 +48,8 @@ Static credentials can be provided by adding `access_key` and `secret_key` in-li
 
 ```hcl
 provider "edgenext" {
-  access_key = "your-access-key"
-  secret_key = "your-secret-key"
+  access_key = "your-access-key" # Set to edgenext-<your-username>
+  secret_key = "your-secret-key" # Please contact the operations team to obtain it
   endpoint   = "https://cdn.api.edgenext.com" # CDN (https://cdn.api.edgenext.com) / SCDN (https://api.edgenextscdn.com)
   region     = "us-east-1" # Optional
 }
