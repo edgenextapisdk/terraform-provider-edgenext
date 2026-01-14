@@ -94,8 +94,8 @@ provider "edgenext" {
 ### Environment Variables
 
 ```bash
-export EDGENEXT_ACCESS_KEY="your-access-key"
-export EDGENEXT_SECRET_KEY="your-secret-key"
+export EDGENEXT_ACCESS_KEY="your-access-key" # Set to edgenext-<your-username>
+export EDGENEXT_SECRET_KEY="your-secret-key" # Please contact the operations team to obtain it
 export EDGENEXT_ENDPOINT="https://cdn.api.edgenext.com" # CDN (https://cdn.api.edgenext.com) / SCDN (https://api.edgenextscdn.com)
 export EDGENEXT_REGION="your-region"  # Optional
 ```
