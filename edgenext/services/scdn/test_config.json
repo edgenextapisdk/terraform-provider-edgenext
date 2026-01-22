@@ -1,7 +1,0 @@
-{
-  "access_key": "ENAK1ae723ff1e6092410ef8",
-  "secret_key": "67344d5b4ab116b19dd6cbd262390b47",
-  "endpoint": "http://apiv5.prxcdn.com:60041",
-  "timeout_seconds": 30,
-  "enable_integration_tests": true
-}
