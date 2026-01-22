@@ -163,4 +163,18 @@ const (
 	EndpointLogDownloadTemplateBatchChangeStatus = "/api/v5/soc.log.download.template.batch.change.status" // POST - Batch change template status
 	EndpointLogDownloadTemplateAll               = "/api/v5/soc.log.download.template.all"                 // GET/POST - Get all templates (for adding tasks)
 	EndpointLogDownloadTemplateGroupAll          = "/api/v5/soc.log.download.template.group.all"           // GET/POST - Get all template groups
+	// ============================================================================
+	// User IP Intelligence Constants
+	// ============================================================================
+	EndpointUserIpList         = "/api/v5/user.ip.list"
+	EndpointUserIpAdd          = "/api/v5/user.ip.add"
+	EndpointUserIpSave         = "/api/v5/user.ip.save"
+	EndpointUserIpDel          = "/api/v5/user.ip.del"
+	EndpointUserIpItemList     = "/api/v5/user.ip.item.list"
+	EndpointUserIpItemTextSave = "/api/v5/user.ip.item.text.save"
+	EndpointUserIpItemEdit     = "/api/v5/user.ip.item.edit"
+	EndpointUserIpItemDel      = "/api/v5/user.ip.item.del"
+	EndpointUserIpItemAll      = "/api/v5/user.ip.item.all"
+	EndpointUserIpCopy         = "/api/v5/user.ip.copy"
+	EndpointUserIpItemFileSave = "/api/v5/user.ip.item.file.save"
 )
