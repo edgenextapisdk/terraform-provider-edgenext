@@ -35,9 +35,9 @@ func createMockCDNServer() *httptest.Server {
 		case r.Method == "GET" && r.URL.Path == "/v2/cache/refresh":
 			handleQueryCacheRefresh(w, r)
 		case r.Method == "POST" && r.URL.Path == "/v2/cache/prefetch":
-			handleFilePurge(w, r)
+			handleFilePrefetch(w, r)
 		case r.Method == "GET" && r.URL.Path == "/v2/cache/prefetch":
-			handleQueryFilePurge(w, r)
+			handleQueryFilePrefetch(w, r)
 		default:
 			w.WriteHeader(http.StatusNotFound)
 			fmt.Fprint(w, `{"code": 404, "msg": "endpoint not found"}`)
@@ -259,12 +259,12 @@ func handleQueryCacheRefresh(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func handleFilePurge(w http.ResponseWriter, r *http.Request) {
-	var req FilePurgeRequest
+func handleFilePrefetch(w http.ResponseWriter, r *http.Request) {
+	var req FilePrefetchRequest
 	json.NewDecoder(r.Body).Decode(&req)
 
 	if len(req.URLs) > 0 && req.URLs[0] == "http://invalid.domain/file" {
-		response := FilePurgeResponse{
+		response := FilePrefetchResponse{
 			Code: 1001,
 			Msg:  "Invalid URL",
 		}
@@ -273,9 +273,9 @@ func handleFilePurge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := FilePurgeResponse{
+	response := FilePrefetchResponse{
 		Code: 0,
-		Data: FilePurgeData{
+		Data: FilePrefetchData{
 			TaskID: "task-67890",
 			Count:  len(req.URLs),
 		},
@@ -283,15 +283,15 @@ func handleFilePurge(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func handleQueryFilePurge(w http.ResponseWriter, r *http.Request) {
+func handleQueryFilePrefetch(w http.ResponseWriter, r *http.Request) {
 	taskID := r.URL.Query().Get("task_id")
 
 	if taskID == "999999" {
-		response := FilePurgeQueryResponse{
+		response := FilePrefetchQueryResponse{
 			Code: 1002,
 			Msg:  "Task not found",
-			Data: FilePurgeQueryData{
-				List: []FilePurgeQueryItem{},
+			Data: FilePrefetchQueryData{
+				List: []FilePrefetchQueryItem{},
 			},
 		}
 		w.WriteHeader(http.StatusNotFound)
@@ -299,12 +299,12 @@ func handleQueryFilePurge(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := FilePurgeQueryResponse{
+	response := FilePrefetchQueryResponse{
 		Code: 0,
-		Data: FilePurgeQueryData{
+		Data: FilePrefetchQueryData{
 			Total:      1,
 			PageNumber: 1,
-			List: []FilePurgeQueryItem{
+			List: []FilePrefetchQueryItem{
 				{
 					ID:           "1",
 					URL:          "http://example.com/file.txt",
@@ -670,16 +670,16 @@ func TestQueryCacheRefresh(t *testing.T) {
 	})
 }
 
-func TestFilePurge(t *testing.T) {
+func TestFilePrefetch(t *testing.T) {
 	server := createMockCDNServer()
 	defer server.Close()
 
 	service := createTestCDNService(server)
 
-	t.Run("SuccessfulPurge", func(t *testing.T) {
+	t.Run("SuccessfulPrefetch", func(t *testing.T) {
 		urls := []string{"http://example.com/file.txt"}
 
-		response, err := service.FilePurge(urls)
+		response, err := service.FilePrefetch(urls)
 		if err != nil {
 			t.Fatalf("Expected no error, got: %v", err)
 		}
@@ -700,25 +700,25 @@ func TestFilePurge(t *testing.T) {
 	t.Run("InvalidURL", func(t *testing.T) {
 		urls := []string{"http://invalid.domain/file"}
 
-		_, err := service.FilePurge(urls)
+		_, err := service.FilePrefetch(urls)
 		if err == nil {
 			t.Fatal("Expected error for invalid URL, got nil")
 		}
 	})
 }
 
-func TestQueryFilePurge(t *testing.T) {
+func TestQueryFilePrefetch(t *testing.T) {
 	server := createMockCDNServer()
 	defer server.Close()
 
 	service := createTestCDNService(server)
 
 	t.Run("SuccessfulQueryByTaskID", func(t *testing.T) {
-		req := FilePurgeQueryRequest{
+		req := FilePrefetchQueryRequest{
 			TaskID: 67890,
 		}
 
-		response, err := service.QueryFilePurge(req)
+		response, err := service.QueryFilePrefetch(req)
 		if err != nil {
 			t.Fatalf("Expected no error, got: %v", err)
 		}
@@ -735,7 +735,7 @@ func TestQueryFilePurge(t *testing.T) {
 	t.Run("QueryByTaskIDHelper", func(t *testing.T) {
 		taskID := 67890
 
-		response, err := service.QueryFilePurgeByTaskID(taskID)
+		response, err := service.QueryFilePrefetchByTaskID(taskID)
 		if err != nil {
 			t.Fatalf("Expected no error, got: %v", err)
 		}
@@ -746,11 +746,11 @@ func TestQueryFilePurge(t *testing.T) {
 	})
 
 	t.Run("TaskNotFound", func(t *testing.T) {
-		req := FilePurgeQueryRequest{
+		req := FilePrefetchQueryRequest{
 			TaskID: 999999,
 		}
 
-		_, err := service.QueryFilePurge(req)
+		_, err := service.QueryFilePrefetch(req)
 		if err == nil {
 			t.Fatal("Expected error for non-existent task, got nil")
 		}

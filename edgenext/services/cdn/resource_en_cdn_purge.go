@@ -13,7 +13,7 @@ func ResourceEdgenextCdnPurge() *schema.Resource {
 	return &schema.Resource{
 		Create: resourcePurgeCreate,
 		Read:   resourcePurgeRead,
-		Update: nil, // Purge does not support updates
+		Update: nil, // Cache purge does not support updates
 		Delete: resourcePurgeDelete,
 
 		Schema: map[string]*schema.Schema{
@@ -21,10 +21,16 @@ func ResourceEdgenextCdnPurge() *schema.Resource {
 				Type:        schema.TypeList,
 				Required:    true,
 				ForceNew:    true, // Need to recreate task when urls list is updated
-				Description: "List of URLs to purge, maximum 500 URLs per request",
+				Description: "List of URLs/directories to purge, maximum 500 URLs per request",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			"type": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true, // Need to recreate task when purge type is updated
+				Description: "URL type for purge: dir(directory), url(URL)",
 			},
 			"task_id": {
 				Type:        schema.TypeString,
@@ -34,7 +40,7 @@ func ResourceEdgenextCdnPurge() *schema.Resource {
 			"total": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "Number of successfully submitted URLs",
+				Description: "Number of successfully submitted URLs/directories",
 			},
 			"list": {
 				Type:        schema.TypeList,
@@ -43,14 +49,19 @@ func ResourceEdgenextCdnPurge() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:        schema.TypeInt,
+							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "URL ID",
 						},
 						"url": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "URL",
+							Description: "URL/Directory",
+						},
+						"type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "URL type",
 						},
 						"status": {
 							Type:        schema.TypeString,
@@ -79,8 +90,9 @@ func resourcePurgeCreate(d *schema.ResourceData, m interface{}) error {
 	service := NewCdnService(client)
 
 	urlsList := d.Get("urls").([]interface{})
+	purgeType := d.Get("type").(string)
 
-	log.Printf("[INFO] Creating file purge task: URL count=%d", len(urlsList))
+	log.Printf("[INFO] Creating cache purge task: type=%s, URL count=%d", purgeType, len(urlsList))
 
 	// Convert URL list
 	var urls []string
@@ -88,16 +100,16 @@ func resourcePurgeCreate(d *schema.ResourceData, m interface{}) error {
 		urls = append(urls, url.(string))
 	}
 
-	// Call file purge API
-	response, err := service.FilePurge(urls)
+	// Call cache refresh API
+	response, err := service.CacheRefresh(urls, purgeType)
 	if err != nil {
-		return fmt.Errorf("failed to create file purge task: %w", err)
+		return fmt.Errorf("failed to create cache purge task: %w", err)
 	}
 
 	// Set resource ID
 	d.SetId(response.Data.TaskID)
 
-	log.Printf("[INFO] File purge task created successfully: %s", response.Data.TaskID)
+	log.Printf("[INFO] Cache purge task created successfully: %s", response.Data.TaskID)
 	return resourcePurgeRead(d, m)
 }
 
@@ -107,22 +119,23 @@ func resourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 
 	taskID := d.Id()
 
-	log.Printf("[INFO] Reading file purge task: %s", taskID)
+	log.Printf("[INFO] Reading cache purge task: %s", taskID)
 
 	// Query purge status by task ID
 	taskIDInt, err := strconv.Atoi(taskID)
 	if err != nil {
 		return fmt.Errorf("invalid task ID: %s", taskID)
 	}
-	response, err := service.QueryFilePurgeByTaskID(taskIDInt)
+	response, err := service.QueryCacheRefreshByTaskID(taskIDInt)
 	if err != nil {
-		return fmt.Errorf("failed to read file purge task: %w", err)
+		return fmt.Errorf("failed to read cache purge task: %w", err)
 	}
 	if len(response.Data.List) == 0 {
-		log.Printf("[WARN] File purge task does not exist: %s", taskID)
+		log.Printf("[WARN] Cache purge task does not exist: %s", taskID)
 		d.SetId("")
 		return nil
 	}
+
 	// Set resource ID
 	d.SetId(taskID)
 	// Set response data
@@ -137,16 +150,17 @@ func resourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 		elemMap := map[string]interface{}{
 			"id":            elem.ID,
 			"url":           elem.URL,
+			"type":          elem.Type,
 			"status":        elem.Status,
 			"create_time":   elem.CreateTime,
 			"complete_time": elem.CompleteTime,
 		}
 		list = append(list, elemMap)
 	}
-	// Set the list of successfully submitted URLs
+	// Set the list of successfully submitted URLs/directories
 	err = d.Set("list", list)
 	if err != nil {
-		log.Printf("[ERROR] Failed to set successfully submitted URL list: %v", err)
+		log.Printf("[ERROR] Failed to set successfully submitted URL/directory list: %v", err)
 		return err
 	}
 
@@ -155,7 +169,7 @@ func resourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 
 func resourcePurgeDelete(d *schema.ResourceData, m interface{}) error {
 	// API does not support deletion, can only no-op
-	log.Printf("[WARN] File purge task %s cannot be deleted (API limitation)", d.Id())
+	log.Printf("[WARN] Cache purge task %s cannot be deleted (API limitation)", d.Id())
 	d.SetId("") // Remove from state, Terraform considers it deleted
 	return nil
 }

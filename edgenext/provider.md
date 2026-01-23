@@ -91,15 +91,15 @@ Content Delivery Network (CDN)
 Data Source
 edgenext_cdn_domain
 edgenext_cdn_domains
-edgenext_cdn_push
-edgenext_cdn_pushes
 edgenext_cdn_purge
 edgenext_cdn_purges
+edgenext_cdn_prefetch
+edgenext_cdn_prefetches
 
 Resource
 edgenext_cdn_domain
-edgenext_cdn_push
 edgenext_cdn_purge
+edgenext_cdn_prefetch
 
 SSL Certificate Management (SSL)
 Data Source

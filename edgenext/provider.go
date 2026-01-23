@@ -66,9 +66,9 @@ func Provider() *schema.Provider {
 		// CDN domain and configuration management resources
 		"edgenext_cdn_domain": cdn.ResourceEdgenextCdnDomainConfig(),
 
-		// CDN cache purge and file push resources
-		"edgenext_cdn_push":  cdn.ResourceEdgenextCdnPush(),
-		"edgenext_cdn_purge": cdn.ResourceEdgenextCdnPurge(),
+		// CDN cache prefetch and file purge resources
+		"edgenext_cdn_purge":    cdn.ResourceEdgenextCdnPurge(),
+		"edgenext_cdn_prefetch": cdn.ResourceEdgenextCdnPrefetch(),
 
 		// SSL certificate management resources
 		"edgenext_ssl_certificate": ssl.ResourceEdgenextSslCertificate(),
@@ -134,13 +134,13 @@ func Provider() *schema.Provider {
 		"edgenext_cdn_domain":  cdn.DataSourceEdgenextCdnDomainConfig(),
 		"edgenext_cdn_domains": cdn.DataSourceEdgenextCdnDomains(),
 
-		// CDN cache push data sources
-		"edgenext_cdn_push":   cdn.DataSourceEdgenextCdnPush(),
-		"edgenext_cdn_pushes": cdn.DataSourceEdgenextCdnPushes(),
-
-		// CDN file purge data sources
+		// CDN cache purge data sources
 		"edgenext_cdn_purge":  cdn.DataSourceEdgenextCdnPurge(),
 		"edgenext_cdn_purges": cdn.DataSourceEdgenextCdnPurges(),
+
+		// CDN file prefetch data sources
+		"edgenext_cdn_prefetch":   cdn.DataSourceEdgenextCdnPrefetch(),
+		"edgenext_cdn_prefetches": cdn.DataSourceEdgenextCdnPrefetches(),
 
 		// SSL certificate data sources
 		"edgenext_ssl_certificate":  ssl.DataSourceEdgenextSslCertificate(),

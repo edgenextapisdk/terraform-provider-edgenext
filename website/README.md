@@ -16,10 +16,14 @@ This directory contains the generated Terraform provider documentation.
    - `doc_list.json` - JSON format (for fallback)
    - `doc_list.js` - JavaScript format (for fast loading, embedded in HTML)
 
-2. **Start HTTP server:**
+2. **Start HTTP server (make sure you're in the `website` directory):**
    ```bash
+   # Make sure you're in the website directory
+   cd website
    python3 -m http.server 8080
    ```
+   
+   ⚠️ **Important**: The server must be started from the `website` directory, not from the project root. Otherwise, `preview.html` will not be found (404 error).
 
 3. **Open preview page in browser:**
    - Interactive preview: http://localhost:8080/preview.html

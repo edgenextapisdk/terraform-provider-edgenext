@@ -9,28 +9,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func ResourceEdgenextCdnPush() *schema.Resource {
+func ResourceEdgenextCdnPrefetch() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePushCreate,
-		Read:   resourcePushRead,
-		Update: nil, // Cache refresh does not support updates
-		Delete: resourcePushDelete,
+		Create: resourcePrefetchCreate,
+		Read:   resourcePrefetchRead,
+		Update: nil, // Prefetch does not support updates
+		Delete: resourcePrefetchDelete,
 
 		Schema: map[string]*schema.Schema{
 			"urls": {
 				Type:        schema.TypeList,
 				Required:    true,
 				ForceNew:    true, // Need to recreate task when urls list is updated
-				Description: "List of URLs/directories to refresh, maximum 500 URLs per request",
+				Description: "List of URLs to prefetch, maximum 500 URLs per request",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-			},
-			"type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true, // Need to recreate task when push type is updated
-				Description: "URL type for push: dir(directory), url(URL)",
 			},
 			"task_id": {
 				Type:        schema.TypeString,
@@ -40,7 +34,7 @@ func ResourceEdgenextCdnPush() *schema.Resource {
 			"total": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "Number of successfully submitted URLs/directories",
+				Description: "Number of successfully submitted URLs",
 			},
 			"list": {
 				Type:        schema.TypeList,
@@ -49,19 +43,14 @@ func ResourceEdgenextCdnPush() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:        schema.TypeString,
+							Type:        schema.TypeInt,
 							Computed:    true,
 							Description: "URL ID",
 						},
 						"url": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "URL/Directory",
-						},
-						"type": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "URL type",
+							Description: "URL",
 						},
 						"status": {
 							Type:        schema.TypeString,
@@ -85,14 +74,13 @@ func ResourceEdgenextCdnPush() *schema.Resource {
 	}
 }
 
-func resourcePushCreate(d *schema.ResourceData, m interface{}) error {
+func resourcePrefetchCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	urlsList := d.Get("urls").([]interface{})
-	refreshType := d.Get("type").(string)
 
-	log.Printf("[INFO] Creating cache refresh task: type=%s, URL count=%d", refreshType, len(urlsList))
+	log.Printf("[INFO] Creating file prefetch task: URL count=%d", len(urlsList))
 
 	// Convert URL list
 	var urls []string
@@ -100,42 +88,41 @@ func resourcePushCreate(d *schema.ResourceData, m interface{}) error {
 		urls = append(urls, url.(string))
 	}
 
-	// Call cache refresh API
-	response, err := service.CacheRefresh(urls, refreshType)
+	// Call file prefetch API
+	response, err := service.FilePrefetch(urls)
 	if err != nil {
-		return fmt.Errorf("failed to create cache refresh task: %w", err)
+		return fmt.Errorf("failed to create file prefetch task: %w", err)
 	}
 
 	// Set resource ID
 	d.SetId(response.Data.TaskID)
 
-	log.Printf("[INFO] Cache refresh task created successfully: %s", response.Data.TaskID)
-	return resourcePushRead(d, m)
+	log.Printf("[INFO] File prefetch task created successfully: %s", response.Data.TaskID)
+	return resourcePrefetchRead(d, m)
 }
 
-func resourcePushRead(d *schema.ResourceData, m interface{}) error {
+func resourcePrefetchRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	taskID := d.Id()
 
-	log.Printf("[INFO] Reading cache refresh task: %s", taskID)
+	log.Printf("[INFO] Reading file prefetch task: %s", taskID)
 
-	// Query refresh status by task ID
+	// Query prefetch status by task ID
 	taskIDInt, err := strconv.Atoi(taskID)
 	if err != nil {
 		return fmt.Errorf("invalid task ID: %s", taskID)
 	}
-	response, err := service.QueryCacheRefreshByTaskID(taskIDInt)
+	response, err := service.QueryFilePrefetchByTaskID(taskIDInt)
 	if err != nil {
-		return fmt.Errorf("failed to read cache refresh task: %w", err)
+		return fmt.Errorf("failed to read file prefetch task: %w", err)
 	}
 	if len(response.Data.List) == 0 {
-		log.Printf("[WARN] Cache refresh task does not exist: %s", taskID)
+		log.Printf("[WARN] File prefetch task does not exist: %s", taskID)
 		d.SetId("")
 		return nil
 	}
-
 	// Set resource ID
 	d.SetId(taskID)
 	// Set response data
@@ -150,26 +137,25 @@ func resourcePushRead(d *schema.ResourceData, m interface{}) error {
 		elemMap := map[string]interface{}{
 			"id":            elem.ID,
 			"url":           elem.URL,
-			"type":          elem.Type,
 			"status":        elem.Status,
 			"create_time":   elem.CreateTime,
 			"complete_time": elem.CompleteTime,
 		}
 		list = append(list, elemMap)
 	}
-	// Set the list of successfully submitted URLs/directories
+	// Set the list of successfully submitted URLs
 	err = d.Set("list", list)
 	if err != nil {
-		log.Printf("[ERROR] Failed to set successfully submitted URL/directory list: %v", err)
+		log.Printf("[ERROR] Failed to set successfully submitted URL list: %v", err)
 		return err
 	}
 
 	return nil
 }
 
-func resourcePushDelete(d *schema.ResourceData, m interface{}) error {
+func resourcePrefetchDelete(d *schema.ResourceData, m interface{}) error {
 	// API does not support deletion, can only no-op
-	log.Printf("[WARN] Cache refresh task %s cannot be deleted (API limitation)", d.Id())
+	log.Printf("[WARN] File prefetch task %s cannot be deleted (API limitation)", d.Id())
 	d.SetId("") // Remove from state, Terraform considers it deleted
 	return nil
 }
