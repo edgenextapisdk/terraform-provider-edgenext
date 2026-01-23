@@ -17,13 +17,40 @@ func DataSourceEdgenextCdnPurge() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"task_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "Task ID for querying the purge status of a specific task",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results.",
+			},
+			"start_time": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Start time, format: YYYY-MM-DD, used together with end_time",
+			},
+			"end_time": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "End time, format: YYYY-MM-DD, used together with start_time",
+			},
+			"url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "URL",
+			},
+			"page_number": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "1",
+				Description: "Page number to retrieve, default 1",
+			},
+			"page_size": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "50",
+				Description: "Page size, default 50, range 1-500",
 			},
 			"total": {
 				Type:        schema.TypeInt,
@@ -44,7 +71,12 @@ func DataSourceEdgenextCdnPurge() *schema.Resource {
 						"url": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "URL",
+							Description: "URL/Directory",
+						},
+						"type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "URL type",
 						},
 						"status": {
 							Type:        schema.TypeString,
@@ -74,9 +106,9 @@ func dataSourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 
 	taskID := d.Get("task_id").(string)
 
-	log.Printf("[INFO] Querying file purge task, task_id: %s", taskID)
+	log.Printf("[INFO] Querying cache purge task")
 
-	var response *FilePurgeQueryResponse
+	var response *CacheRefreshQueryResponse
 	var err error
 
 	// Query by task ID
@@ -85,7 +117,7 @@ func dataSourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return fmt.Errorf("invalid task ID: %s", taskID)
 	}
-	response, err = service.QueryFilePurgeByTaskID(taskIDInt)
+	response, err = service.QueryCacheRefreshByTaskID(taskIDInt)
 	if err != nil {
 		return fmt.Errorf("failed to query by task ID: %w", err)
 	}
@@ -102,6 +134,7 @@ func dataSourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 		elemMap := map[string]interface{}{
 			"id":            elem.ID,
 			"url":           elem.URL,
+			"type":          elem.Type,
 			"status":        elem.Status,
 			"create_time":   elem.CreateTime,
 			"complete_time": elem.CompleteTime,
@@ -124,11 +157,11 @@ func dataSourcePurgeRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	log.Printf("[INFO] File purge task query successful, total %d records", response.Data.Total)
+	log.Printf("[INFO] Cache purge task query successful, total %d records", response.Data.Total)
 	return nil
 }
 
-// DataSourceEdgenextCdnPurges data source for querying multiple file purge tasks
+// DataSourceEdgenextCdnPurges data source for querying multiple cache purge tasks
 func DataSourceEdgenextCdnPurges() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourcePurgesRead,
@@ -149,6 +182,11 @@ func DataSourceEdgenextCdnPurges() *schema.Resource {
 				Optional:    true,
 				Description: "URL",
 			},
+			"output_file": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Used to save results.",
+			},
 			"page_number": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -160,11 +198,6 @@ func DataSourceEdgenextCdnPurges() *schema.Resource {
 				Optional:    true,
 				Default:     "50",
 				Description: "Page size, default 50, range 1-500",
-			},
-			"output_file": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Used to save results.",
 			},
 			"total": {
 				Type:        schema.TypeInt,
@@ -185,7 +218,12 @@ func DataSourceEdgenextCdnPurges() *schema.Resource {
 						"url": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "URL",
+							Description: "URL/Directory",
+						},
+						"type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "URL type",
 						},
 						"status": {
 							Type:        schema.TypeString,
@@ -219,24 +257,26 @@ func dataSourcePurgesRead(d *schema.ResourceData, m interface{}) error {
 	pageNumber := d.Get("page_number").(string)
 	pageSize := d.Get("page_size").(string)
 
-	log.Printf("[INFO] Querying multiple file purge tasks: %s to %s", startTime, endTime)
+	log.Printf("[INFO] Querying multiple cache purge tasks: %s to %s", startTime, endTime)
 
 	// Query by time range
-	response, err := service.QueryFilePurgeByTimeRange(startTime, endTime, url, pageNumber, pageSize)
+	response, err := service.QueryCacheRefreshByTimeRange(startTime, endTime, url, pageNumber, pageSize)
 	if err != nil {
-		return fmt.Errorf("failed to query file purge tasks: %w", err)
+		return fmt.Errorf("failed to query cache purge tasks: %w", err)
 	}
 
 	// Set response data
 	if err := d.Set("total", response.Data.Total); err != nil {
 		return fmt.Errorf("error setting total: %w", err)
 	}
+
 	var list []map[string]interface{}
 	ids := make([]string, 0)
 	for _, elem := range response.Data.List {
 		elemMap := map[string]interface{}{
 			"id":            elem.ID,
 			"url":           elem.URL,
+			"type":          elem.Type,
 			"status":        elem.Status,
 			"create_time":   elem.CreateTime,
 			"complete_time": elem.CompleteTime,
@@ -269,6 +309,6 @@ func dataSourcePurgesRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	log.Printf("[INFO] Multiple file purge tasks query successful, total %d records", len(list))
+	log.Printf("[INFO] Multiple cache purge tasks query successful, total %d records", len(list))
 	return nil
 }

@@ -61,17 +61,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Resources
 - `edgenext_cdn_domain`: Complete CDN domain and configuration management
+- `edgenext_cdn_prefetch`: Cache prefetch operations
 - `edgenext_cdn_purge`: Cache purging operations
-- `edgenext_cdn_push`: URL preloading operations
 - `edgenext_ssl_certificate`: SSL certificate management
 
 ### Data Sources
 - `data.edgenext_cdn_domain`: Query domain configurations
 - `data.edgenext_cdn_domains`: Query multiple domain configurations
+- `data.edgenext_cdn_prefetch`: Query prefetch operation status
+- `data.edgenext_cdn_prefetches`: Query multiple prefetch operations
 - `data.edgenext_cdn_purge`: Query purge operation status
 - `data.edgenext_cdn_purges`: Query multiple purge operations
-- `data.edgenext_cdn_push`: Query push operation status
-- `data.edgenext_cdn_pushes`: Query multiple push operations
 - `data.edgenext_ssl_certificate`: Query certificate information
 - `data.edgenext_ssl_certificates`: Query multiple certificates
 

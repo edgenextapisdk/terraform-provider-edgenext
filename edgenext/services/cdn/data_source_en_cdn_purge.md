@@ -15,7 +15,7 @@ Query CDN purge task by URL and time range
 
 ```hcl
 data "edgenext_cdn_purge" "example" {
-  url        = "https://example.com/static/old-file.jpg"
+  url        = "https://example.com/static/image.jpg"
   start_time = "2024-01-01"
   end_time   = "2024-01-31"
   output_file = "purge_tasks.json"

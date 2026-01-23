@@ -26,7 +26,7 @@ data "edgenext_cdn_purge" "example" {
 
 ```hcl
 data "edgenext_cdn_purge" "example" {
-  url         = "https://example.com/static/old-file.jpg"
+  url         = "https://example.com/static/image.jpg"
   start_time  = "2024-01-01"
   end_time    = "2024-01-31"
   output_file = "purge_tasks.json"
@@ -37,8 +37,13 @@ data "edgenext_cdn_purge" "example" {
 
 The following arguments are supported:
 
-* `task_id` - (Required, String) Task ID for querying the purge status of a specific task
+* `end_time` - (Optional, String) End time, format: YYYY-MM-DD, used together with start_time
 * `output_file` - (Optional, String) Used to save results.
+* `page_number` - (Optional, String) Page number to retrieve, default 1
+* `page_size` - (Optional, String) Page size, default 50, range 1-500
+* `start_time` - (Optional, String) Start time, format: YYYY-MM-DD, used together with end_time
+* `task_id` - (Optional, String) Task ID for querying the purge status of a specific task
+* `url` - (Optional, String) URL
 
 ## Attributes Reference
 
@@ -49,7 +54,7 @@ In addition to all arguments above, the following attributes are exported:
   * `create_time` - Creation time
   * `id` - URL ID
   * `status` - Status
-  * `url` - URL
+  * `type` - URL type
+  * `url` - URL/Directory
 * `total` - Total number of records
-
 

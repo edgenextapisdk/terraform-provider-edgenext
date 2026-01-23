@@ -809,8 +809,8 @@ func replace(input, from, to string) string {
 func getResourceDesc(resourceName string) string {
 	descriptions := map[string]string{
 		"edgenext_cdn_domain":      "CDN domain configuration",
-		"edgenext_cdn_push":        "CDN cache push tasks",
 		"edgenext_cdn_purge":       "CDN cache purge tasks",
+		"edgenext_cdn_prefetch":    "CDN cache prefetch tasks",
 		"edgenext_ssl_certificate": "SSL certificates",
 		"edgenext_oss_bucket":      "OSS buckets",
 		"edgenext_oss_object":      "OSS objects",
@@ -864,10 +864,10 @@ func getDataSourceDesc(dataSourceName string) string {
 	descriptions := map[string]string{
 		"edgenext_cdn_domain":       "CDN domain configuration",
 		"edgenext_cdn_domains":      "CDN domains",
-		"edgenext_cdn_push":         "CDN push task details",
-		"edgenext_cdn_pushes":       "CDN push tasks",
 		"edgenext_cdn_purge":        "CDN purge task details",
 		"edgenext_cdn_purges":       "CDN purge tasks",
+		"edgenext_cdn_prefetch":     "CDN prefetch task details",
+		"edgenext_cdn_prefetches":   "CDN prefetch tasks",
 		"edgenext_ssl_certificate":  "SSL certificate details",
 		"edgenext_ssl_certificates": "SSL certificates",
 		"edgenext_oss_buckets":      "OSS buckets",

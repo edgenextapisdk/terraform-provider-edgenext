@@ -94,17 +94,17 @@ The EdgeNext provider supports the following resource types:
 #### Resources
 
 * [`edgenext_cdn_domain`](resources/cdn_domain) - Manage CDN domain configuration
-* [`edgenext_cdn_push`](resources/cdn_push) - Manage CDN cache push tasks
 * [`edgenext_cdn_purge`](resources/cdn_purge) - Manage CDN cache purge tasks
+* [`edgenext_cdn_prefetch`](resources/cdn_prefetch) - Manage CDN cache prefetch tasks
 
 #### Data Sources
 
 * [`edgenext_cdn_domain`](data-sources/cdn_domain) - Query CDN domain configuration
 * [`edgenext_cdn_domains`](data-sources/cdn_domains) - Query CDN domains
-* [`edgenext_cdn_push`](data-sources/cdn_push) - Query CDN push task details
-* [`edgenext_cdn_pushes`](data-sources/cdn_pushes) - Query CDN push tasks
 * [`edgenext_cdn_purge`](data-sources/cdn_purge) - Query CDN purge task details
 * [`edgenext_cdn_purges`](data-sources/cdn_purges) - Query CDN purge tasks
+* [`edgenext_cdn_prefetch`](data-sources/cdn_prefetch) - Query CDN prefetch task details
+* [`edgenext_cdn_prefetches`](data-sources/cdn_prefetches) - Query CDN prefetch tasks
 
 ### SSL Certificate Management (SSL)
 

@@ -23,7 +23,7 @@ A comprehensive Terraform Provider for EdgeNext services, featuring complete CDN
 
 ### 🔄 Cache Management
 - **Cache Refresh**: URL and directory-based cache invalidation
-- **File Purge**: Content preheating and optimization
+- **File Prefetch**: Content preheating and optimization
 - **Batch Operations**: Support for bulk cache operations
 - **Status Monitoring**: Real-time task status tracking
 
@@ -172,28 +172,27 @@ data "edgenext_ssl_certificates" "all" {
 ### Cache Operations
 
 ```hcl
-# Cache refresh
-resource "edgenext_cdn_purge" "cache_refresh" {
+# Cache prefetch
+resource "edgenext_cdn_prefetch" "cache_prefetch" {
   urls = [
     "https://example.com/images/logo.png",
     "https://example.com/css/styles.css",
     "https://example.com/js/app.js"
   ]
-  type = "url"
 }
 
-# File preheating
-resource "edgenext_cdn_push" "content_preload" {
-  urls = [
-    "https://example.com/videos/intro.mp4",
-    "https://example.com/downloads/manual.pdf"
-  ]
+# Cache purge
+resource "edgenext_cdn_purge" "cache_purge" {
   type = "url"
+  urls = [
+    "https://example.com/static/old-image.jpg",
+    "https://example.com/static/old-style.css"
+  ]
 }
 
 # Query task status
-data "edgenext_cdn_purge" "refresh_status" {
-  task_id = edgenext_cdn_purge.cache_refresh.task_id
+data "edgenext_cdn_prefetch" "prefetch_status" {
+  task_id = edgenext_cdn_prefetch.cache_prefetch.task_id
 }
 ```
 
@@ -263,8 +262,8 @@ terraform-provider-edgenext/
 │   │   │   ├── service_en_cdn.go                     # Core CDN service
 │   │   │   ├── service_en_cdn_test.go                # Comprehensive test suite
 │   │   │   ├── resource_en_cdn_domain.go             # Domain config resource
+│   │   │   ├── resource_en_cdn_prefetch.go            # Cache prefetch resource
 │   │   │   ├── resource_en_cdn_purge.go              # Cache purge resource
-│   │   │   ├── resource_en_cdn_push.go               # Content push resource
 │   │   │   ├── data_source_en_cdn_*.go               # Data sources
 │   │   │   ├── *.md                                  # Resource documentation
 │   │   │   └── README.md                             # CDN service documentation
@@ -310,8 +309,8 @@ terraform-provider-edgenext/
 | Resource | Description |
 |----------|-------------|
 | `edgenext_cdn_domain` | Manage CDN domain configuration |
+| `edgenext_cdn_prefetch` | Manage cache prefetch operations |
 | `edgenext_cdn_purge` | Manage cache purge operations |
-| `edgenext_cdn_push` | Manage content push operations |
 | `edgenext_ssl_certificate` | Manage SSL certificates |
 | `edgenext_oss_bucket` | Manage OSS buckets |
 | `edgenext_oss_object` | Manage OSS objects |
@@ -323,10 +322,10 @@ terraform-provider-edgenext/
 |-------------|-------------|
 | `edgenext_cdn_domain` | Query CDN domain configuration |
 | `edgenext_cdn_domains` | List CDN domains |
+| `edgenext_cdn_prefetch` | Query cache prefetch status |
+| `edgenext_cdn_prefetches` | List cache prefetch operations |
 | `edgenext_cdn_purge` | Query cache purge status |
 | `edgenext_cdn_purges` | List cache purge operations |
-| `edgenext_cdn_push` | Query content push status |
-| `edgenext_cdn_pushes` | List content push operations |
 | `edgenext_ssl_certificate` | Query SSL certificate details |
 | `edgenext_ssl_certificates` | List SSL certificates |
 | `edgenext_oss_buckets` | List OSS buckets |
