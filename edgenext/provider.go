@@ -12,6 +12,8 @@ import (
 	scdncacheoperate "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cache_operate"
 	scdncert "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cert"
 	scdndomain "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/domain"
+	scdndomaingroupdata "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/domain_group/data"
+	scdndomaingroupresource "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/domain_group/resource"
 	scdnipdata "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/ip/data"
 	scdnipresource "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/ip/resource"
 	scdnlogdownload "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/log_download"
@@ -83,6 +85,9 @@ func Provider() *schema.Provider {
 
 		// SCDN domain management resources (from domain module)
 		// Note: These resources are organized under scdn/domain/ for better module management
+
+		// Domain Group resources
+		"edgenext_scdn_domain_group": scdndomaingroupresource.ResourceEdgenextScdnDomainGroup(),
 
 		// User IP Intelligence resources
 		"edgenext_scdn_user_ip":      scdnipresource.ResourceEdgenextScdnUserIp(),
@@ -161,6 +166,10 @@ func Provider() *schema.Provider {
 
 		// SCDN domain data sources (from domain module)
 		// Note: These data sources are organized under scdn/domain/ for better module management
+
+		// Domain Group data sources
+		"edgenext_scdn_domain_groups":        scdndomaingroupdata.DataSourceEdgenextScdnDomainGroups(),
+		"edgenext_scdn_domain_group_domains": scdndomaingroupdata.DataSourceEdgenextScdnDomainGroupDomains(),
 
 		// User IP Intelligence data sources
 		"edgenext_scdn_user_ips":      scdnipdata.DataSourceEdgenextScdnUserIps(),
