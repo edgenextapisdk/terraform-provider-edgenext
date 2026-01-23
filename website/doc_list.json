@@ -14,6 +14,16 @@
           "display_name": "cdn domains"
         },
         {
+          "name": "cdn_prefetch",
+          "path": "docs/d/cdn_prefetch.html.markdown",
+          "display_name": "cdn prefetch"
+        },
+        {
+          "name": "cdn_prefetches",
+          "path": "docs/d/cdn_prefetches.html.markdown",
+          "display_name": "cdn prefetches"
+        },
+        {
           "name": "cdn_purge",
           "path": "docs/d/cdn_purge.html.markdown",
           "display_name": "cdn purge"
@@ -22,16 +32,6 @@
           "name": "cdn_purges",
           "path": "docs/d/cdn_purges.html.markdown",
           "display_name": "cdn purges"
-        },
-        {
-          "name": "cdn_push",
-          "path": "docs/d/cdn_push.html.markdown",
-          "display_name": "cdn push"
-        },
-        {
-          "name": "cdn_pushes",
-          "path": "docs/d/cdn_pushes.html.markdown",
-          "display_name": "cdn pushes"
         }
       ],
       "resources": [
@@ -41,14 +41,14 @@
           "display_name": "cdn domain"
         },
         {
+          "name": "cdn_prefetch",
+          "path": "docs/r/cdn_prefetch.html.markdown",
+          "display_name": "cdn prefetch"
+        },
+        {
           "name": "cdn_purge",
           "path": "docs/r/cdn_purge.html.markdown",
           "display_name": "cdn purge"
-        },
-        {
-          "name": "cdn_push",
-          "path": "docs/r/cdn_push.html.markdown",
-          "display_name": "cdn push"
         }
       ]
     },
@@ -468,6 +468,16 @@
       "display_name": "cdn domains"
     },
     {
+      "name": "cdn_prefetch",
+      "path": "docs/d/cdn_prefetch.html.markdown",
+      "display_name": "cdn prefetch"
+    },
+    {
+      "name": "cdn_prefetches",
+      "path": "docs/d/cdn_prefetches.html.markdown",
+      "display_name": "cdn prefetches"
+    },
+    {
       "name": "cdn_purge",
       "path": "docs/d/cdn_purge.html.markdown",
       "display_name": "cdn purge"
@@ -476,16 +486,6 @@
       "name": "cdn_purges",
       "path": "docs/d/cdn_purges.html.markdown",
       "display_name": "cdn purges"
-    },
-    {
-      "name": "cdn_push",
-      "path": "docs/d/cdn_push.html.markdown",
-      "display_name": "cdn push"
-    },
-    {
-      "name": "cdn_pushes",
-      "path": "docs/d/cdn_pushes.html.markdown",
-      "display_name": "cdn pushes"
     },
     {
       "name": "oss_buckets",
@@ -705,14 +705,14 @@
       "display_name": "cdn domain"
     },
     {
+      "name": "cdn_prefetch",
+      "path": "docs/r/cdn_prefetch.html.markdown",
+      "display_name": "cdn prefetch"
+    },
+    {
       "name": "cdn_purge",
       "path": "docs/r/cdn_purge.html.markdown",
       "display_name": "cdn purge"
-    },
-    {
-      "name": "cdn_push",
-      "path": "docs/r/cdn_push.html.markdown",
-      "display_name": "cdn push"
     },
     {
       "name": "oss_bucket",

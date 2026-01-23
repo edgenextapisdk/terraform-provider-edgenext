@@ -10,47 +10,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func DataSourceEdgenextCdnPush() *schema.Resource {
+func DataSourceEdgenextCdnPrefetch() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourcePushRead,
+		Read: dataSourcePrefetchRead,
 
 		Schema: map[string]*schema.Schema{
 			"task_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Task ID for querying the refresh status of a specific task",
+				Required:    true,
+				Description: "Task ID for querying the prefetch status of a specific task",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Used to save results.",
-			},
-			"start_time": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Start time, format: YYYY-MM-DD, used together with end_time",
-			},
-			"end_time": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "End time, format: YYYY-MM-DD, used together with start_time",
-			},
-			"url": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "URL",
-			},
-			"page_number": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "1",
-				Description: "Page number to retrieve, default 1",
-			},
-			"page_size": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "50",
-				Description: "Page size, default 50, range 1-500",
 			},
 			"total": {
 				Type:        schema.TypeInt,
@@ -71,12 +44,7 @@ func DataSourceEdgenextCdnPush() *schema.Resource {
 						"url": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "URL/Directory",
-						},
-						"type": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "URL type",
+							Description: "URL",
 						},
 						"status": {
 							Type:        schema.TypeString,
@@ -100,15 +68,15 @@ func DataSourceEdgenextCdnPush() *schema.Resource {
 	}
 }
 
-func dataSourcePushRead(d *schema.ResourceData, m interface{}) error {
+func dataSourcePrefetchRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
 	taskID := d.Get("task_id").(string)
 
-	log.Printf("[INFO] Querying cache refresh task")
+	log.Printf("[INFO] Querying file prefetch task, task_id: %s", taskID)
 
-	var response *CacheRefreshQueryResponse
+	var response *FilePrefetchQueryResponse
 	var err error
 
 	// Query by task ID
@@ -117,7 +85,7 @@ func dataSourcePushRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return fmt.Errorf("invalid task ID: %s", taskID)
 	}
-	response, err = service.QueryCacheRefreshByTaskID(taskIDInt)
+	response, err = service.QueryFilePrefetchByTaskID(taskIDInt)
 	if err != nil {
 		return fmt.Errorf("failed to query by task ID: %w", err)
 	}
@@ -134,7 +102,6 @@ func dataSourcePushRead(d *schema.ResourceData, m interface{}) error {
 		elemMap := map[string]interface{}{
 			"id":            elem.ID,
 			"url":           elem.URL,
-			"type":          elem.Type,
 			"status":        elem.Status,
 			"create_time":   elem.CreateTime,
 			"complete_time": elem.CompleteTime,
@@ -157,14 +124,14 @@ func dataSourcePushRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	log.Printf("[INFO] Cache refresh task query successful, total %d records", response.Data.Total)
+	log.Printf("[INFO] File prefetch task query successful, total %d records", response.Data.Total)
 	return nil
 }
 
-// DataSourceEdgenextCdnPushes data source for querying multiple cache refresh tasks
-func DataSourceEdgenextCdnPushes() *schema.Resource {
+// DataSourceEdgenextCdnPrefetches data source for querying multiple file prefetch tasks
+func DataSourceEdgenextCdnPrefetches() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourcePushesRead,
+		Read: dataSourcePrefetchesRead,
 
 		Schema: map[string]*schema.Schema{
 			"start_time": {
@@ -182,11 +149,6 @@ func DataSourceEdgenextCdnPushes() *schema.Resource {
 				Optional:    true,
 				Description: "URL",
 			},
-			"output_file": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Used to save results.",
-			},
 			"page_number": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -198,6 +160,11 @@ func DataSourceEdgenextCdnPushes() *schema.Resource {
 				Optional:    true,
 				Default:     "50",
 				Description: "Page size, default 50, range 1-500",
+			},
+			"output_file": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Used to save results.",
 			},
 			"total": {
 				Type:        schema.TypeInt,
@@ -218,12 +185,7 @@ func DataSourceEdgenextCdnPushes() *schema.Resource {
 						"url": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "URL/Directory",
-						},
-						"type": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "URL type",
+							Description: "URL",
 						},
 						"status": {
 							Type:        schema.TypeString,
@@ -247,7 +209,7 @@ func DataSourceEdgenextCdnPushes() *schema.Resource {
 	}
 }
 
-func dataSourcePushesRead(d *schema.ResourceData, m interface{}) error {
+func dataSourcePrefetchesRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*connectivity.EdgeNextClient)
 	service := NewCdnService(client)
 
@@ -257,26 +219,24 @@ func dataSourcePushesRead(d *schema.ResourceData, m interface{}) error {
 	pageNumber := d.Get("page_number").(string)
 	pageSize := d.Get("page_size").(string)
 
-	log.Printf("[INFO] Querying multiple cache refresh tasks: %s to %s", startTime, endTime)
+	log.Printf("[INFO] Querying multiple file prefetch tasks: %s to %s", startTime, endTime)
 
 	// Query by time range
-	response, err := service.QueryCacheRefreshByTimeRange(startTime, endTime, url, pageNumber, pageSize)
+	response, err := service.QueryFilePrefetchByTimeRange(startTime, endTime, url, pageNumber, pageSize)
 	if err != nil {
-		return fmt.Errorf("failed to query cache refresh tasks: %w", err)
+		return fmt.Errorf("failed to query file prefetch tasks: %w", err)
 	}
 
 	// Set response data
 	if err := d.Set("total", response.Data.Total); err != nil {
 		return fmt.Errorf("error setting total: %w", err)
 	}
-
 	var list []map[string]interface{}
 	ids := make([]string, 0)
 	for _, elem := range response.Data.List {
 		elemMap := map[string]interface{}{
 			"id":            elem.ID,
 			"url":           elem.URL,
-			"type":          elem.Type,
 			"status":        elem.Status,
 			"create_time":   elem.CreateTime,
 			"complete_time": elem.CompleteTime,
@@ -309,6 +269,6 @@ func dataSourcePushesRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	log.Printf("[INFO] Multiple cache refresh tasks query successful, total %d records", len(list))
+	log.Printf("[INFO] Multiple file prefetch tasks query successful, total %d records", len(list))
 	return nil
 }

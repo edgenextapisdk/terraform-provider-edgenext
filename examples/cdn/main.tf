@@ -31,7 +31,7 @@ provider "edgenext" {
 
 # 2. Create web acceleration domain
 # resource "edgenext_cdn_domain" "web_domain" {
-#   domain = "example2.com"
+#   domain = "example200.com"
 #   area   = "mainland_china"
 #   type   = "page"
 
@@ -68,7 +68,7 @@ provider "edgenext" {
 #       follow_expired = "no"
 #       query_params_op = "customer"
 #       priority = 1
-#       cache_or_not = "yes"
+#       # cache_or_not = "yes"
 #       query_params_op_way = "keep"
 #       query_params_op_when = "cache_back_source"
 #       params = "index"
@@ -184,11 +184,11 @@ provider "edgenext" {
 # }
 
 # =============================================================================
-# CDN Push Task Examples
+# CDN Purge Task Examples
 # =============================================================================
 
-# 1. Push specific URLs
-# resource "edgenext_cdn_push" "url_refresh" {
+# 1. Purge specific URLs
+# resource "edgenext_cdn_purge" "url_refresh" {
 #   type = "url"
 #   urls = [
 #     "https://${edgenext_cdn_domain.web_domain.domain}/config.mp4",
@@ -198,17 +198,45 @@ provider "edgenext" {
 #   depends_on = [edgenext_cdn_domain.web_domain]
 # }
 
-# 2. Query push task status
-# data "edgenext_cdn_push" "static_push_status" {
-#   task_id = edgenext_cdn_push.url_refresh.task_id
+# 2. Query purge task status
+# data "edgenext_cdn_purge" "static_purge_status" {
+#   task_id = edgenext_cdn_purge.url_refresh.task_id
 
-#   depends_on = [edgenext_cdn_push.url_refresh]
+#   depends_on = [edgenext_cdn_purge.url_refresh]
 # }
 
-# 3. Query push tasks within a time period
-# data "edgenext_cdn_pushes" "recent_pushes" {
-#   start_time = "2025-01-01"
-#   end_time   = "2025-12-31"
+# 3. Query purge tasks within a time period
+# data "edgenext_cdn_purges" "recent_purges" {
+#   start_time = "2026-01-01"
+#   end_time   = "2026-12-31"
 
-#   depends_on = [edgenext_cdn_push.url_refresh]
+#   depends_on = [edgenext_cdn_purge.url_refresh]
+# }
+
+# =============================================================================
+# CDN Prefetch Task Examples
+# =============================================================================
+
+# 1. Prefetch specific URLs
+# resource "edgenext_cdn_prefetch" "url_prefetch" {
+#   urls = [
+#     "https://${edgenext_cdn_domain.web_domain.domain}/config_prefetch.mp4",
+#     "https://${edgenext_cdn_domain.web_domain.domain}/data/abc_prefetch.jpg"
+#   ]
+#   depends_on = [edgenext_cdn_domain.web_domain]
+# }
+
+# 2. Query prefetch task status
+# data "edgenext_cdn_prefetch" "static_prefetch_status" {
+#   task_id = edgenext_cdn_prefetch.url_prefetch.task_id
+
+#   depends_on = [edgenext_cdn_prefetch.url_prefetch]
+# }
+
+# 3. Query prefetch tasks within a time period
+# data "edgenext_cdn_prefetches" "recent_prefetches" {
+#   start_time = "2026-01-01"
+#   end_time   = "2026-12-31"
+
+#   depends_on = [edgenext_cdn_prefetch.url_prefetch]
 # }
