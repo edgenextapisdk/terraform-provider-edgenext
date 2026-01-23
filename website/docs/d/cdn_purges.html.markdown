@@ -56,7 +56,7 @@ In addition to all arguments above, the following attributes are exported:
   * `create_time` - Creation time
   * `id` - URL ID
   * `status` - Status
-  * `url` - URL
+  * `type` - URL type
+  * `url` - URL/Directory
 * `total` - Total number of records
-
 

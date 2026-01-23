@@ -741,29 +741,29 @@ func NewCacheRefreshRequest(urls []string, refreshType string) CacheRefreshReque
 	}
 }
 
-// File purge related structs and methods
+// File prefetch related structs and methods
 
-// FilePurgeRequest file purge request
-type FilePurgeRequest struct {
+// FilePrefetchRequest file prefetch request
+type FilePrefetchRequest struct {
 	URLs []string `json:"urls"`
 }
 
-// FilePurgeResponse file purge response
-type FilePurgeResponse struct {
-	Code int           `json:"code"`
-	Data FilePurgeData `json:"data"`
-	Msg  string        `json:"message,omitempty"`
+// FilePrefetchResponse file prefetch response
+type FilePrefetchResponse struct {
+	Code int              `json:"code"`
+	Data FilePrefetchData `json:"data"`
+	Msg  string           `json:"message,omitempty"`
 }
 
-// FilePurgeData file purge data
-type FilePurgeData struct {
+// FilePrefetchData file prefetch data
+type FilePrefetchData struct {
 	TaskID  string   `json:"task_id"`
 	Count   int      `json:"count"`
 	ErrURLs []string `json:"err_urls,omitempty"`
 }
 
-// FilePurgeQueryRequest file purge query request
-type FilePurgeQueryRequest struct {
+// FilePrefetchQueryRequest file prefetch query request
+type FilePrefetchQueryRequest struct {
 	StartTime  string `json:"start_time,omitempty"`
 	EndTime    string `json:"end_time,omitempty"`
 	URL        string `json:"url,omitempty"`
@@ -772,22 +772,22 @@ type FilePurgeQueryRequest struct {
 	TaskID     int    `json:"task_id,omitempty"`
 }
 
-// FilePurgeQueryResponse file purge query response
-type FilePurgeQueryResponse struct {
-	Code int                `json:"code"`
-	Msg  string             `json:"message,omitempty"`
-	Data FilePurgeQueryData `json:"data"`
+// FilePrefetchQueryResponse file prefetch query response
+type FilePrefetchQueryResponse struct {
+	Code int                   `json:"code"`
+	Msg  string                `json:"message,omitempty"`
+	Data FilePrefetchQueryData `json:"data"`
 }
 
-// FilePurgeQueryData file purge query data
-type FilePurgeQueryData struct {
-	Total      int                  `json:"total"`
-	PageNumber int                  `json:"page_number"`
-	List       []FilePurgeQueryItem `json:"list"`
+// FilePrefetchQueryData file prefetch query data
+type FilePrefetchQueryData struct {
+	Total      int                     `json:"total"`
+	PageNumber int                     `json:"page_number"`
+	List       []FilePrefetchQueryItem `json:"list"`
 }
 
-// FilePurgeQueryItem file purge query item
-type FilePurgeQueryItem struct {
+// FilePrefetchQueryItem file prefetch query item
+type FilePrefetchQueryItem struct {
 	ID           string `json:"id"`
 	URL          string `json:"url"`
 	Status       string `json:"status"`
@@ -795,44 +795,44 @@ type FilePurgeQueryItem struct {
 	CompleteTime string `json:"complete_time,omitempty"`
 }
 
-// PurgeStatus purge status constants
+// PrefetchStatus prefetch status constants
 const (
-	PurgeStatusCompleted  = "completed"  // Completed
-	PurgeStatusWaiting    = "waiting"    // Waiting
-	PurgeStatusProcessing = "processing" // Processing
-	PurgeStatusFailed     = "failed"     // Processing failed
+	PrefetchStatusCompleted  = "completed"  // Completed
+	PrefetchStatusWaiting    = "waiting"    // Waiting
+	PrefetchStatusProcessing = "processing" // Processing
+	PrefetchStatusFailed     = "failed"     // Processing failed
 )
 
-// FilePurge file purge
-func (c *CdnService) FilePurge(urls []string) (*FilePurgeResponse, error) {
+// FilePrefetch file prefetch
+func (c *CdnService) FilePrefetch(urls []string) (*FilePrefetchResponse, error) {
 	ctx := context.Background()
 
-	requestBody := FilePurgeRequest{
+	requestBody := FilePrefetchRequest{
 		URLs: urls,
 	}
 
-	var response FilePurgeResponse
+	var response FilePrefetchResponse
 	apiClient, err := c.client.APIClient()
 	if err != nil {
-		return nil, fmt.Errorf("file purge failed: %w", err)
+		return nil, fmt.Errorf("file prefetch failed: %w", err)
 	}
 	err = apiClient.Post(ctx, "/v2/cache/prefetch", requestBody, &response)
 	if err != nil {
-		return nil, fmt.Errorf("file purge failed: %w", err)
+		return nil, fmt.Errorf("file prefetch failed: %w", err)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("file purge failed: %w", err)
+		return nil, fmt.Errorf("file prefetch failed: %w", err)
 	}
 
 	if response.Code != 0 {
-		return nil, fmt.Errorf("file purge failed: %s", response.Msg)
+		return nil, fmt.Errorf("file prefetch failed: %s", response.Msg)
 	}
 
 	return &response, nil
 }
 
-// QueryFilePurge queries file purge status
-func (c *CdnService) QueryFilePurge(req FilePurgeQueryRequest) (*FilePurgeQueryResponse, error) {
+// QueryFilePrefetch queries file prefetch status
+func (c *CdnService) QueryFilePrefetch(req FilePrefetchQueryRequest) (*FilePrefetchQueryResponse, error) {
 	ctx := context.Background()
 
 	query := make(map[string]string)
@@ -860,56 +860,56 @@ func (c *CdnService) QueryFilePurge(req FilePurgeQueryRequest) (*FilePurgeQueryR
 		}
 	}
 
-	var response FilePurgeQueryResponse
+	var response FilePrefetchQueryResponse
 	apiClient, err := c.client.APIClient()
 	if err != nil {
-		return nil, fmt.Errorf("failed to query file purge: %w", err)
+		return nil, fmt.Errorf("failed to query file prefetch: %w", err)
 	}
 	err = apiClient.GetWithQuery(ctx, "/v2/cache/prefetch", query, &response)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query file purge: %w", err)
+		return nil, fmt.Errorf("failed to query file prefetch: %w", err)
 	}
 
 	if response.Code != 0 {
-		return nil, fmt.Errorf("failed to query file purge: %s", response.Msg)
+		return nil, fmt.Errorf("failed to query file prefetch: %s", response.Msg)
 	}
 
 	return &response, nil
 }
 
-// QueryFilePurgeByTaskID queries file purge status by task ID
-func (c *CdnService) QueryFilePurgeByTaskID(taskID int) (*FilePurgeQueryResponse, error) {
-	req := FilePurgeQueryRequest{
+// QueryFilePrefetchByTaskID queries file prefetch status by task ID
+func (c *CdnService) QueryFilePrefetchByTaskID(taskID int) (*FilePrefetchQueryResponse, error) {
+	req := FilePrefetchQueryRequest{
 		TaskID: taskID,
 	}
-	return c.QueryFilePurge(req)
+	return c.QueryFilePrefetch(req)
 }
 
-// QueryFilePurgeByTimeRange queries file purge status by time range
-func (c *CdnService) QueryFilePurgeByTimeRange(startTime, endTime, url, pageNumber, pageSize string) (*FilePurgeQueryResponse, error) {
-	req := FilePurgeQueryRequest{
+// QueryFilePrefetchByTimeRange queries file prefetch status by time range
+func (c *CdnService) QueryFilePrefetchByTimeRange(startTime, endTime, url, pageNumber, pageSize string) (*FilePrefetchQueryResponse, error) {
+	req := FilePrefetchQueryRequest{
 		StartTime:  startTime,
 		EndTime:    endTime,
 		URL:        url,
 		PageNumber: pageNumber,
 		PageSize:   pageSize,
 	}
-	return c.QueryFilePurge(req)
+	return c.QueryFilePrefetch(req)
 }
 
-// Helper method: check purge status
-func (item *FilePurgeQueryItem) IsCompleted() bool {
-	return item.Status == PurgeStatusCompleted
+// Helper method: check prefetch status
+func (item *FilePrefetchQueryItem) IsCompleted() bool {
+	return item.Status == PrefetchStatusCompleted
 }
 
-func (item *FilePurgeQueryItem) IsWaiting() bool {
-	return item.Status == PurgeStatusWaiting
+func (item *FilePrefetchQueryItem) IsWaiting() bool {
+	return item.Status == PrefetchStatusWaiting
 }
 
-func (item *FilePurgeQueryItem) IsProcessing() bool {
-	return item.Status == PurgeStatusProcessing
+func (item *FilePrefetchQueryItem) IsProcessing() bool {
+	return item.Status == PrefetchStatusProcessing
 }
 
-func (item *FilePurgeQueryItem) IsFailed() bool {
-	return item.Status == PurgeStatusFailed
+func (item *FilePrefetchQueryItem) IsFailed() bool {
+	return item.Status == PrefetchStatusFailed
 }
