@@ -177,4 +177,17 @@ const (
 	EndpointUserIpItemAll      = "/api/v5/user.ip.item.all"
 	EndpointUserIpCopy         = "/api/v5/user.ip.copy"
 	EndpointUserIpItemFileSave = "/api/v5/user.ip.item.file.save"
+
+	// ============================================================================
+	// Domain Group Management API Endpoints
+	// ============================================================================
+	EndpointDomainGroupAdd                     = "/api/v5/web.domain.group.add"
+	EndpointDomainGroupSave                    = "/api/v5/web.domain.group.save"
+	EndpointDomainGroupList                    = "/api/v5/web.domain.group.list"
+	EndpointDomainGroupDel                     = "/api/v5/web.domain.group.del"
+	EndpointDomainGroupInfo                    = "/api/v5/web.domain.group.info"
+	EndpointDomainGroupDomainList              = "/api/v5/web.domain.group.domain.list"
+	EndpointDomainGroupDomainSave              = "/api/v5/web.domain.group.domain.save"
+	EndpointDomainGroupUndistributedDomainList = "/api/v5/web.domain.group.undistributed.domain.list"
+	EndpointDomainGroupMoveDomain              = "/api/v5/web.domain.group.move_domain"
 )
