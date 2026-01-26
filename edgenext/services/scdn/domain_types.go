@@ -18,6 +18,7 @@ type DomainListRequest struct {
 	AccessMode          string `json:"access_mode,omitempty"`
 	ProtectStatus       string `json:"protect_status,omitempty"`
 	ExclusiveResourceID int    `json:"exclusive_resource_id,omitempty"`
+	WithGroup           bool   `json:"with_group,omitempty"`
 }
 
 // DomainListResponse domain list response
@@ -37,6 +38,7 @@ type DomainInfo struct {
 	ID                  int       `json:"id"`
 	Domain              string    `json:"domain"`
 	Remark              string    `json:"remark"`
+	GroupID             int       `json:"group_id"`
 	AccessProgress      string    `json:"access_progress"`
 	AccessMode          string    `json:"access_mode"`
 	ProtectStatus       string    `json:"protect_status"`
