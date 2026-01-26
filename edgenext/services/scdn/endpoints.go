@@ -68,10 +68,11 @@ const (
 	// Rule Template Management API Endpoints
 	// ============================================================================
 	// Rule template CRUD operations
-	EndpointRuleTemplates        = "/api/v5/ruletpls"               // GET, POST, PUT, DELETE
-	EndpointRuleTemplatesBind    = "/api/v5/ruletpls/bind_domain"   // PUT - Bind domain to template
-	EndpointRuleTemplatesUnbind  = "/api/v5/ruletpls/unbind_domain" // PUT - Unbind domain from template
-	EndpointRuleTemplatesDomains = "/api/v5/ruletpls/domains"       // GET - List domains bound to template
+	EndpointRuleTemplates             = "/api/v5/ruletpls"                   // GET, POST, PUT, DELETE
+	EndpointRuleTemplatesBind         = "/api/v5/ruletpls/bind_domain"       // PUT - Bind domain to template
+	EndpointRuleTemplatesUnbind       = "/api/v5/ruletpls/unbind_domain"     // PUT - Unbind domain from template
+	EndpointRuleTemplatesDomains      = "/api/v5/ruletpls/domains"           // GET - List domains bound to template
+	EndpointRuleTemplatesSwitchDomain = "/api/v5/ruletpls/domain/switch_tpl" // PUT - Switch domains to a new template
 
 	// ============================================================================
 	// Network Speed Management API Endpoints

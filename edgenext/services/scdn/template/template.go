@@ -10,6 +10,7 @@ func Resources() map[string]*schema.Resource {
 		"edgenext_scdn_rule_template":               ResourceEdgenextScdnRuleTemplate(),
 		"edgenext_scdn_rule_template_domain_bind":   ResourceEdgenextScdnRuleTemplateDomainBind(),
 		"edgenext_scdn_rule_template_domain_unbind": ResourceEdgenextScdnRuleTemplateDomainUnbind(),
+		"edgenext_scdn_rule_template_switch":        ResourceEdgenextScdnRuleTemplateSwitch(),
 	}
 }
 
