@@ -48,7 +48,6 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `apply_status` - The application status: 1-applying, 2-issued, 3-review failed, 4-uploaded
 * `binded` - Whether the certificate is bound
 * `ca_domain` - The domains in the certificate

@@ -454,6 +454,42 @@
           "display_name": "scdn security protection waf config"
         }
       ]
+    },
+    "SDNS": {
+      "data_sources": [
+        {
+          "name": "sdns_domain_groups",
+          "path": "docs/d/sdns_domain_groups.html.markdown",
+          "display_name": "sdns domain groups"
+        },
+        {
+          "name": "sdns_domains",
+          "path": "docs/d/sdns_domains.html.markdown",
+          "display_name": "sdns domains"
+        },
+        {
+          "name": "sdns_records",
+          "path": "docs/d/sdns_records.html.markdown",
+          "display_name": "sdns records"
+        }
+      ],
+      "resources": [
+        {
+          "name": "sdns_domain",
+          "path": "docs/r/sdns_domain.html.markdown",
+          "display_name": "sdns domain"
+        },
+        {
+          "name": "sdns_domain_group",
+          "path": "docs/r/sdns_domain_group.html.markdown",
+          "display_name": "sdns domain group"
+        },
+        {
+          "name": "sdns_record",
+          "path": "docs/r/sdns_record.html.markdown",
+          "display_name": "sdns record"
+        }
+      ]
     }
   },
   "all_data_sources": [
@@ -688,6 +724,21 @@
       "display_name": "scdn security protection waf config"
     },
     {
+      "name": "sdns_domain_groups",
+      "path": "docs/d/sdns_domain_groups.html.markdown",
+      "display_name": "sdns domain groups"
+    },
+    {
+      "name": "sdns_domains",
+      "path": "docs/d/sdns_domains.html.markdown",
+      "display_name": "sdns domains"
+    },
+    {
+      "name": "sdns_records",
+      "path": "docs/d/sdns_records.html.markdown",
+      "display_name": "sdns records"
+    },
+    {
       "name": "ssl_certificate",
       "path": "docs/d/ssl_certificate.html.markdown",
       "display_name": "ssl certificate"
@@ -883,6 +934,21 @@
       "name": "scdn_security_protection_waf_config",
       "path": "docs/r/scdn_security_protection_waf_config.html.markdown",
       "display_name": "scdn security protection waf config"
+    },
+    {
+      "name": "sdns_domain",
+      "path": "docs/r/sdns_domain.html.markdown",
+      "display_name": "sdns domain"
+    },
+    {
+      "name": "sdns_domain_group",
+      "path": "docs/r/sdns_domain_group.html.markdown",
+      "display_name": "sdns domain group"
+    },
+    {
+      "name": "sdns_record",
+      "path": "docs/r/sdns_record.html.markdown",
+      "display_name": "sdns record"
     },
     {
       "name": "ssl_certificate",

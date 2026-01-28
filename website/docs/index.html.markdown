@@ -131,6 +131,20 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_oss_object`](data-sources/oss_object) - Query OSS object details
 * [`edgenext_oss_objects`](data-sources/oss_objects) - Query OSS objects
 
+### Security DNS (SDNS)
+
+#### Resources
+
+* [`edgenext_sdns_domain`](resources/sdns_domain) - Manage sdns domain
+* [`edgenext_sdns_domain_group`](resources/sdns_domain_group) - Manage sdns domain group
+* [`edgenext_sdns_record`](resources/sdns_record) - Manage sdns record
+
+#### Data Sources
+
+* [`edgenext_sdns_domains`](data-sources/sdns_domains) - Query sdns domains
+* [`edgenext_sdns_domain_groups`](data-sources/sdns_domain_groups) - Query sdns domain groups
+* [`edgenext_sdns_records`](data-sources/sdns_records) - Query sdns records
+
 ### Security CDN (SCDN)
 
 #### Resources

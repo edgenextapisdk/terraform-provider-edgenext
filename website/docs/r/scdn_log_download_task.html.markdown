@@ -63,7 +63,6 @@ The `search_terms` object supports the following:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `created_at` - Creation timestamp
 * `download_url` - Download URL (available when task is completed)
 * `id` - The ID of the log download task

@@ -41,24 +41,24 @@ variable "domain_name" {
   type        = string
 }
 
-resource "edgenext_dns_domain" "example" {
+resource "edgenext_sdns_domain" "example" {
   domain = var.domain_name
 }
 
-resource "edgenext_dns_group" "example" {
+resource "edgenext_sdns_domain_group" "example" {
   group_name = var.group_name
   remark     = "Managed by Terraform"
-  domain_ids = [edgenext_dns_domain.example.id]
+  domain_ids = [edgenext_sdns_domain.example.id]
 }
 
 output "group_id" {
-  value = edgenext_dns_group.example.id
+  value = edgenext_sdns_domain_group.example.id
 }
 
-data "edgenext_dns_group" "matched" {
-  group_name = edgenext_dns_group.example.group_name
+data "edgenext_sdns_domain_groups" "matched" {
+  group_name = edgenext_sdns_domain_group.example.group_name
 }
 
 output "matched_groups" {
-  value = data.edgenext_dns_group.matched.groups
+  value = data.edgenext_sdns_domain_groups.matched.groups
 }

@@ -46,12 +46,12 @@ variable "record_value" {
   type        = string
 }
 
-resource "edgenext_dns_domain" "example" {
+resource "edgenext_sdns_domain" "example" {
   domain = var.domain_name
 }
 
-resource "edgenext_dns_record" "example" {
-  domain_id = tonumber(edgenext_dns_domain.example.id)
+resource "edgenext_sdns_record" "example" {
+  domain_id = tonumber(edgenext_sdns_domain.example.id)
   name      = var.record_name
   type      = "A"
   view      = "any"
@@ -61,13 +61,13 @@ resource "edgenext_dns_record" "example" {
 }
 
 output "record_id" {
-  value = edgenext_dns_record.example.id
+  value = edgenext_sdns_record.example.id
 }
 
-data "edgenext_dns_record" "matched" {
-  domain_id = tonumber(edgenext_dns_domain.example.id)
+data "edgenext_sdns_records" "matched" {
+  domain_id = tonumber(edgenext_sdns_domain.example.id)
 }
 
 output "all_records" {
-  value = data.edgenext_dns_record.matched.records
+  value = data.edgenext_sdns_records.matched.records
 }

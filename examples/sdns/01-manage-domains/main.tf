@@ -36,22 +36,22 @@ variable "domain_name" {
   type        = string
 }
 
-resource "edgenext_dns_domain" "example" {
+resource "edgenext_sdns_domain" "example" {
   domain = var.domain_name
 }
 
 output "domain_id" {
-  value = edgenext_dns_domain.example.id
+  value = edgenext_sdns_domain.example.id
 }
 
 output "domain_status" {
-  value = edgenext_dns_domain.example.status
+  value = edgenext_sdns_domain.example.status
 }
 
-data "edgenext_dns_domain" "matched" {
-  domain = edgenext_dns_domain.example.domain
+data "edgenext_sdns_domains" "matched" {
+  domain = edgenext_sdns_domain.example.domain
 }
 
 output "matched_domains" {
-  value = data.edgenext_dns_domain.matched.domains
+  value = data.edgenext_sdns_domains.matched.domains
 }
