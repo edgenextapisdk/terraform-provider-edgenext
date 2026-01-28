@@ -120,6 +120,17 @@ edgenext_oss_bucket
 edgenext_oss_object
 edgenext_oss_object_copy
 
+Security DNS (SDNS)
+Data Source
+edgenext_sdns_domains
+edgenext_sdns_domain_groups
+edgenext_sdns_records
+
+Resource
+edgenext_sdns_domain
+edgenext_sdns_domain_group
+edgenext_sdns_record
+
 Security CDN (SCDN)
 Data Source
 edgenext_scdn_domain

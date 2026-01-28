@@ -128,7 +128,6 @@ The `records` object of `origins` supports the following:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `access_mode` - The access mode (ns or cname)
 * `access_progress_desc` - The description of the access progress status
 * `access_progress` - The access progress status

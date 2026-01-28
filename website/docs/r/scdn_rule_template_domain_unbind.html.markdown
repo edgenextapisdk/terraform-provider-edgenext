@@ -33,7 +33,6 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `id` - The unique identifier for this unbind operation
 
 

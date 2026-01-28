@@ -9,13 +9,13 @@ import (
 // Resources returns all domain-related resources
 func Resources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
-		"edgenext_dns_domain": resource.ResourceEdgenextDnsDomain(),
+		"edgenext_sdns_domain": resource.ResourceEdgenextDnsDomain(),
 	}
 }
 
 // DataSources returns all domain-related data sources
 func DataSources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
-		"edgenext_dns_domain": data.DataSourceEdgenextDnsDomain(),
+		"edgenext_sdns_domains": data.DataSourceEdgenextDnsDomain(),
 	}
 }

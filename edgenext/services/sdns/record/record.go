@@ -9,13 +9,13 @@ import (
 // Resources returns all record-related resources
 func Resources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
-		"edgenext_dns_record": resource.ResourceEdgenextDnsRecord(),
+		"edgenext_sdns_record": resource.ResourceEdgenextDnsRecord(),
 	}
 }
 
 // DataSources returns all record-related data sources
 func DataSources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
-		"edgenext_dns_record": data.DataSourceEdgenextDnsRecord(),
+		"edgenext_sdns_records": data.DataSourceEdgenextDnsRecord(),
 	}
 }

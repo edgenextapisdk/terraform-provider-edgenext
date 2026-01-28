@@ -9,13 +9,13 @@ import (
 // Resources returns all domain group-related resources
 func Resources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
-		"edgenext_dns_group": resource.ResourceEdgenextDnsGroup(),
+		"edgenext_sdns_domain_group": resource.ResourceEdgenextDnsGroup(),
 	}
 }
 
 // DataSources returns all domain group-related data sources
 func DataSources() map[string]*schema.Resource {
 	return map[string]*schema.Resource{
-		"edgenext_dns_group": data.DataSourceEdgenextDnsGroup(),
+		"edgenext_sdns_domain_groups": data.DataSourceEdgenextDnsGroup(),
 	}
 }

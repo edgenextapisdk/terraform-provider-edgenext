@@ -70,7 +70,6 @@ The `bind_domain` object supports the following:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `created_at` - The template creation timestamp
 * `id` - The ID of the rule template
 

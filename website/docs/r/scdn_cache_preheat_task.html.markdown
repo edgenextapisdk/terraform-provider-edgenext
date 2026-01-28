@@ -51,7 +51,6 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `error_url` - List of URLs with preheat errors
 * `id` - The ID of the preheat task (generated timestamp)
 

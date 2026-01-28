@@ -83,7 +83,7 @@ The `cache_rule` object of `conf` supports the following:
 
 The `cache_share` object of `conf` supports the following:
 
-* `scheme` - (Required, String) HTTP/HTTPS cache sharing method: 'http' or 'https'
+* `scheme` - (Optional, String) HTTP/HTTPS cache sharing method: '', 'http' or 'https'
 
 The `cache_url_rewrite` object of `conf` supports the following:
 
@@ -94,11 +94,11 @@ The `cache_url_rewrite` object of `conf` supports the following:
 
 The `conf` object supports the following:
 
-* `cache_share` - (Required, List) Cache sharing configuration
 * `nocache` - (Required, Bool) Cache eligibility (true: bypass cache, false: cache)
 * `browser_cache_rule` - (Optional, List) Browser cache configuration
 * `cache_errstatus` - (Optional, List) Status code cache configuration
 * `cache_rule` - (Optional, List) Edge TTL cache configuration
+* `cache_share` - (Optional, List) Cache sharing configuration
 * `cache_url_rewrite` - (Optional, List) Custom cache key configuration
 
 The `cookies` object of `cache_url_rewrite` supports the following:
@@ -115,7 +115,6 @@ The `queries` object of `cache_url_rewrite` supports the following:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `id` - The rule ID
 * `status` - Status (1: enabled, 2: disabled)
 * `type` - Type: 'domain', 'tpl', or 'global'
