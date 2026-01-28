@@ -161,8 +161,8 @@ type UserIpItemDelRequest struct {
 
 // UserIpItemDelResponse Delete IP item response
 type UserIpItemDelResponse struct {
-	Status Status              `json:"status"`
-	Data   UserIpItemDelData   `json:"data"`
+	Status Status            `json:"status"`
+	Data   UserIpItemDelData `json:"data"`
 }
 
 // UserIpItemDelData Delete IP item data
@@ -200,8 +200,8 @@ type UserIpCopyResponse struct {
 
 // UserIpItemFileSaveResponse File save upload response
 type UserIpItemFileSaveResponse struct {
-	Status Status                  `json:"status"`
-	Data   UserIpItemFileSaveData  `json:"data"`
+	Status Status                 `json:"status"`
+	Data   UserIpItemFileSaveData `json:"data"`
 }
 
 // UserIpItemFileSaveData File save upload data

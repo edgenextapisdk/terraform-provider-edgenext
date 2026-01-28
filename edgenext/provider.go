@@ -21,8 +21,10 @@ import (
 	scdnorigingroup "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/origin_group"
 	scdnsecurityprotect "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/security_protect"
 	scdntemplate "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/template"
+	sdnsdomain "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/sdns/domain"
+	sdnsgroup "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/sdns/domain_group"
+	sdnsrecord "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/sdns/record"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/ssl"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -64,6 +66,14 @@ func Provider() *schema.Provider {
 	// Initialize log download module resources and data sources
 	logDownloadResources := scdnlogdownload.Resources()
 	logDownloadDataSources := scdnlogdownload.DataSources()
+
+	// Initialize SDNS module resources and data sources
+	sdnsDomainResources := sdnsdomain.Resources()
+	sdnsDomainDataSources := sdnsdomain.DataSources()
+	sdnsGroupResources := sdnsgroup.Resources()
+	sdnsGroupDataSources := sdnsgroup.DataSources()
+	sdnsRecordResources := sdnsrecord.Resources()
+	sdnsRecordDataSources := sdnsrecord.DataSources()
 
 	// Build resources map
 	ResourcesMap := map[string]*schema.Resource{
@@ -136,6 +146,17 @@ func Provider() *schema.Provider {
 
 	// Add log download module resources dynamically
 	for k, v := range logDownloadResources {
+		ResourcesMap[k] = v
+	}
+
+	// Add SDNS module resources
+	for k, v := range sdnsDomainResources {
+		ResourcesMap[k] = v
+	}
+	for k, v := range sdnsGroupResources {
+		ResourcesMap[k] = v
+	}
+	for k, v := range sdnsRecordResources {
 		ResourcesMap[k] = v
 	}
 
@@ -218,6 +239,17 @@ func Provider() *schema.Provider {
 
 	// Add log download module data sources dynamically
 	for k, v := range logDownloadDataSources {
+		DataSourcesMap[k] = v
+	}
+
+	// Add SDNS module data sources
+	for k, v := range sdnsDomainDataSources {
+		DataSourcesMap[k] = v
+	}
+	for k, v := range sdnsGroupDataSources {
+		DataSourcesMap[k] = v
+	}
+	for k, v := range sdnsRecordDataSources {
 		DataSourcesMap[k] = v
 	}
 
