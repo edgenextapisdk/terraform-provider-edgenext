@@ -307,26 +307,22 @@ func resourceScdnRuleTemplateUpdate(d *schema.ResourceData, m interface{}) error
 	service := scdn.NewScdnService(client)
 
 	templateID, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return fmt.Errorf("invalid template ID: %w", err)
-	}
+	// Check if there are any changes before making the update request
+	if d.HasChange("name") || d.HasChange("description") {
+		// Build update request - only include parameters that have changed
+		req := scdn.RuleTemplateUpdateRequest{
+			ID:          templateID,
+			Name:        d.Get("name").(string),
+			Description: d.Get("description").(string),
+		}
 
-	// Build update request
-	req := scdn.RuleTemplateUpdateRequest{
-		ID: templateID,
-	}
-
-	if d.HasChange("name") {
-		req.Name = d.Get("name").(string)
-	}
-	if d.HasChange("description") {
-		req.Description = d.Get("description").(string)
-	}
-
-	log.Printf("[INFO] Updating SCDN rule template: %d", templateID)
-	_, err = service.UpdateRuleTemplate(req)
-	if err != nil {
-		return fmt.Errorf("failed to update SCDN rule template: %w", err)
+		log.Printf("[INFO] Updating SCDN rule template: %d", templateID)
+		_, err = service.UpdateRuleTemplate(req)
+		if err != nil {
+			return fmt.Errorf("failed to update SCDN rule template: %w", err)
+		}
+	} else {
+		log.Printf("[INFO] No changes detected for SCDN rule template: %d, skipping update", templateID)
 	}
 
 	log.Printf("[INFO] SCDN rule template updated successfully: %s", d.Id())
