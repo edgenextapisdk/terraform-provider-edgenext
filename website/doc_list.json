@@ -182,6 +182,16 @@
           "display_name": "scdn domain base settings"
         },
         {
+          "name": "scdn_domain_group_domains",
+          "path": "docs/d/scdn_domain_group_domains.html.markdown",
+          "display_name": "scdn domain group domains"
+        },
+        {
+          "name": "scdn_domain_groups",
+          "path": "docs/d/scdn_domain_groups.html.markdown",
+          "display_name": "scdn domain groups"
+        },
+        {
           "name": "scdn_domain_templates",
           "path": "docs/d/scdn_domain_templates.html.markdown",
           "display_name": "scdn domain templates"
@@ -295,6 +305,16 @@
           "name": "scdn_security_protection_waf_config",
           "path": "docs/d/scdn_security_protection_waf_config.html.markdown",
           "display_name": "scdn security protection waf config"
+        },
+        {
+          "name": "scdn_user_ip_items",
+          "path": "docs/d/scdn_user_ip_items.html.markdown",
+          "display_name": "scdn user ip items"
+        },
+        {
+          "name": "scdn_user_ips",
+          "path": "docs/d/scdn_user_ips.html.markdown",
+          "display_name": "scdn user ips"
         }
       ],
       "resources": [
@@ -352,6 +372,11 @@
           "name": "scdn_domain_base_settings",
           "path": "docs/r/scdn_domain_base_settings.html.markdown",
           "display_name": "scdn domain base settings"
+        },
+        {
+          "name": "scdn_domain_group",
+          "path": "docs/r/scdn_domain_group.html.markdown",
+          "display_name": "scdn domain group"
         },
         {
           "name": "scdn_domain_node_switch",
@@ -452,6 +477,16 @@
           "name": "scdn_security_protection_waf_config",
           "path": "docs/r/scdn_security_protection_waf_config.html.markdown",
           "display_name": "scdn security protection waf config"
+        },
+        {
+          "name": "scdn_user_ip",
+          "path": "docs/r/scdn_user_ip.html.markdown",
+          "display_name": "scdn user ip"
+        },
+        {
+          "name": "scdn_user_ip_item",
+          "path": "docs/r/scdn_user_ip_item.html.markdown",
+          "display_name": "scdn user ip item"
         }
       ]
     },
@@ -609,6 +644,16 @@
       "display_name": "scdn domain base settings"
     },
     {
+      "name": "scdn_domain_group_domains",
+      "path": "docs/d/scdn_domain_group_domains.html.markdown",
+      "display_name": "scdn domain group domains"
+    },
+    {
+      "name": "scdn_domain_groups",
+      "path": "docs/d/scdn_domain_groups.html.markdown",
+      "display_name": "scdn domain groups"
+    },
+    {
       "name": "scdn_domain_templates",
       "path": "docs/d/scdn_domain_templates.html.markdown",
       "display_name": "scdn domain templates"
@@ -724,6 +769,16 @@
       "display_name": "scdn security protection waf config"
     },
     {
+      "name": "scdn_user_ip_items",
+      "path": "docs/d/scdn_user_ip_items.html.markdown",
+      "display_name": "scdn user ip items"
+    },
+    {
+      "name": "scdn_user_ips",
+      "path": "docs/d/scdn_user_ips.html.markdown",
+      "display_name": "scdn user ips"
+    },
+    {
       "name": "sdns_domain_groups",
       "path": "docs/d/sdns_domain_groups.html.markdown",
       "display_name": "sdns domain groups"
@@ -836,6 +891,11 @@
       "display_name": "scdn domain base settings"
     },
     {
+      "name": "scdn_domain_group",
+      "path": "docs/r/scdn_domain_group.html.markdown",
+      "display_name": "scdn domain group"
+    },
+    {
       "name": "scdn_domain_node_switch",
       "path": "docs/r/scdn_domain_node_switch.html.markdown",
       "display_name": "scdn domain node switch"
@@ -934,6 +994,16 @@
       "name": "scdn_security_protection_waf_config",
       "path": "docs/r/scdn_security_protection_waf_config.html.markdown",
       "display_name": "scdn security protection waf config"
+    },
+    {
+      "name": "scdn_user_ip",
+      "path": "docs/r/scdn_user_ip.html.markdown",
+      "display_name": "scdn user ip"
+    },
+    {
+      "name": "scdn_user_ip_item",
+      "path": "docs/r/scdn_user_ip_item.html.markdown",
+      "display_name": "scdn user ip item"
     },
     {
       "name": "sdns_domain",

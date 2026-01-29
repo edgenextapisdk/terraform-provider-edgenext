@@ -180,6 +180,9 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_scdn_log_download_task`](resources/scdn_log_download_task) - Manage SCDN log download tasks
 * [`edgenext_scdn_log_download_template`](resources/scdn_log_download_template) - Manage SCDN log download templates
 * [`edgenext_scdn_log_download_template_status`](resources/scdn_log_download_template_status) - Manage SCDN log download template status
+* [`edgenext_scdn_domain_group`](resources/scdn_domain_group) - Manage scdn domain group
+* [`edgenext_scdn_user_ip`](resources/scdn_user_ip) - Manage scdn user ip
+* [`edgenext_scdn_user_ip_item`](resources/scdn_user_ip_item) - Manage scdn user ip item
 
 #### Data Sources
 
@@ -220,4 +223,8 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_scdn_log_download_tasks`](data-sources/scdn_log_download_tasks) - Query SCDN log download tasks
 * [`edgenext_scdn_log_download_templates`](data-sources/scdn_log_download_templates) - Query SCDN log download templates
 * [`edgenext_scdn_log_download_fields`](data-sources/scdn_log_download_fields) - Query SCDN log download fields
+* [`edgenext_scdn_domain_groups`](data-sources/scdn_domain_groups) - Query scdn domain groups
+* [`edgenext_scdn_domain_group_domains`](data-sources/scdn_domain_group_domains) - Query scdn domain group domains
+* [`edgenext_scdn_user_ips`](data-sources/scdn_user_ips) - Query scdn user ips
+* [`edgenext_scdn_user_ip_items`](data-sources/scdn_user_ip_items) - Query scdn user ip items
 

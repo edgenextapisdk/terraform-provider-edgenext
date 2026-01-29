@@ -1,17 +1,10 @@
----
-subcategory: "SCDN"
-layout: "edgenext"
-page_title: "EdgeNext: edgenext_scdn_user_ip_item"
-sidebar_current: "docs-edgenext-resource-scdn-user-ip-item"
-description: |-
-  Provides a resource to manage SCDN User IP Items.
----
-
-# Resource: edgenext_scdn_user_ip_item
+# edgenext_scdn_user_ip_item
 
 Provides a resource to manage individual IP items within an SCDN User IP List.
 
-## Example Usage
+Example Usage
+
+Create a user IP item
 
 ```hcl
 resource "edgenext_scdn_user_ip" "list" {
@@ -25,7 +18,7 @@ resource "edgenext_scdn_user_ip_item" "item" {
 }
 ```
 
-## Argument Reference
+Argument Reference
 
 The following arguments are supported:
 
@@ -33,7 +26,7 @@ The following arguments are supported:
 * `ip` - (Required) The IP address or CIDR block.
 * `remark` - (Optional) The remark or description for the IP item.
 
-## Attributes Reference
+Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
@@ -41,7 +34,7 @@ In addition to all arguments above, the following attributes are exported:
 * `format_created_at` - The formatted creation time.
 * `format_updated_at` - The formatted last update time.
 
-## Import
+Import
 
 SCDN User IP Items can be imported using the combined `user_ip_id` and `id` separated by a colon, e.g.
 

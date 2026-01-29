@@ -2,7 +2,9 @@
 
 Manages an SCDN Domain Group.
 
-## Example Usage
+Example Usage
+
+Create a domain group
 
 ```hcl
 resource "edgenext_scdn_domain_group" "example" {
@@ -12,7 +14,7 @@ resource "edgenext_scdn_domain_group" "example" {
 }
 ```
 
-## Argument Reference
+Argument Reference
 
 The following arguments are supported:
 
@@ -21,7 +23,7 @@ The following arguments are supported:
 * `domain_ids` - (Optional) List of domain IDs to bind to the group. Conflicts with `domains`.
 * `domains` - (Optional) List of domain names to bind to the group. Conflicts with `domain_ids`.
 
-## Attributes Reference
+Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
@@ -29,7 +31,7 @@ In addition to all arguments above, the following attributes are exported:
 * `created_at` - The creation time of the domain group.
 * `updated_at` - The last update time of the domain group.
 
-## Import
+Import
 
 SCDN Domain Groups can be imported using the group ID, e.g.
 

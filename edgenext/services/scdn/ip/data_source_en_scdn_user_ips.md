@@ -1,17 +1,10 @@
----
-subcategory: "SCDN"
-layout: "edgenext"
-page_title: "EdgeNext: edgenext_scdn_user_ips"
-sidebar_current: "docs-edgenext-datasource-scdn-user-ips"
-description: |-
-  Use this data source to query SCDN User IP Lists.
----
-
-# Data Source: edgenext_scdn_user_ips
+# edgenext_scdn_user_ips
 
 Use this data source to query SCDN User IP Lists.
 
-## Example Usage
+Example Usage
+
+Query all user IP lists
 
 ```hcl
 data "edgenext_scdn_user_ips" "all" {
@@ -24,14 +17,14 @@ output "ip_lists" {
 }
 ```
 
-## Argument Reference
+Argument Reference
 
 The following arguments are supported:
 
 * `page` - (Optional) The page number for pagination. Defaults to 1.
 * `per_page` - (Optional) The number of items per page. Defaults to 10.
 
-## Attributes Reference
+Attributes Reference
 
 The following attributes are exported:
 

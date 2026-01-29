@@ -170,6 +170,10 @@ edgenext_scdn_cache_preheat_tasks
 edgenext_scdn_log_download_tasks
 edgenext_scdn_log_download_templates
 edgenext_scdn_log_download_fields
+edgenext_scdn_domain_groups
+edgenext_scdn_domain_group_domains
+edgenext_scdn_user_ips
+edgenext_scdn_user_ip_items
 
 Resource
 edgenext_scdn_domain
@@ -203,3 +207,6 @@ edgenext_scdn_cache_preheat_task
 edgenext_scdn_log_download_task
 edgenext_scdn_log_download_template
 edgenext_scdn_log_download_template_status
+edgenext_scdn_domain_group
+edgenext_scdn_user_ip
+edgenext_scdn_user_ip_item

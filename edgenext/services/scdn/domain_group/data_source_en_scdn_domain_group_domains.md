@@ -2,7 +2,9 @@
 
 Query domains in an SCDN Domain Group.
 
-## Example Usage
+Example Usage
+
+Query domains in a domain group
 
 ```hcl
 data "edgenext_scdn_domain_group_domains" "example" {
@@ -14,7 +16,7 @@ output "domains" {
 }
 ```
 
-## Argument Reference
+Argument Reference
 
 The following arguments are supported:
 
@@ -23,7 +25,7 @@ The following arguments are supported:
 * `page` - (Optional) Page number. Default is 1.
 * `per_page` - (Optional) Items per page. Default is 10.
 
-## Attributes Reference
+Attributes Reference
 
 The following attributes are exported:
 
