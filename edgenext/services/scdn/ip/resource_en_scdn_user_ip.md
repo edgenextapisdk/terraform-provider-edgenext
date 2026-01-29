@@ -1,17 +1,10 @@
----
-subcategory: "SCDN"
-layout: "edgenext"
-page_title: "EdgeNext: edgenext_scdn_user_ip"
-sidebar_current: "docs-edgenext-resource-scdn-user-ip"
-description: |-
-  Provides a resource to manage SCDN User IP Lists.
----
-
-# Resource: edgenext_scdn_user_ip
+# edgenext_scdn_user_ip
 
 Provides a resource to manage SCDN User IP Lists. This resource allows you to create, update, and delete IP address lists that can be used in various SCDN configurations.
 
-## Example Usage
+Example Usage
+
+Create a user IP list
 
 ```hcl
 resource "edgenext_scdn_user_ip" "example" {
@@ -21,7 +14,7 @@ resource "edgenext_scdn_user_ip" "example" {
 }
 ```
 
-## Argument Reference
+Argument Reference
 
 The following arguments are supported:
 
@@ -29,7 +22,7 @@ The following arguments are supported:
 * `remark` - (Optional) The remark or description for the IP list.
 * `file_path` - (Optional) The path to the file containing IP list to upload.
 
-## Attributes Reference
+Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
@@ -38,7 +31,7 @@ In addition to all arguments above, the following attributes are exported:
 * `created_at` - The creation time of the list.
 * `updated_at` - The last update time of the list.
 
-## Import
+Import
 
 SCDN User IP Lists can be imported using the `id`, e.g.
 
