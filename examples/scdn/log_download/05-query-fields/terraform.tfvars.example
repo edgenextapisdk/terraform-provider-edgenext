@@ -1,4 +1,4 @@
 access_key  = "YOUR_ACCESS_KEY"
 secret_key  = "YOUR_SECRET_KEY"
-endpoint    = "http://apiv5.prxcdn.com:60041"
+endpoint    = "http://api.edgenextscdn.com"
 

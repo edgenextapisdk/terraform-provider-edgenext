@@ -1,0 +1,6 @@
+access_key  = "your-access-key-here"
+secret_key  = "your-secret-key-here"
+endpoint    = "https://api.edgenextscdn.com"
+domain_name = "records-demo.com"
+record_name = "www"
+record_value = "1.2.3.4"

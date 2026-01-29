@@ -1,0 +1,15 @@
+access_key = "your_access_key"
+secret_key = "your_secret_key"
+endpoint   = "https://api.edgenextscdn.com"
+
+# The ID of the existing domain group
+group_id = "111"
+
+# The name of the existing group (get this from the console or 02-query-groups)
+group_name = "111"
+
+# Domains to bind to the group
+domains_to_bind = [
+  "example.com",
+  "www.example.com"
+]

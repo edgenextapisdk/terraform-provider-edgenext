@@ -81,15 +81,17 @@ func resourceScdnCertificateApplyCreate(d *schema.ResourceData, m interface{}) e
 
 	log.Printf("[DEBUG] Certificate application response: %+v", response)
 
-	// Generate resource ID from domain list
-	resourceID := strings.Join(domains, ",")
-	d.SetId(resourceID)
-
 	// Convert maps for Terraform
 	caIDDomains := make(map[string]interface{})
+	caIds := make([]string, 0)
 	for k, v := range response.Data.CAIDDomains {
 		caIDDomains[k] = v
+		caIds = append(caIds, k)
 	}
+
+	// Generate resource ID from domain list
+	resourceID := strings.Join(caIds, ",")
+	d.SetId(resourceID)
 
 	caIDNames := make(map[string]interface{})
 	for k, v := range response.Data.CAIDNames {

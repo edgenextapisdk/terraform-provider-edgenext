@@ -12,13 +12,19 @@ import (
 	scdncacheoperate "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cache_operate"
 	scdncert "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cert"
 	scdndomain "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/domain"
+	scdndomaingroupdata "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/domain_group/data"
+	scdndomaingroupresource "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/domain_group/resource"
+	scdnipdata "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/ip/data"
+	scdnipresource "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/ip/resource"
 	scdnlogdownload "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/log_download"
 	scdnnetworkspeed "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/network_speed"
 	scdnorigingroup "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/origin_group"
 	scdnsecurityprotect "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/security_protect"
 	scdntemplate "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/template"
+	sdnsdomain "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/sdns/domain"
+	sdnsgroup "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/sdns/domain_group"
+	sdnsrecord "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/sdns/record"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/ssl"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -61,6 +67,14 @@ func Provider() *schema.Provider {
 	logDownloadResources := scdnlogdownload.Resources()
 	logDownloadDataSources := scdnlogdownload.DataSources()
 
+	// Initialize SDNS module resources and data sources
+	sdnsDomainResources := sdnsdomain.Resources()
+	sdnsDomainDataSources := sdnsdomain.DataSources()
+	sdnsGroupResources := sdnsgroup.Resources()
+	sdnsGroupDataSources := sdnsgroup.DataSources()
+	sdnsRecordResources := sdnsrecord.Resources()
+	sdnsRecordDataSources := sdnsrecord.DataSources()
+
 	// Build resources map
 	ResourcesMap := map[string]*schema.Resource{
 		// CDN domain and configuration management resources
@@ -81,6 +95,13 @@ func Provider() *schema.Provider {
 
 		// SCDN domain management resources (from domain module)
 		// Note: These resources are organized under scdn/domain/ for better module management
+
+		// Domain Group resources
+		"edgenext_scdn_domain_group": scdndomaingroupresource.ResourceEdgenextScdnDomainGroup(),
+
+		// User IP Intelligence resources
+		"edgenext_scdn_user_ip":      scdnipresource.ResourceEdgenextScdnUserIp(),
+		"edgenext_scdn_user_ip_item": scdnipresource.ResourceEdgenextScdnUserIpItem(),
 	}
 
 	// Add domain module resources dynamically
@@ -128,6 +149,17 @@ func Provider() *schema.Provider {
 		ResourcesMap[k] = v
 	}
 
+	// Add SDNS module resources
+	for k, v := range sdnsDomainResources {
+		ResourcesMap[k] = v
+	}
+	for k, v := range sdnsGroupResources {
+		ResourcesMap[k] = v
+	}
+	for k, v := range sdnsRecordResources {
+		ResourcesMap[k] = v
+	}
+
 	// Build data sources map
 	DataSourcesMap := map[string]*schema.Resource{
 		// CDN domain and configuration data sources
@@ -155,6 +187,14 @@ func Provider() *schema.Provider {
 
 		// SCDN domain data sources (from domain module)
 		// Note: These data sources are organized under scdn/domain/ for better module management
+
+		// Domain Group data sources
+		"edgenext_scdn_domain_groups":        scdndomaingroupdata.DataSourceEdgenextScdnDomainGroups(),
+		"edgenext_scdn_domain_group_domains": scdndomaingroupdata.DataSourceEdgenextScdnDomainGroupDomains(),
+
+		// User IP Intelligence data sources
+		"edgenext_scdn_user_ips":      scdnipdata.DataSourceEdgenextScdnUserIps(),
+		"edgenext_scdn_user_ip_items": scdnipdata.DataSourceEdgenextScdnUserIpItems(),
 	}
 
 	// Add domain module data sources dynamically
@@ -199,6 +239,17 @@ func Provider() *schema.Provider {
 
 	// Add log download module data sources dynamically
 	for k, v := range logDownloadDataSources {
+		DataSourcesMap[k] = v
+	}
+
+	// Add SDNS module data sources
+	for k, v := range sdnsDomainDataSources {
+		DataSourcesMap[k] = v
+	}
+	for k, v := range sdnsGroupDataSources {
+		DataSourcesMap[k] = v
+	}
+	for k, v := range sdnsRecordDataSources {
 		DataSourcesMap[k] = v
 	}
 

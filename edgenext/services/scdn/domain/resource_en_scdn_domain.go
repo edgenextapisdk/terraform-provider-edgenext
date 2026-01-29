@@ -7,6 +7,7 @@ import (
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn"
+	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/domain_group"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -313,30 +314,22 @@ func resourceScdnDomainRead(d *schema.ResourceData, m interface{}) error {
 
 	// Build request - support both domain name and ID queries
 	req := scdn.DomainListRequest{
-		Page:     1,
-		PageSize: 100,
+		Page:      1,
+		PageSize:  100,
+		WithGroup: true,
 	}
 
-	// If domain name is not set (e.g., during import), try to use ID
-	if domainName == "" {
-		// Try to get domain ID from resource ID
-		domainID, err := strconv.Atoi(d.Id())
-		if err == nil && domainID > 0 {
-			log.Printf("[DEBUG] Domain name not set, using ID to query: %d", domainID)
-			req.ID = domainID
-		} else {
-			log.Printf("[DEBUG] Domain name not set and invalid ID, skipping read operation")
-			return nil
-		}
-	} else {
-		// Use domain name to query
-		req.Domain = domainName
-	}
-
-	if domainName != "" {
+	// Determine how to query the domain: ID has priority over name
+	domainID, err := strconv.Atoi(d.Id())
+	if err == nil && domainID > 0 {
+		log.Printf("[DEBUG] Reading SCDN domain by ID: %d", domainID)
+		req.ID = domainID
+	} else if domainName != "" {
 		log.Printf("[DEBUG] Reading SCDN domain by name: %s", domainName)
+		req.Domain = domainName
 	} else {
-		log.Printf("[DEBUG] Reading SCDN domain by ID: %d", req.ID)
+		log.Printf("[DEBUG] Neither domain ID nor name is available, skipping read operation")
+		return nil
 	}
 
 	response, err := service.ListDomains(req)
@@ -391,6 +384,9 @@ func resourceScdnDomainRead(d *schema.ResourceData, m interface{}) error {
 	}
 	if err := d.Set("remark", domainInfo.Remark); err != nil {
 		return fmt.Errorf("error setting remark: %w", err)
+	}
+	if err := d.Set("group_id", domainInfo.GroupID); err != nil {
+		return fmt.Errorf("error setting group_id: %w", err)
 	}
 	if err := d.Set("protect_status", domainInfo.ProtectStatus); err != nil {
 		return fmt.Errorf("error setting protect_status: %w", err)
@@ -599,6 +595,49 @@ func resourceScdnDomainUpdate(d *schema.ResourceData, m interface{}) error {
 		_, err := service.SwitchDomainNodes(req)
 		if err != nil {
 			return fmt.Errorf("failed to switch domain nodes: %w", err)
+		}
+	}
+
+	// Update domain group if changed
+	if d.HasChange("group_id") {
+		oldGroupIDRaw, newGroupIDRaw := d.GetChange("group_id")
+		oldGroupID := oldGroupIDRaw.(int)
+		newGroupID := newGroupIDRaw.(int)
+		domainGroupService := domain_group.NewDomainGroupService(client)
+
+		if oldGroupID > 0 && newGroupID > 0 {
+			// Option 1: Move domain between groups (atomic operation)
+			log.Printf("[INFO] Moving domain %d from group %d to group %d", domainID, oldGroupID, newGroupID)
+			moveReq := domain_group.DomainGroupMoveDomainRequest{
+				FromGroupID: oldGroupID,
+				ToGroupID:   newGroupID,
+				DomainIDs:   []int{domainID},
+			}
+			if _, err := domainGroupService.MoveDomains(moveReq); err != nil {
+				return fmt.Errorf("failed to move domain between groups: %w", err)
+			}
+		} else if oldGroupID > 0 {
+			// Option 2: Remove from old group only
+			log.Printf("[INFO] Unbinding domain %d from group %d", domainID, oldGroupID)
+			unbindReq := domain_group.DomainGroupDomainSaveRequest{
+				GroupID:   oldGroupID,
+				DomainIDs: []string{strconv.Itoa(domainID)},
+				Action:    "del",
+			}
+			if _, err := domainGroupService.BindDomainsToGroup(unbindReq); err != nil {
+				return fmt.Errorf("failed to unbind domain from old group: %w", err)
+			}
+		} else if newGroupID > 0 {
+			// Option 3: Add to new group only
+			log.Printf("[INFO] Binding domain %d to group %d", domainID, newGroupID)
+			bindReq := domain_group.DomainGroupDomainSaveRequest{
+				GroupID:   newGroupID,
+				DomainIDs: []string{strconv.Itoa(domainID)},
+				Action:    "add",
+			}
+			if _, err := domainGroupService.BindDomainsToGroup(bindReq); err != nil {
+				return fmt.Errorf("failed to bind domain to new group: %w", err)
+			}
 		}
 	}
 

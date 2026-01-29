@@ -1,0 +1,6 @@
+access_key = "your_access_key"
+secret_key = "your_secret_key"
+endpoint   = "https://api.edgenextscdn.com"
+group_name = "tf-demo-group-01"
+remark     = "Managed by Terraform"
+domains    = ["example.com", "test.example.com"]

@@ -63,6 +63,9 @@ func (s *ScdnService) ListDomains(req DomainListRequest) (*DomainListResponse, e
 	if req.ExclusiveResourceID > 0 {
 		scdnReq.Query["exclusive_resource_id"] = req.ExclusiveResourceID
 	}
+	if req.WithGroup {
+		scdnReq.Query["with_group"] = req.WithGroup
+	}
 
 	// Call SCDN API
 	scdnResp, err := scdnClient.Get(ctx, EndpointDomains, scdnReq)

@@ -343,6 +343,8 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		productDir = "oss"
 	case "security cdn(scdn)", "security cdn", "scdn":
 		productDir = "scdn"
+	case "security dns(sdns)", "security dns", "sdns":
+		productDir = "sdns"
 	}
 
 	// Try to find the file, first in the main directory, then in subdirectories
@@ -356,14 +358,14 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 	filePath := filepath.Join(fpath, filename)
 	raw, err = os.ReadFile(filePath)
 
-	// If not found and it's SCDN, try subdirectories
-	if err != nil && productDir == "scdn" {
-		// List subdirectories in scdn
-		scdnPath := filepath.Join(fpath, "services", "scdn")
-		if entries, err2 := os.ReadDir(scdnPath); err2 == nil {
+	// If not found and it's SCDN or SDNS, try subdirectories
+	if err != nil && (productDir == "scdn" || productDir == "sdns") {
+		// List subdirectories in service path
+		servicePath := filepath.Join(fpath, "services", productDir)
+		if entries, err2 := os.ReadDir(servicePath); err2 == nil {
 			for _, entry := range entries {
 				if entry.IsDir() {
-					subDirPath := filepath.Join(scdnPath, entry.Name(), fmt.Sprintf("%s_%s_%s.md", dtype, cloudMarkShort, data["resource"]))
+					subDirPath := filepath.Join(servicePath, entry.Name(), fmt.Sprintf("%s_%s_%s.md", dtype, cloudMarkShort, data["resource"]))
 					if raw2, err2 := os.ReadFile(subDirPath); err2 == nil {
 						raw = raw2
 						err = nil
@@ -546,8 +548,18 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 	}
 	data["attributes"] = strings.Join(attributes, "\n")
 	if dtype == "resource" {
-		idAttribute := "* `id` - ID of the resource.\n"
-		data["attributes"] = idAttribute + data["attributes"]
+		// Check if id is already defined in attributes
+		hasID := false
+		for _, attr := range attributes {
+			if strings.HasPrefix(attr, "* `id` -") {
+				hasID = true
+				break
+			}
+		}
+		if !hasID {
+			idAttribute := "* `id` - ID of the resource.\n"
+			data["attributes"] = idAttribute + data["attributes"]
+		}
 	}
 
 	filename = filepath.Join(docRoot, dtype[:1], fmt.Sprintf("%s.html.markdown", data["resource"]))
