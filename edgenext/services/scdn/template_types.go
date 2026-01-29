@@ -167,3 +167,26 @@ type RuleTemplateDomainInfo struct {
 	Domain    string `json:"domain"`     // Domain name
 	CreatedAt string `json:"created_at"` // Domain binding timestamp
 }
+
+// ============================================================================
+// Template Switch Types
+// ============================================================================
+
+// RuleTemplateSwitchDomainRequest request to switch domains to a new template
+type RuleTemplateSwitchDomainRequest struct {
+	AppType    string `json:"app_type,omitempty"` // Application type, default: network_speed
+	DomainIDs  []int  `json:"domain_ids"`         // List of domain IDs to switch
+	NewTplID   int    `json:"new_tpl_id"`         // New template ID (0 when new_tpl_type=global)
+	NewTplType string `json:"new_tpl_type"`       // Template type: only_domain, more_domain, global
+}
+
+// RuleTemplateSwitchDomainResponse response from switch domain template API
+type RuleTemplateSwitchDomainResponse struct {
+	Status Status                       `json:"status"`
+	Data   RuleTemplateSwitchDomainData `json:"data"`
+}
+
+// RuleTemplateSwitchDomainData data from switch domain template response
+type RuleTemplateSwitchDomainData struct {
+	Info string `json:"info"` // Operation result information
+}

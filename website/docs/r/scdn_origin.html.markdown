@@ -76,7 +76,6 @@ The `records` object supports the following:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `id` - The ID of the origin
 * `listen_port` - The listening port of the origin server (single port from API)
 

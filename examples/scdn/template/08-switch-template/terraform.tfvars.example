@@ -1,0 +1,12 @@
+access_key = "YOUR_ACCESS_KEY"
+secret_key = "YOUR_SECRET_KEY"
+endpoint   = "https://api.edgenextscdn.com"
+
+# switch to only_domain
+domain_ids   = [115188]
+new_tpl_id   = 1636
+new_tpl_type = "more_domain"
+
+# # switch to global
+# domain_ids   = [115188]
+# new_tpl_type = "global" # only_domain, more_domain

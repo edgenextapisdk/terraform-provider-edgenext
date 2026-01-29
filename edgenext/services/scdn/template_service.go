@@ -207,3 +207,16 @@ func (s *ScdnService) ListRuleTemplateDomains(req RuleTemplateListDomainsRequest
 
 	return response, nil
 }
+
+// SwitchDomainTemplate switches domains from their current template to a new template
+func (s *ScdnService) SwitchDomainTemplate(req RuleTemplateSwitchDomainRequest) (*RuleTemplateSwitchDomainResponse, error) {
+	ctx := context.Background()
+
+	var response RuleTemplateSwitchDomainResponse
+	err := s.callSCDNAPI(ctx, MethodPUT, EndpointRuleTemplatesSwitchDomain, req, &response)
+	if err != nil {
+		return nil, fmt.Errorf("failed to switch domain template: %w", err)
+	}
+
+	return &response, nil
+}

@@ -5,7 +5,16 @@ import (
 	"fmt"
 	"time"
 
+	"bytes"
+	"encoding/json"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"os"
+	"path/filepath"
+
 	edgenext "github.com/edgenextapisdk/edgenext-go"
+	v2 "github.com/edgenextapisdk/edgenext-go/core"
 )
 
 // ScdnClient SCDN API client for domain_v5 interfaces
@@ -203,4 +212,115 @@ func (c *ScdnClient) GetAPIVersion() string {
 // GetServiceName returns the service name
 func (c *ScdnClient) GetServiceName() string {
 	return "scdn"
+}
+
+// Upload performs a multipart file upload to SCDN API
+func (c *ScdnClient) Upload(ctx context.Context, api string, params map[string]string, fileField, filePath string) (*ScdnResponse, error) {
+	// 1. Prepare body
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	// Add file
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file: %w", err)
+	}
+	defer file.Close()
+
+	part, err := writer.CreateFormFile(fileField, filepath.Base(filePath))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create form file: %w", err)
+	}
+	_, err = io.Copy(part, file)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy file content: %w", err)
+	}
+
+	// Add other params
+	for key, val := range params {
+		_ = writer.WriteField(key, val)
+	}
+
+	err = writer.Close()
+	if err != nil {
+		return nil, fmt.Errorf("failed to close multipart writer: %w", err)
+	}
+
+	// 2. Create Request
+	fullURL := c.baseURL + api
+	req, err := http.NewRequestWithContext(ctx, "POST", fullURL, body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	// Add Standard Headers
+	req.Header.Set("X-Auth-App-Id", c.apiKey)
+	req.Header.Set("X-Auth-Sdk-Version", "2.0.0") // Sync with SDK version if possible
+
+	// 3. Sign Request
+	signer := v2.Signer{
+		AppId:     c.apiKey,
+		AppSecret: c.apiSecret,
+	}
+
+	err = signer.Sign(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign request: %w", err)
+	}
+
+	// 4. Send Request
+	client := &http.Client{
+		Timeout: c.timeout,
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("failed to request, status code is %d", resp.StatusCode)
+	}
+
+	// 5. Handle Response
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Parse JSON
+	var jsonResp map[string]interface{}
+	if err := json.Unmarshal(respBody, &jsonResp); err != nil {
+		return nil, fmt.Errorf("failed to parse response json: %w", err)
+	}
+
+	var scdnResp ScdnResponse
+
+	// Check status
+	if status, ok := jsonResp["status"].(map[string]interface{}); ok {
+		if code, ok := status["code"].(float64); ok {
+			scdnResp.Status.Code = int(code)
+		}
+		if msg, ok := status["message"].(string); ok {
+			scdnResp.Status.Message = msg
+		}
+	} else {
+		return nil, fmt.Errorf("invalid response format: missing status")
+	}
+
+	if scdnResp.Status.Code != 1 {
+		return nil, fmt.Errorf("API error: %s (code: %d)", scdnResp.Status.Message, scdnResp.Status.Code)
+	}
+
+	if scdnResp.Status.Message != "success" {
+		return nil, fmt.Errorf("API error: %s (code: %d)", scdnResp.Status.Message, scdnResp.Status.Code)
+	}
+
+	if data, ok := jsonResp["data"]; ok {
+		scdnResp.Data = data
+	}
+
+	return &scdnResp, nil
 }
