@@ -35,10 +35,10 @@ resource "edgenext_scdn_security_protection_template_domain_bind" "example" {
 
 The following arguments are supported:
 
-* `business_id` - (Required, Int, ForceNew) Business ID (template ID)
-* `bind_business_ids` - (Optional, List: [`Int`], ForceNew) Bind business ID list
-* `domain_ids` - (Optional, List: [`Int`], ForceNew) Domain ID list
-* `group_ids` - (Optional, List: [`Int`], ForceNew) Group ID list
+* `business_id` - (Required, Int, ForceNew) Business ID (template ID) to bind domains to.
+* `bind_business_ids` - (Optional, List: [`Int`]) List of business IDs to bind.
+* `domain_ids` - (Optional, List: [`Int`]) List of domain IDs to bind to the template.
+* `group_ids` - (Optional, List: [`Int`]) Group ID list. If both group_ids and domain_ids are provided, the intersection of domains from the groups and the domain IDs will be used for binding.
 
 ## Attributes Reference
 
@@ -50,9 +50,11 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-SCDN security protection template domain bindings can be imported using the template ID and domain IDs:
+Import is not supported for this resource because:
+1. There is no unique identifier for a specific bind relationship
+2. The API does not provide enough information to reconstruct all resource attributes
+3. Bind relationships are many-to-many between templates and domains
+4. The resource ID format does not represent a specific binding
 
-```shell
-terraform import edgenext_scdn_security_protection_template_domain_bind.example 12345-67890,11111
-```
+When attempting to import, you will receive an error with the above explanation.
 
