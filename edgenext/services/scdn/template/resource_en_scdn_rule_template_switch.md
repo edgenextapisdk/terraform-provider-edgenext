@@ -1,8 +1,8 @@
-# edgenext_scdn_rule_template_switch
-
 Provides a resource to switch domains to a different SCDN Rule Template.
 
-## Example Usage
+Example Usage
+
+Switch domains to a new template
 
 ```hcl
 resource "edgenext_scdn_rule_template_switch" "example" {
@@ -13,7 +13,7 @@ resource "edgenext_scdn_rule_template_switch" "example" {
 }
 ```
 
-## Argument Reference
+Argument Reference
 
 The following arguments are supported:
 
@@ -22,16 +22,10 @@ The following arguments are supported:
 * `new_tpl_id` - (Required) New template ID to switch to. When `new_tpl_type` is `global`, pass 0.
 * `new_tpl_type` - (Required) New template type. Valid values: `more_domain`, `global`.
 
-## Attributes Reference
+Import
 
-In addition to all arguments above, the following attributes are exported:
+Rule Template Switch instances can be imported using an ID with the format `template_id:domain_id1,domain_id2,...`:
 
-* `id` - The unique identifier for this switch operation.
-
-## Import
-
-Rule Template Switch instances can be imported using an ID with the format `template_id:domain_id1,domain_id2,...`, e.g.
-
-```
-$ terraform import edgenext_scdn_rule_template_switch.example 12345:1001,1002
+```shell
+terraform import edgenext_scdn_rule_template_switch.example 12345:1001,1002
 ```

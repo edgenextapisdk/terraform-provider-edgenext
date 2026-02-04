@@ -22,9 +22,11 @@ resource "edgenext_scdn_security_protection_template_domain_bind" "example" {
 
 Import
 
-SCDN security protection template domain bindings can be imported using the template ID and domain IDs:
+Import is not supported for this resource because:
+1. There is no unique identifier for a specific bind relationship
+2. The API does not provide enough information to reconstruct all resource attributes
+3. Bind relationships are many-to-many between templates and domains
+4. The resource ID format does not represent a specific binding
 
-```shell
-terraform import edgenext_scdn_security_protection_template_domain_bind.example 12345-67890,11111
-```
+When attempting to import, you will receive an error with the above explanation.
 
