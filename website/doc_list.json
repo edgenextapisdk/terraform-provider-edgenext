@@ -454,6 +454,11 @@
           "display_name": "scdn rule template domain unbind"
         },
         {
+          "name": "scdn_rule_template_switch",
+          "path": "docs/r/scdn_rule_template_switch.html.markdown",
+          "display_name": "scdn rule template switch"
+        },
+        {
           "name": "scdn_security_protection_ddos_config",
           "path": "docs/r/scdn_security_protection_ddos_config.html.markdown",
           "display_name": "scdn security protection ddos config"
@@ -969,6 +974,11 @@
       "name": "scdn_rule_template_domain_unbind",
       "path": "docs/r/scdn_rule_template_domain_unbind.html.markdown",
       "display_name": "scdn rule template domain unbind"
+    },
+    {
+      "name": "scdn_rule_template_switch",
+      "path": "docs/r/scdn_rule_template_switch.html.markdown",
+      "display_name": "scdn rule template switch"
     },
     {
       "name": "scdn_security_protection_ddos_config",

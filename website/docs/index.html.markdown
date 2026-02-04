@@ -161,6 +161,7 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_scdn_rule_template`](resources/scdn_rule_template) - Manage SCDN rule templates
 * [`edgenext_scdn_rule_template_domain_bind`](resources/scdn_rule_template_domain_bind) - Manage SCDN rule template domain bindings
 * [`edgenext_scdn_rule_template_domain_unbind`](resources/scdn_rule_template_domain_unbind) - Manage SCDN rule template domain unbindings
+* [`edgenext_scdn_rule_template_switch`](resources/scdn_rule_template_switch) - Manage scdn rule template switch
 * [`edgenext_scdn_network_speed_config`](resources/scdn_network_speed_config) - Manage SCDN network speed configuration
 * [`edgenext_scdn_network_speed_rule`](resources/scdn_network_speed_rule) - Manage SCDN network speed rules
 * [`edgenext_scdn_network_speed_rules_sort`](resources/scdn_network_speed_rules_sort) - Manage SCDN network speed rules sorting
