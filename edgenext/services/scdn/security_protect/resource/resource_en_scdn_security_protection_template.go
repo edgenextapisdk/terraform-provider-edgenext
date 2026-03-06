@@ -177,7 +177,7 @@ func resourceScdnSecurityProtectionTemplateRead(d *schema.ResourceData, m interf
 
 	// Search for template by ID
 	req := scdn.SecurityProtectionTemplateSearchRequest{
-		TplType:  "global", // Default, can be adjusted
+		TplType:  "more_domain", // Default, can be adjusted
 		Page:     1,
 		PageSize: 100,
 	}
