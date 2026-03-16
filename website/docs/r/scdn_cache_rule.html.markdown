@@ -54,10 +54,10 @@ resource "edgenext_scdn_cache_rule" "example" {
 
 The following arguments are supported:
 
-* `business_id` - (Required, Int, ForceNew) Business ID (template ID for 'tpl' type, domain ID for 'domain' type)
-* `business_type` - (Required, String, ForceNew) Business type: 'tpl' (template) or 'domain'
 * `conf` - (Required, List) Cache configuration
 * `name` - (Required, String) Rule name
+* `business_id` - (Optional, Int, ForceNew) Business ID (template ID for 'tpl' type, domain ID for 'domain' type)
+* `business_type` - (Optional, String, ForceNew) Business type: 'tpl' (template) or 'domain'
 * `expr` - (Optional, String) Wirefilter rule. Empty string means 'allow all'. If not set (null), keeps existing value.
 * `remark` - (Optional, String) Rule remark
 * `rule_id` - (Optional, Int) Rule ID for updating existing rule. If provided, this will update the rule instead of creating a new one.
@@ -123,9 +123,9 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-SCDN cache rules can be imported using the rule ID:
+SCDN cache rules can be imported using the composite ID: `{business_id}-{business_type}-{rule_id}`.
 
 ```shell
-terraform import edgenext_scdn_cache_rule.example 67890
+terraform import edgenext_scdn_cache_rule.example 12345-tpl-67890
 ```
 
