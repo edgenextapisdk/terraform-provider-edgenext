@@ -50,9 +50,9 @@ resource "edgenext_scdn_network_speed_rule" "example" {
 
 The following arguments are supported:
 
-* `business_id` - (Required, Int, ForceNew) Business ID
-* `business_type` - (Required, String, ForceNew) Business type: 'tpl' or 'global'
-* `config_group` - (Required, String, ForceNew) Rule group: 'custom_page', 'upstream_uri_change_rule', 'resp_headers_rule', or 'customized_req_headers_rule'
+* `business_id` - (Optional, Int, ForceNew) Business ID
+* `business_type` - (Optional, String, ForceNew) Business type: 'tpl' or 'global'
+* `config_group` - (Optional, String, ForceNew) Rule group: 'custom_page', 'upstream_uri_change_rule', 'resp_headers_rule', or 'customized_req_headers_rule'
 * `custom_page` - (Optional, List) Custom page rule
 * `customized_req_headers_rule` - (Optional, List) Customized request headers rule
 * `resp_headers_rule` - (Optional, List) Response headers rule
@@ -93,9 +93,9 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-SCDN network speed rules can be imported using the rule ID:
+SCDN network speed rules can be imported using the composite ID: `{business_id}-{business_type}-{config_group}-{rule_id}`.
 
 ```shell
-terraform import edgenext_scdn_network_speed_rule.example 67890
+terraform import edgenext_scdn_network_speed_rule.example 12345-tpl-custom_page-67890
 ```
 

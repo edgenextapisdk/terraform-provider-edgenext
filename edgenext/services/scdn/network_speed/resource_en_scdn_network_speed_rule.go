@@ -26,26 +26,34 @@ func ResourceEdgenextScdnNetworkSpeedRule() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"business_id": {
 				Type:        schema.TypeInt,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "Business ID",
 			},
 			"business_type": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "Business type: 'tpl' or 'global'",
 			},
 			"config_group": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "Rule group: 'custom_page', 'upstream_uri_change_rule', 'resp_headers_rule', or 'customized_req_headers_rule'",
 			},
 			"rule_id": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				Computed:    true,
 				Description: "Rule ID for updating existing rule. If provided, this will update the rule instead of creating a new one.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// Suppress diff if new value is "0" (not in HCL) and we have an old value (in state)
+					return (new == "0" || new == "") && old != "0" && old != ""
+				},
 			},
 			// Rule types - only one should be set based on config_group
 			"custom_page": {
@@ -167,9 +175,42 @@ func resourceScdnNetworkSpeedRuleCreate(d *schema.ResourceData, m interface{}) e
 	client := m.(*connectivity.EdgeNextClient)
 	service := scdn.NewScdnService(client)
 
-	businessID := d.Get("business_id").(int)
-	businessType := d.Get("business_type").(string)
-	configGroup := d.Get("config_group").(string)
+	businessIDVal, businessIDSet := d.GetOk("business_id")
+	businessTypeVal, businessTypeSet := d.GetOk("business_type")
+	configGroupVal, configGroupSet := d.GetOk("config_group")
+
+	if !businessIDSet || !businessTypeSet || !configGroupSet {
+		// If not set in config, it's only okay if we are adopting an existing rule via rule_id
+		if _, ok := d.GetOk("rule_id"); !ok {
+			return fmt.Errorf("business_id, business_type, and config_group are required when creating a new network speed rule")
+		}
+	}
+
+	businessID := 0
+	if businessIDSet {
+		businessID = businessIDVal.(int)
+	}
+	businessType := ""
+	if businessTypeSet {
+		businessType = businessTypeVal.(string)
+	}
+	configGroup := ""
+	if configGroupSet {
+		configGroup = configGroupVal.(string)
+	}
+
+	// Inferred config_group if missing
+	if configGroup == "" {
+		if _, ok := d.GetOk("custom_page"); ok {
+			configGroup = "custom_page"
+		} else if _, ok := d.GetOk("upstream_uri_change_rule"); ok {
+			configGroup = "upstream_uri_change_rule"
+		} else if _, ok := d.GetOk("resp_headers_rule"); ok {
+			configGroup = "resp_headers_rule"
+		} else if _, ok := d.GetOk("customized_req_headers_rule"); ok {
+			configGroup = "customized_req_headers_rule"
+		}
+	}
 
 	// Check if rule_id is provided - if so, update existing rule instead of creating
 	if ruleIDVal, ok := d.GetOk("rule_id"); ok {
@@ -239,7 +280,27 @@ func resourceScdnNetworkSpeedRuleCreate(d *schema.ResourceData, m interface{}) e
 
 	// Set composite ID format: business_id-business_type-config_group-rule_id
 	d.SetId(fmt.Sprintf("%d-%s-%s-%d", businessID, businessType, configGroup, response.Data.ID))
-	return resourceScdnNetworkSpeedRuleRead(d, m)
+
+	// Set rule_id from creation response to avoid drift and ensure it's in state
+	ruleID := response.Data.ID
+	if err := d.Set("rule_id", ruleID); err != nil {
+		log.Printf("[WARN] Failed to set rule_id: %v", err)
+	}
+	d.Set("rule_id", ruleID)
+
+	// Set other basic fields from creation response
+	d.Set("business_id", businessID)
+	d.Set("business_type", businessType)
+	d.Set("config_group", configGroup)
+
+	// Try to read full details, but don't fail if rule is not immediately available
+	// This can happen due to API eventual consistency or transient errors like 521
+	readErr := resourceScdnNetworkSpeedRuleRead(d, m)
+	if readErr != nil {
+		log.Printf("[WARN] Failed to read network speed rule immediately after creation: %v", readErr)
+	}
+
+	return nil
 }
 
 func resourceScdnNetworkSpeedRuleRead(d *schema.ResourceData, m interface{}) error {
@@ -288,6 +349,11 @@ func resourceScdnNetworkSpeedRuleRead(d *schema.ResourceData, m interface{}) err
 	log.Printf("[INFO] Reading SCDN network speed rule: rule_id=%d", ruleID)
 	response, err := service.GetNetworkSpeedRules(req)
 	if err != nil {
+		// Handle transient 521 errors gracefully if we already have resource state
+		if strings.Contains(err.Error(), "521") && d.Id() != "" {
+			log.Printf("[WARN] Transient 521 error during read for %s: %v. Maintaining existing state.", d.Id(), err)
+			return nil
+		}
 		return fmt.Errorf("failed to read network speed rule: %w", err)
 	}
 
@@ -322,6 +388,8 @@ func resourceScdnNetworkSpeedRuleRead(d *schema.ResourceData, m interface{}) err
 	if err := d.Set("rule_id", ruleID); err != nil {
 		log.Printf("[WARN] Failed to set rule_id: %v", err)
 	}
+	// Ensure rule_id is correctly set in state to avoid drift if missing from HCL
+	d.Set("rule_id", ruleID)
 
 	// Set rule-specific fields
 	if foundRule.CustomPage != nil {
@@ -377,23 +445,26 @@ func resourceScdnNetworkSpeedRuleUpdate(d *schema.ResourceData, m interface{}) e
 	client := m.(*connectivity.EdgeNextClient)
 	service := scdn.NewScdnService(client)
 
-	ruleIDStr := d.Id()
-	if ruleIDStr == "" {
-		if ruleID, ok := d.GetOk("rule_id"); ok {
-			ruleIDStr = strconv.Itoa(ruleID.(int))
-		} else {
-			return fmt.Errorf("rule_id is required for update")
-		}
-	}
+	var ruleID int
+	var err error
 
-	ruleID, err := strconv.Atoi(ruleIDStr)
-	if err != nil {
-		// Try to parse from composite ID
-		parts := strings.Split(ruleIDStr, "-")
+	// Parse rule ID from resource ID or config
+	if d.Id() != "" {
+		parts := strings.Split(d.Id(), "-")
 		if len(parts) >= 4 {
 			ruleID, _ = strconv.Atoi(parts[3])
 		} else {
-			return fmt.Errorf("invalid rule ID: %s", ruleIDStr)
+			if ruleIDVal, ok := d.GetOk("rule_id"); ok {
+				ruleID = ruleIDVal.(int)
+			} else {
+				return fmt.Errorf("failed to parse rule_id from resource ID %q and no rule_id provided in config", d.Id())
+			}
+		}
+	} else {
+		if ruleIDVal, ok := d.GetOk("rule_id"); ok {
+			ruleID = ruleIDVal.(int)
+		} else {
+			return fmt.Errorf("rule_id is required for update")
 		}
 	}
 

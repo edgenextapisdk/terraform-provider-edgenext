@@ -26,20 +26,27 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"business_id": {
 				Type:        schema.TypeInt,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "Business ID (template ID for 'tpl' type, domain ID for 'domain' type)",
 			},
 			"business_type": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "Business type: 'tpl' (template) or 'domain'",
 			},
 			"rule_id": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				Computed:    true,
 				Description: "Rule ID for updating existing rule. If provided, this will update the rule instead of creating a new one.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// Suppress diff if new value is "0" (not in HCL) and we have an old value (in state)
+					return (new == "0" || new == "") && old != "0" && old != ""
+				},
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -263,8 +270,24 @@ func resourceScdnCacheRuleCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*connectivity.EdgeNextClient)
 	service := scdn.NewScdnService(client)
 
-	businessID := d.Get("business_id").(int)
-	businessType := d.Get("business_type").(string)
+	businessIDVal, businessIDSet := d.GetOk("business_id")
+	businessTypeVal, businessTypeSet := d.GetOk("business_type")
+
+	if !businessIDSet || !businessTypeSet {
+		// If not set in config, it's only okay if we are adopting an existing rule via rule_id
+		if _, ok := d.GetOk("rule_id"); !ok {
+			return fmt.Errorf("business_id and business_type are required when creating a new cache rule")
+		}
+	}
+
+	businessID := 0
+	if businessIDSet {
+		businessID = businessIDVal.(int)
+	}
+	businessType := ""
+	if businessTypeSet {
+		businessType = businessTypeVal.(string)
+	}
 
 	// Check if rule_id is provided - if so, read existing rule instead of creating
 	if ruleIDVal, ok := d.GetOk("rule_id"); ok {
@@ -416,6 +439,11 @@ func resourceScdnCacheRuleRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Reading SCDN cache rule: rule_id=%d (using id query parameter)", ruleID)
 	response, err := service.GetCacheRules(req)
 	if err != nil {
+		// Handle transient 521 errors gracefully if we already have resource state
+		if strings.Contains(err.Error(), "521") && d.Id() != "" {
+			log.Printf("[WARN] Transient 521 error during read for %s: %v. Maintaining existing state.", d.Id(), err)
+			return nil
+		}
 		return fmt.Errorf("failed to read cache rule: %w", err)
 	}
 
@@ -558,15 +586,6 @@ func resourceScdnCacheRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	businessID := d.Get("business_id").(int)
 	businessType := d.Get("business_type").(string)
 
-	// Check if rule_id is provided in config - if not, create a new rule instead of updating
-	if _, ok := d.GetOk("rule_id"); !ok {
-		// No rule_id in config means user wants to create a new rule
-		log.Printf("[INFO] rule_id not provided in config, creating new rule instead of updating")
-		// Clear the old resource ID so Create function will create a new rule
-		d.SetId("")
-		return resourceScdnCacheRuleCreate(d, m)
-	}
-
 	var ruleID int
 	var err error
 
@@ -579,19 +598,14 @@ func resourceScdnCacheRuleUpdate(d *schema.ResourceData, m interface{}) error {
 			if ruleIDVal, ok := d.GetOk("rule_id"); ok {
 				ruleID = ruleIDVal.(int)
 			} else {
-				// No rule_id and invalid resource ID, create new rule
-				log.Printf("[INFO] Invalid resource ID and no rule_id, creating new rule")
-				d.SetId("")
-				return resourceScdnCacheRuleCreate(d, m)
+				return fmt.Errorf("failed to parse rule_id from resource ID %q and no rule_id provided in config", d.Id())
 			}
 		}
 	} else {
 		if ruleIDVal, ok := d.GetOk("rule_id"); ok {
 			ruleID = ruleIDVal.(int)
 		} else {
-			// No rule_id and no resource ID, create new rule
-			log.Printf("[INFO] No resource ID and no rule_id, creating new rule")
-			return resourceScdnCacheRuleCreate(d, m)
+			return fmt.Errorf("rule_id is required for update")
 		}
 	}
 
