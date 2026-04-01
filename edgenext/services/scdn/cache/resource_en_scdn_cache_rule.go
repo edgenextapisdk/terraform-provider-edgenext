@@ -78,6 +78,7 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 						"cache_rule": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							MaxItems:    1,
 							Description: "Edge TTL cache configuration",
 							Elem: &schema.Resource{
@@ -113,6 +114,7 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 						"browser_cache_rule": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							MaxItems:    1,
 							Description: "Browser cache configuration",
 							Elem: &schema.Resource{
@@ -138,6 +140,7 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 						"cache_errstatus": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							Description: "Status code cache configuration",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -160,6 +163,7 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 						"cache_url_rewrite": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							MaxItems:    1,
 							Description: "Custom cache key configuration",
 							Elem: &schema.Resource{
@@ -226,6 +230,7 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 						"cache_share": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							MaxItems:    1,
 							Description: "Cache sharing configuration",
 							Elem: &schema.Resource{
@@ -233,6 +238,7 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 									"scheme": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										Computed:    true,
 										Description: "HTTP/HTTPS cache sharing method: '', 'http' or 'https'",
 									},
 								},
@@ -516,59 +522,7 @@ func resourceScdnCacheRuleRead(d *schema.ResourceData, m interface{}) error {
 		}
 
 		confMap := buildCacheRuleConfToSchema(foundRule.Conf)
-		log.Printf("[DEBUG] Built confMap cache_rule: %+v", confMap["cache_rule"])
-		log.Printf("[DEBUG] Built confMap cache_rule type: %T", confMap["cache_rule"])
-		if cacheRuleList, ok := confMap["cache_rule"].([]interface{}); ok {
-			log.Printf("[DEBUG] Built confMap cache_rule length: %d", len(cacheRuleList))
-		}
-		log.Printf("[DEBUG] API returned cache_errstatus: %+v (length: %d)", foundRule.Conf.CacheErrStatus, len(foundRule.Conf.CacheErrStatus))
-		log.Printf("[DEBUG] Built confMap cache_errstatus: %+v", confMap["cache_errstatus"])
-		if cacheErrStatusList, ok := confMap["cache_errstatus"].([]interface{}); ok {
-			log.Printf("[DEBUG] Built confMap cache_errstatus length: %d", len(cacheErrStatusList))
-		}
-
-		// Preserve optional fields from state if API returned null/empty
-		// This handles cases where API doesn't return these fields even though they exist in state
-		if stateConf, ok := d.GetOk("conf.0"); ok {
-			stateConfMap := stateConf.(map[string]interface{})
-
-			// Preserve cache_rule if API returned nil but state has it
-			if foundRule.Conf.CacheRule == nil {
-				log.Printf("[DEBUG] API returned cache_rule as nil, checking state...")
-				if stateCacheRule, ok := stateConfMap["cache_rule"]; ok {
-					log.Printf("[DEBUG] State cache_rule found: %+v", stateCacheRule)
-					if cacheRuleList, ok := stateCacheRule.([]interface{}); ok && len(cacheRuleList) > 0 {
-						confMap["cache_rule"] = cacheRuleList
-						log.Printf("[DEBUG] Preserved cache_rule from state: %+v", cacheRuleList)
-					}
-				}
-			} else {
-				log.Printf("[DEBUG] API returned cache_rule, using API value")
-			}
-
-			// Preserve browser_cache_rule if API returned nil but state has it
-			if foundRule.Conf.BrowserCacheRule == nil {
-				if stateBrowserCacheRule, ok := stateConfMap["browser_cache_rule"]; ok {
-					if browserCacheRuleList, ok := stateBrowserCacheRule.([]interface{}); ok && len(browserCacheRuleList) > 0 {
-						confMap["browser_cache_rule"] = browserCacheRuleList
-					}
-				}
-			}
-
-			// Note: cache_errstatus is an array that can contain multiple items
-			// If API returns empty array, it means "no configuration", so we should use empty array
-			// Do NOT preserve from state - always use API value to ensure consistency
-			// The buildCacheRuleConfToSchema function already initializes it as empty array if API returns nil/empty
-
-			// Preserve cache_url_rewrite if API returned nil but state has it
-			if foundRule.Conf.CacheURLRewrite == nil {
-				if stateCacheURLRewrite, ok := stateConfMap["cache_url_rewrite"]; ok {
-					if cacheURLRewriteList, ok := stateCacheURLRewrite.([]interface{}); ok && len(cacheURLRewriteList) > 0 {
-						confMap["cache_url_rewrite"] = cacheURLRewriteList
-					}
-				}
-			}
-		}
+		log.Printf("[DEBUG] Built confMap from API response: %+v", confMap)
 
 		if err := d.Set("conf", []interface{}{confMap}); err != nil {
 			log.Printf("[WARN] Failed to set conf: %v", err)
