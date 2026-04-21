@@ -2,6 +2,8 @@ package ecs
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/helper"
@@ -17,7 +19,7 @@ func ResourceENECSFloatingIp() *schema.Resource {
 		UpdateContext: resourceENECSFloatingIpUpdate,
 		DeleteContext: resourceENECSFloatingIpDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceENECSFloatingIpImport,
 		},
 		Description: "Provides an EdgeNext ECS floating_ip resource.",
 		Schema: map[string]*schema.Schema{
@@ -34,6 +36,33 @@ func ResourceENECSFloatingIp() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSFloatingIpImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected import id as region/floating_ip_id, got %q", d.Id())
+	}
+	region := helper.NormalizeRegion(parts[0])
+	floatingIPID := strings.TrimSpace(parts[1])
+	if region == "" || floatingIPID == "" {
+		return nil, fmt.Errorf("expected import id as region/floating_ip_id, got %q", d.Id())
+	}
+	if err := d.Set("region", region); err != nil {
+		return nil, err
+	}
+	d.SetId(floatingIPID)
+	if diags := resourceENECSFloatingIpRead(ctx, d, meta); diags.HasError() {
+		errDiag := diags[0]
+		if errDiag.Detail != "" {
+			return nil, fmt.Errorf("%s: %s", errDiag.Summary, errDiag.Detail)
+		}
+		return nil, fmt.Errorf("%s", errDiag.Summary)
+	}
+	if d.Id() == "" {
+		return nil, fmt.Errorf("floating IP %q not found in region %q", floatingIPID, region)
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceENECSFloatingIpCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

@@ -2,6 +2,8 @@ package ecs
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/helper"
@@ -17,7 +19,7 @@ func ResourceENECSDisk() *schema.Resource {
 		UpdateContext: resourceENECSDiskUpdate,
 		DeleteContext: resourceENECSDiskDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceENECSDiskImport,
 		},
 		Description: "Provides an EdgeNext ECS disk resource.",
 		Schema: map[string]*schema.Schema{
@@ -39,6 +41,33 @@ func ResourceENECSDisk() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSDiskImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected import id as region/disk_id, got %q", d.Id())
+	}
+	region := helper.NormalizeRegion(parts[0])
+	diskID := strings.TrimSpace(parts[1])
+	if region == "" || diskID == "" {
+		return nil, fmt.Errorf("expected import id as region/disk_id, got %q", d.Id())
+	}
+	if err := d.Set("region", region); err != nil {
+		return nil, err
+	}
+	d.SetId(diskID)
+	if diags := resourceENECSDiskRead(ctx, d, meta); diags.HasError() {
+		errDiag := diags[0]
+		if errDiag.Detail != "" {
+			return nil, fmt.Errorf("%s: %s", errDiag.Summary, errDiag.Detail)
+		}
+		return nil, fmt.Errorf("%s", errDiag.Summary)
+	}
+	if d.Id() == "" {
+		return nil, fmt.Errorf("disk %q not found in region %q", diskID, region)
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceENECSDiskCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

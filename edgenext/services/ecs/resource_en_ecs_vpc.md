@@ -1,23 +1,41 @@
-# en_ecs_vpc
+Use this resource to create and manage ECS VPC networks.
 
-Provides an EdgeNext ECS vpc resource. This allows you to manage vpcs within your ECS environment.
-
-## Example Usage
+Example Usage
 
 ```hcl
 resource "edgenext_ecs_vpc" "example" {
-  name = "example-vpc"
+  region      = "tokyo-a"
+  name        = "example-vpc"
+  description = "vpc for app"
+
+  subnet {
+    name       = "example-subnet"
+    ip_version = 4
+    cidr       = "192.168.0.0/24"
+  }
 }
 ```
 
-## Argument Reference
+Import
 
-The following arguments are supported:
+Import format is `region/network_id`.
 
-* `name` - (Required) The name of the vpc.
+```shell
+terraform import edgenext_ecs_vpc.example tokyo-a/0e07db22-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
 
-## Attributes Reference
+Argument Reference
 
-The following attributes are exported:
+* `region` - (Required) Region.
+* `name` - (Required) VPC name.
+* `description` - (Optional) VPC description.
+* `subnet` - (Required, ForceNew) Initial subnet block with:
+  * `name` - (Required) Subnet name.
+  * `ip_version` - (Optional) IP version, default `4`.
+  * `cidr` - (Required) Subnet CIDR.
 
-* `id` - The ID of the vpc.
+Attributes Reference
+
+* `id` - VPC network ID.
+* `cidr`, `status`, `total_ips`, `used_ips`, `project_id`
+* `created_at`, `updated_at`

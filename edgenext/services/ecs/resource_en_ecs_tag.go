@@ -2,7 +2,9 @@ package ecs
 
 import (
 	"context"
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/helper"
@@ -17,7 +19,7 @@ func ResourceENECSTag() *schema.Resource {
 		ReadContext:   resourceENECSTagRead,
 		DeleteContext: resourceENECSTagDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceENECSTagImport,
 		},
 		Description: "Provides an EdgeNext ECS tag resource.",
 		Schema: map[string]*schema.Schema{
@@ -35,6 +37,40 @@ func ResourceENECSTag() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSTagImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 3 {
+		return nil, fmt.Errorf("expected import id as tag_id/key/value, got %q", d.Id())
+	}
+	tagID := strings.TrimSpace(parts[0])
+	key := strings.TrimSpace(parts[1])
+	value := strings.TrimSpace(parts[2])
+	if tagID == "" || key == "" {
+		return nil, fmt.Errorf("expected import id as tag_id/key/value, got %q", d.Id())
+	}
+	if _, err := strconv.Atoi(tagID); err != nil {
+		return nil, fmt.Errorf("invalid tag_id %q in import id %q", tagID, d.Id())
+	}
+	if err := d.Set("key", key); err != nil {
+		return nil, err
+	}
+	if err := d.Set("value", value); err != nil {
+		return nil, err
+	}
+	d.SetId(tagID)
+	if diags := resourceENECSTagRead(ctx, d, meta); diags.HasError() {
+		errDiag := diags[0]
+		if errDiag.Detail != "" {
+			return nil, fmt.Errorf("%s: %s", errDiag.Summary, errDiag.Detail)
+		}
+		return nil, fmt.Errorf("%s", errDiag.Summary)
+	}
+	if d.Id() == "" {
+		return nil, fmt.Errorf("tag %q not found", tagID)
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceENECSTagCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

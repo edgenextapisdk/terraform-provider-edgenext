@@ -120,6 +120,36 @@ edgenext_oss_bucket
 edgenext_oss_object
 edgenext_oss_object_copy
 
+Elastic Compute Service (ECS)
+Data Source
+edgenext_ecs_instances
+edgenext_ecs_images
+edgenext_ecs_key_pairs
+edgenext_ecs_vpcs
+edgenext_ecs_external_gateways
+edgenext_ecs_vpc_subnets
+edgenext_ecs_routers
+edgenext_ecs_router_ports
+edgenext_ecs_floating_ips
+edgenext_ecs_network_interfaces
+edgenext_ecs_security_groups
+edgenext_ecs_disks
+edgenext_ecs_tags
+edgenext_ecs_security_group_rules
+edgenext_ecs_resource_tags
+
+Resource
+edgenext_ecs_key_pair
+edgenext_ecs_vpc
+edgenext_ecs_vpc_subnet
+edgenext_ecs_router
+edgenext_ecs_router_port
+edgenext_ecs_network_interface
+edgenext_ecs_security_group
+edgenext_ecs_security_group_rule
+edgenext_ecs_tag
+edgenext_ecs_resource_tag
+
 Security CDN (SCDN)
 Data Source
 edgenext_scdn_domain

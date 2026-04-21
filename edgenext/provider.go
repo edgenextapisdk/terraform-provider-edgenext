@@ -92,9 +92,9 @@ func Provider() *schema.Provider {
 		"edgenext_ecs_network_interface":   ecs.ResourceENECSNetworkInterface(),
 		"edgenext_ecs_security_group":      ecs.ResourceENECSSecurityGroup(),
 		"edgenext_ecs_security_group_rule": ecs.ResourceENECSSecurityGroupRule(),
-		"edgenext_ecs_disk":                ecs.ResourceENECSDisk(),
-		"edgenext_ecs_tag":                 ecs.ResourceENECSTag(),
-		"edgenext_ecs_resource_tag":        ecs.ResourceENECSResourceTag(),
+		// "edgenext_ecs_disk":                ecs.ResourceENECSDisk(),
+		"edgenext_ecs_tag":          ecs.ResourceENECSTag(),
+		"edgenext_ecs_resource_tag": ecs.ResourceENECSResourceTag(),
 
 		// SCDN domain management resources (from domain module)
 		// Note: These resources are organized under scdn/domain/ for better module management

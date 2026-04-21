@@ -5,6 +5,463 @@
 [![Go Version](https://img.shields.io/badge/Go-1.23+-blue.svg)](https://golang.org)
 [![Terraform](https://img.shields.io/badge/Terraform-1.0+-purple.svg)](https://terraform.io)
 
+Terraform provider for managing EdgeNext services, including CDN, SSL, OSS, ECS, and SCDN.
+
+## Supported Services
+
+| Service | Scope | Documentation |
+| --- | --- | --- |
+| CDN | Domain configuration and cache operations | [edgenext/services/cdn/README.md](edgenext/services/cdn/README.md) |
+| SSL | Certificate lifecycle management | [edgenext/services/ssl/README.md](edgenext/services/ssl/README.md) |
+| OSS | Bucket and object management | [edgenext/services/oss/README.md](edgenext/services/oss/README.md) |
+| ECS | Network, security group, tag, and related resources/data sources | [edgenext/services/ecs/README.md](edgenext/services/ecs/README.md) |
+| SCDN | Domain/origin/template/cache/security/log modules | [edgenext/services/scdn/README.md](edgenext/services/scdn/README.md) |
+
+## Installation
+
+### Terraform
+
+```hcl
+terraform {
+  required_providers {
+    edgenext = {
+      source  = "edgenextapisdk/edgenext"
+      version = "~> 1.0"
+    }
+  }
+}
+```
+
+### Build from Source
+
+```bash
+git clone https://github.com/edgenextapisdk/terraform-provider-edgenext.git
+cd terraform-provider-edgenext
+go build -o terraform-provider-edgenext
+```
+
+## Provider Configuration
+
+```hcl
+provider "edgenext" {
+  access_key = var.access_key
+  secret_key = var.secret_key
+  endpoint   = var.endpoint
+  region     = var.region # optional
+}
+```
+
+Environment variables are supported:
+
+```bash
+export EDGENEXT_ACCESS_KEY="your-access-key"
+export EDGENEXT_SECRET_KEY="your-secret-key"
+export EDGENEXT_ENDPOINT="https://cdn.api.edgenext.com"
+export EDGENEXT_REGION="us-east-1"
+```
+
+### Arguments
+
+- `access_key` - (Required) EdgeNext access key.
+- `secret_key` - (Required) EdgeNext secret key.
+- `endpoint` - (Required) EdgeNext API endpoint.
+- `region` - (Optional) Default region.
+
+## Quick Examples
+
+### CDN
+
+```hcl
+resource "edgenext_cdn_domain" "example" {
+  domain = "example.com"
+  area   = "global"
+  type   = "page"
+}
+```
+
+### OSS
+
+```hcl
+resource "edgenext_oss_bucket" "assets" {
+  bucket = "my-assets-bucket"
+  acl    = "private"
+}
+
+resource "edgenext_oss_object" "logo" {
+  bucket = edgenext_oss_bucket.assets.bucket
+  key    = "images/logo.png"
+  source = "${path.module}/assets/logo.png"
+}
+```
+
+### ECS
+
+```hcl
+resource "edgenext_ecs_vpc" "example" {
+  region = "tokyo-a"
+  name   = "example-vpc"
+  cidr   = "172.31.0.0/16"
+}
+
+resource "edgenext_ecs_vpc_subnet" "example" {
+  region     = "tokyo-a"
+  network_id = edgenext_ecs_vpc.example.id
+  name       = "example-subnet"
+  cidr       = "172.31.1.0/24"
+}
+```
+
+### SCDN
+
+```hcl
+resource "edgenext_scdn_domain" "example" {
+  domain = "secure.example.com"
+}
+```
+
+## Registered Resources and Data Sources
+
+The authoritative registration is in `edgenext/provider.go`.
+
+Documentation entry points:
+
+- [Provider doc source](edgenext/provider.md)
+- [Generated website docs](website/docs/index.html.markdown)
+- [Service-level docs](edgenext/services/)
+
+### ECS Registration Note
+
+Currently registered ECS resources:
+
+- `edgenext_ecs_key_pair`
+- `edgenext_ecs_vpc`
+- `edgenext_ecs_vpc_subnet`
+- `edgenext_ecs_router`
+- `edgenext_ecs_router_port`
+- `edgenext_ecs_network_interface`
+- `edgenext_ecs_security_group`
+- `edgenext_ecs_security_group_rule`
+- `edgenext_ecs_tag`
+- `edgenext_ecs_resource_tag`
+
+`edgenext_ecs_instance`, `edgenext_ecs_image`, `edgenext_ecs_floating_ip`, and `edgenext_ecs_disk` exist in code but are not currently registered as resources in `provider.go`.
+
+## Repository Layout
+
+```text
+terraform-provider-edgenext/
+├── edgenext/
+│   ├── connectivity/          # API clients
+│   ├── helper/                # Shared helpers
+│   ├── services/
+│   │   ├── cdn/
+│   │   ├── ssl/
+│   │   ├── oss/
+│   │   ├── ecs/
+│   │   └── scdn/
+│   ├── provider.go            # Provider registration (source of truth)
+│   └── provider.md            # Provider documentation source
+├── examples/
+│   ├── cdn/
+│   ├── ssl/
+│   ├── oss/
+│   ├── ecs/
+│   └── scdn/
+├── gendoc/                    # Documentation generator
+├── website/docs/              # Generated docs
+├── CHANGELOG.md
+├── Makefile
+└── main.go
+```
+
+## Development
+
+Common commands:
+
+```bash
+# Build provider
+make build
+
+# Run tests
+make test
+
+# Run acceptance tests (requires real credentials/environment)
+make testacc
+
+# Lint
+make lint
+
+# Format
+make fmt
+
+# Generate docs
+make doc
+```
+
+## Documentation and Examples
+
+- [CHANGELOG](CHANGELOG.md)
+- [Provider docs source](edgenext/provider.md)
+- [Service docs](edgenext/services/)
+- [Examples](examples/)
+  - [CDN examples](examples/cdn/)
+  - [SSL examples](examples/ssl/)
+  - [OSS examples](examples/oss/)
+  - [ECS examples](examples/ecs/)
+  - [SCDN examples](examples/scdn/)
+
+## Support
+
+### Getting Help
+
+- Documentation: Check service docs and generated docs first.
+- GitHub Issues: Report bugs and request features.
+- Examples: Review the `examples/` directory for common use cases.
+- Tests: Run the test suite to validate behavior locally.
+
+### Common Issues
+
+- Authentication: Verify `access_key`, `secret_key`, and `endpoint` configuration.
+- Rate limiting: Implement retry/backoff for rate-limited operations.
+- SSL certificates: Ensure certificates and keys are valid PEM format.
+- Domain configuration: Verify domain status and configuration compatibility.
+- OSS operations: Verify bucket/object permissions and region settings.
+- S3 compatibility: Ensure the OSS endpoint is configured correctly.
+
+## Contributing
+
+Contributions are welcome:
+
+1. Open an issue to discuss bug fixes or feature requests.
+2. Create a branch and implement changes with tests.
+3. Update documentation when behavior changes.
+4. Submit a pull request with a clear summary.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
+# Terraform Provider for EdgeNext
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/edgenextapisdk/terraform-provider-edgenext)](https://goreportcard.com/report/github.com/edgenextapisdk/terraform-provider-edgenext)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Version](https://img.shields.io/badge/Go-1.23+-blue.svg)](https://golang.org)
+[![Terraform](https://img.shields.io/badge/Terraform-1.0+-purple.svg)](https://terraform.io)
+
+Terraform provider for managing EdgeNext services including CDN, SSL, OSS, ECS, and SCDN.
+
+## Supported Services
+
+| Service | Scope | Service README |
+| --- | --- | --- |
+| CDN | Domain, cache purge/prefetch, domain settings | [edgenext/services/cdn/README.md](edgenext/services/cdn/README.md) |
+| SSL | Certificate management | [edgenext/services/ssl/README.md](edgenext/services/ssl/README.md) |
+| OSS | Bucket, object, object copy | [edgenext/services/oss/README.md](edgenext/services/oss/README.md) |
+| ECS | VPC/networking, security group, disk/tag related resources and data sources | [edgenext/services/ecs/README.md](edgenext/services/ecs/README.md) |
+| SCDN | Domain/origin/template/cache/security/network-speed/log modules | [edgenext/services/scdn/README.md](edgenext/services/scdn/README.md) |
+
+## Installation
+
+### Terraform Configuration
+
+```hcl
+terraform {
+  required_providers {
+    edgenext = {
+      source  = "edgenextapisdk/edgenext"
+      version = "~> 1.0"
+    }
+  }
+}
+```
+
+### Build from Source
+
+```bash
+git clone https://github.com/edgenextapisdk/terraform-provider-edgenext.git
+cd terraform-provider-edgenext
+go build -o terraform-provider-edgenext
+```
+
+## Provider Configuration
+
+```hcl
+provider "edgenext" {
+  access_key = var.access_key
+  secret_key = var.secret_key
+  endpoint   = var.endpoint
+  region     = var.region # optional
+}
+```
+
+Environment variables are also supported:
+
+```bash
+export EDGENEXT_ACCESS_KEY="your-access-key"
+export EDGENEXT_SECRET_KEY="your-secret-key"
+export EDGENEXT_ENDPOINT="https://cdn.api.edgenext.com"
+export EDGENEXT_REGION="us-east-1"
+```
+
+Provider arguments:
+
+- `access_key` (Required): EdgeNext access key.
+- `secret_key` (Required): EdgeNext secret key.
+- `endpoint` (Required): EdgeNext API endpoint.
+- `region` (Optional): Default region.
+
+## Quick Examples
+
+### CDN Domain
+
+```hcl
+resource "edgenext_cdn_domain" "example" {
+  domain = "example.com"
+  area   = "global"
+  type   = "page"
+}
+```
+
+### OSS Bucket + Object
+
+```hcl
+resource "edgenext_oss_bucket" "assets" {
+  bucket = "my-assets-bucket"
+  acl    = "private"
+}
+
+resource "edgenext_oss_object" "logo" {
+  bucket = edgenext_oss_bucket.assets.bucket
+  key    = "images/logo.png"
+  source = "${path.module}/assets/logo.png"
+}
+```
+
+### ECS VPC + Subnet
+
+```hcl
+resource "edgenext_ecs_vpc" "example" {
+  region = "tokyo-a"
+  name   = "example-vpc"
+  cidr   = "172.31.0.0/16"
+}
+
+resource "edgenext_ecs_vpc_subnet" "example" {
+  region     = "tokyo-a"
+  network_id = edgenext_ecs_vpc.example.id
+  name       = "example-subnet"
+  cidr       = "172.31.1.0/24"
+}
+```
+
+### SCDN Domain
+
+```hcl
+resource "edgenext_scdn_domain" "example" {
+  domain = "secure.example.com"
+}
+```
+
+## Registered Resources and Data Sources
+
+The authoritative list is generated from provider code and documented in:
+
+- [Provider doc source](edgenext/provider.md)
+- [Registry-style generated docs](website/docs/index.html.markdown)
+
+Service-level details:
+
+- [CDN docs](edgenext/services/cdn/)
+- [SSL docs](edgenext/services/ssl/)
+- [OSS docs](edgenext/services/oss/)
+- [ECS docs](edgenext/services/ecs/)
+- [SCDN docs](edgenext/services/scdn/)
+
+### ECS Implementation Note
+
+The provider currently registers ECS resources:
+
+- `edgenext_ecs_key_pair`
+- `edgenext_ecs_vpc`
+- `edgenext_ecs_vpc_subnet`
+- `edgenext_ecs_router`
+- `edgenext_ecs_router_port`
+- `edgenext_ecs_network_interface`
+- `edgenext_ecs_security_group`
+- `edgenext_ecs_security_group_rule`
+- `edgenext_ecs_tag`
+- `edgenext_ecs_resource_tag`
+
+`edgenext_ecs_instance`, `edgenext_ecs_image`, and `edgenext_ecs_floating_ip` are present in codebase but not currently registered as resources in `provider.go`.
+
+## Repository Layout
+
+```text
+terraform-provider-edgenext/
+├── edgenext/
+│   ├── connectivity/          # API clients
+│   ├── helper/                # Shared helpers
+│   ├── services/
+│   │   ├── cdn/
+│   │   ├── ssl/
+│   │   ├── oss/
+│   │   ├── ecs/
+│   │   └── scdn/
+│   ├── provider.go            # Provider registration (source of truth)
+│   └── provider.md            # Provider documentation source
+├── examples/
+│   ├── cdn/
+│   ├── ssl/
+│   ├── oss/
+│   ├── ecs/
+│   └── scdn/
+├── gendoc/                    # Documentation generator
+├── website/docs/              # Generated docs for registry/site
+├── CHANGELOG.md
+├── Makefile
+└── main.go
+```
+
+## Development
+
+Common commands:
+
+```bash
+# Build provider
+make build
+
+# Run tests
+make test
+
+# Run acceptance tests (requires real credentials/environment)
+make testacc
+
+# Lint
+make lint
+
+# Format
+make fmt
+
+# Generate docs
+make doc
+```
+
+## Documentation and Examples
+
+- [CHANGELOG](CHANGELOG.md)
+- [Examples](examples/)
+  - [CDN examples](examples/cdn/)
+  - [SSL examples](examples/ssl/)
+  - [OSS examples](examples/oss/)
+  - [ECS examples](examples/ecs/)
+  - [SCDN examples](examples/scdn/)
+
+# Terraform Provider for EdgeNext
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/edgenextapisdk/terraform-provider-edgenext)](https://goreportcard.com/report/github.com/edgenextapisdk/terraform-provider-edgenext)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Version](https://img.shields.io/badge/Go-1.23+-blue.svg)](https://golang.org)
+[![Terraform](https://img.shields.io/badge/Terraform-1.0+-purple.svg)](https://terraform.io)
+
 A comprehensive Terraform Provider for EdgeNext services, featuring complete CDN domain management, SSL certificate lifecycle management, Object Storage Service (OSS), and enterprise-grade testing.
 
 ## 🚀 Features

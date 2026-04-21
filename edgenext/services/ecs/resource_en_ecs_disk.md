@@ -1,23 +1,31 @@
-# en_ecs_disk
+Use this resource to create and manage ECS disks.
 
-Provides an EdgeNext ECS disk resource. This allows you to manage disks within your ECS environment.
-
-## Example Usage
+Example Usage
 
 ```hcl
 resource "edgenext_ecs_disk" "example" {
-  name = "example-disk"
+  region      = "tokyo-a"
+  name        = "example-disk"
+  volume_type = "SSD"
+  size        = 50
 }
 ```
 
-## Argument Reference
+Import
 
-The following arguments are supported:
+Import format is `region/disk_id`.
 
-* `name` - (Required) The name of the disk.
+```shell
+terraform import edgenext_ecs_disk.example tokyo-a/2c5c9f8d-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
 
-## Attributes Reference
+Argument Reference
 
-The following attributes are exported:
+* `region` - (Required) Region.
+* `name` - (Required) Disk name.
+* `volume_type` - (Required) Volume type.
+* `size` - (Required) Disk size in GiB.
 
-* `id` - The ID of the disk.
+Attributes Reference
+
+* `id` - Disk ID.

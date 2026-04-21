@@ -39,6 +39,25 @@ func TestParseAPIResponseList_envelopeList(t *testing.T) {
 	}
 }
 
+func TestParseAPIResponseList_portsField(t *testing.T) {
+	resp := map[string]interface{}{
+		"code": float64(0),
+		"data": map[string]interface{}{
+			"ports": []interface{}{
+				map[string]interface{}{"id": "p1", "name": "eth0"},
+			},
+			"count": float64(1),
+		},
+	}
+	out, err := ParseAPIResponseList(resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(out) != 1 {
+		t.Fatalf("len=%d", len(out))
+	}
+}
+
 func TestParseAPIResponseList_keypairsField(t *testing.T) {
 	resp := map[string]interface{}{
 		"code": float64(0),
