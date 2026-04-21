@@ -131,6 +131,39 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_oss_object`](data-sources/oss_object) - Query OSS object details
 * [`edgenext_oss_objects`](data-sources/oss_objects) - Query OSS objects
 
+### Elastic Compute Service (ECS)
+
+#### Resources
+
+* [`edgenext_ecs_key_pair`](resources/ecs_key_pair) - Manage ECS key pairs
+* [`edgenext_ecs_vpc`](resources/ecs_vpc) - Manage ECS VPC networks
+* [`edgenext_ecs_vpc_subnet`](resources/ecs_vpc_subnet) - Manage ECS VPC subnets
+* [`edgenext_ecs_router`](resources/ecs_router) - Manage ECS routers
+* [`edgenext_ecs_router_port`](resources/ecs_router_port) - Manage ECS router port attachments
+* [`edgenext_ecs_network_interface`](resources/ecs_network_interface) - Manage ECS network interfaces
+* [`edgenext_ecs_security_group`](resources/ecs_security_group) - Manage ECS security groups
+* [`edgenext_ecs_security_group_rule`](resources/ecs_security_group_rule) - Manage ECS security group rules
+* [`edgenext_ecs_tag`](resources/ecs_tag) - Manage ECS tags
+* [`edgenext_ecs_resource_tag`](resources/ecs_resource_tag) - Manage ECS resource tag bindings
+
+#### Data Sources
+
+* [`edgenext_ecs_instances`](data-sources/ecs_instances) - Query ECS instances
+* [`edgenext_ecs_images`](data-sources/ecs_images) - Query ECS images
+* [`edgenext_ecs_key_pairs`](data-sources/ecs_key_pairs) - Query ECS key pairs
+* [`edgenext_ecs_vpcs`](data-sources/ecs_vpcs) - Query ECS VPC networks
+* [`edgenext_ecs_external_gateways`](data-sources/ecs_external_gateways) - Query ECS external gateways
+* [`edgenext_ecs_vpc_subnets`](data-sources/ecs_vpc_subnets) - Query ECS VPC subnets
+* [`edgenext_ecs_routers`](data-sources/ecs_routers) - Query ECS routers
+* [`edgenext_ecs_router_ports`](data-sources/ecs_router_ports) - Query ECS router ports
+* [`edgenext_ecs_floating_ips`](data-sources/ecs_floating_ips) - Query ECS floating IPs
+* [`edgenext_ecs_network_interfaces`](data-sources/ecs_network_interfaces) - Query ECS network interfaces
+* [`edgenext_ecs_security_groups`](data-sources/ecs_security_groups) - Query ECS security groups
+* [`edgenext_ecs_disks`](data-sources/ecs_disks) - Query ECS disks
+* [`edgenext_ecs_tags`](data-sources/ecs_tags) - Query ECS tags
+* [`edgenext_ecs_security_group_rules`](data-sources/ecs_security_group_rules) - Query ECS security group rules
+* [`edgenext_ecs_resource_tags`](data-sources/ecs_resource_tags) - Query ECS resource tag relations
+
 ### Security CDN (SCDN)
 
 #### Resources
