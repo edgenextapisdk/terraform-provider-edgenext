@@ -83,6 +83,27 @@ variable "endpoint" {
 # # terraform import edgenext_ecs_router_port.example 'tokyo-a/1bac4223-a709-4639-92c7-e2f7eba9e33c/74f3a422-e0cd-4031-9f4e-cb6a2e85ca2b'
 # resource "edgenext_ecs_router_port" "example" {}
 
+# Standalone ENI (Neutron port): /ecs/openapi/v2/ports/add, detail, delete.
+# Only name and description are updatable in place; other changes replace the resource.
+resource "edgenext_ecs_network_interface" "example" {
+  region      = "tokyo-a"
+  name        = "tyd-eni"
+  description = "for test"
+  network_id  = "0e07db22-e210-4138-b40b-6cbdb3580b12"
+  subnet_id   = "50a0f20a-16a8-46e1-8271-0d1660c739d5"
+  # Optional: bind ENI to an existing ECS instance.
+  device_id = "80e47fca-7822-4a71-9e51-6fe8bd232a18"
+  # Optional: manage security relation.
+  port_security_enabled = true
+  security_groups       = ["aa2b7c0d-0e1e-4ab2-97af-14a5d5fe48cd"]
+  # Optional: bind/unbind floating IP by address.
+  floating_ip_address   = "148.222.161.86"
+}
+#
+# # Import format: region/port_id
+# # terraform import edgenext_ecs_network_interface.example 'tokyo-a/fa67c471-722b-4a0d-944b-9e2d741e5c5c'
+# resource "edgenext_ecs_network_interface" "example" {}
+
 # resource "edgenext_ecs_security_group" "example" {
 #   region      = "tokyo-a"
 #   name        = "example-sg-managed"
@@ -264,6 +285,25 @@ locals {
 #
 # output "first_external_gateway_id" {
 #   value = try(data.edgenext_ecs_external_gateways.all_external_gateways.external_gateways[0].id, null)
+# }
+
+# Network interfaces (Neutron ports) via /ecs/openapi/v2/ports/extension/list
+# data "edgenext_ecs_network_interfaces" "all_ports" {
+#   region = "tokyo-a"
+#   name   = ""
+#   limit  = 10
+# }
+#
+# output "network_interface_total" {
+#   value = data.edgenext_ecs_network_interfaces.all_ports.total
+# }
+#
+# output "first_network_interface_id" {
+#   value = try(data.edgenext_ecs_network_interfaces.all_ports.network_interfaces[0].id, null)
+# }
+#
+# output "first_network_interface_server_name" {
+#   value = try(data.edgenext_ecs_network_interfaces.all_ports.network_interfaces[0].server_name, null)
 # }
 
 #

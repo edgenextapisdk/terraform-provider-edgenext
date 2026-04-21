@@ -1,23 +1,30 @@
-# en_ecs_key_pair
+Use this resource to create and manage ECS key pairs.
 
-Provides an EdgeNext ECS key_pair resource. This allows you to manage key_pairs within your ECS environment.
-
-## Example Usage
+Example Usage
 
 ```hcl
 resource "edgenext_ecs_key_pair" "example" {
-  name = "example-key_pair"
+  region     = "tokyo-a"
+  name       = "example-key"
+  public_key = file("~/.ssh/id_rsa.pub")
 }
 ```
 
-## Argument Reference
+Import
 
-The following arguments are supported:
+Import format is `region/name`.
 
-* `name` - (Required) The name of the key_pair.
+```shell
+terraform import edgenext_ecs_key_pair.example tokyo-a/example-key
+```
 
-## Attributes Reference
+Argument Reference
 
-The following attributes are exported:
+* `region` - (Required) Region.
+* `name` - (Required) Key pair name.
+* `public_key` - (Optional) Public key content.
 
-* `id` - The ID of the key_pair.
+Attributes Reference
+
+* `id` - Key pair name (provider ID).
+* `private_key` - Private key returned by API (if generated server side).

@@ -1,0 +1,33 @@
+Use this resource to bind existing tag IDs to a specific ECS resource.
+
+Example Usage
+
+```hcl
+resource "edgenext_ecs_resource_tag" "example" {
+  region        = "tokyo-a"
+  resource_uuid = "55d747cd-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  resource_name = "example-instance"
+  resource_type = 1
+  tag_ids       = [52, 56, 57]
+}
+```
+
+Import
+
+Import format is `region/resource_uuid/resource_name/resource_type`.
+
+```shell
+terraform import edgenext_ecs_resource_tag.example tokyo-a/55d747cd-xxxx-xxxx-xxxx-xxxxxxxxxxxx/example-instance/1
+```
+
+Argument Reference
+
+* `region` - (Required) Region.
+* `resource_uuid` - (Required, ForceNew) Target resource UUID.
+* `resource_name` - (Required, ForceNew) Target resource name.
+* `resource_type` - (Required, ForceNew) Target resource type code.
+* `tag_ids` - (Required) Tag ID list to bind.
+
+Attributes Reference
+
+* `id` - Uses `resource_uuid`.

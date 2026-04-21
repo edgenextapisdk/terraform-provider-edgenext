@@ -1,23 +1,27 @@
-# en_ecs_tag
+Use this resource to create and manage ECS global tags.
 
-Provides an EdgeNext ECS tag resource. This allows you to manage tags within your ECS environment.
-
-## Example Usage
+Example Usage
 
 ```hcl
 resource "edgenext_ecs_tag" "example" {
-  name = "example-tag"
+  key   = "env"
+  value = "dev"
 }
 ```
 
-## Argument Reference
+Import
 
-The following arguments are supported:
+Import format is `tag_id/key/value`.
 
-* `name` - (Required) The name of the tag.
+```shell
+terraform import edgenext_ecs_tag.example 52/env/dev
+```
 
-## Attributes Reference
+Argument Reference
 
-The following attributes are exported:
+* `key` - (Required) Tag key.
+* `value` - (Required) Tag value.
 
-* `id` - The ID of the tag.
+Attributes Reference
+
+* `id` - Tag ID.

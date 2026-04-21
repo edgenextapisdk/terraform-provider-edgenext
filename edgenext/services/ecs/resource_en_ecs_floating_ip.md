@@ -1,23 +1,28 @@
-# en_ecs_floating_ip
+Use this resource to create and manage ECS floating IPs.
 
-Provides an EdgeNext ECS floating_ip resource. This allows you to manage floating_ips within your ECS environment.
-
-## Example Usage
+Example Usage
 
 ```hcl
 resource "edgenext_ecs_floating_ip" "example" {
-  name = "example-floating_ip"
+  region    = "tokyo-a"
+  bandwidth = 10
 }
 ```
 
-## Argument Reference
+Import
 
-The following arguments are supported:
+Import format is `region/floating_ip_id`.
 
-* `name` - (Required) The name of the floating_ip.
+```shell
+terraform import edgenext_ecs_floating_ip.example tokyo-a/c1eae862-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
 
-## Attributes Reference
+Argument Reference
 
-The following attributes are exported:
+* `region` - (Required) Region.
+* `bandwidth` - (Required) Floating IP bandwidth in Mbps.
 
-* `id` - The ID of the floating_ip.
+Attributes Reference
+
+* `id` - Floating IP ID.
+* `ip_address` - Floating IP address.

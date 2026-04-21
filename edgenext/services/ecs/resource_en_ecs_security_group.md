@@ -1,23 +1,29 @@
-# en_ecs_security_group
+Use this resource to create and manage ECS security groups.
 
-Provides an EdgeNext ECS security_group resource. This allows you to manage security_groups within your ECS environment.
-
-## Example Usage
+Example Usage
 
 ```hcl
 resource "edgenext_ecs_security_group" "example" {
-  name = "example-security_group"
+  region      = "tokyo-a"
+  name        = "example-sg"
+  description = "security group for app"
 }
 ```
 
-## Argument Reference
+Import
 
-The following arguments are supported:
+Import format is `region/name`.
 
-* `name` - (Required) The name of the security_group.
+```shell
+terraform import edgenext_ecs_security_group.example tokyo-a/example-sg
+```
 
-## Attributes Reference
+Argument Reference
 
-The following attributes are exported:
+* `region` - (Required) Region.
+* `name` - (Required) Security group name.
+* `description` - (Optional) Security group description.
 
-* `id` - The ID of the security_group.
+Attributes Reference
+
+* `id` - Security group ID.

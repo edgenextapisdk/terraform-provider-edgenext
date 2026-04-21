@@ -1,23 +1,32 @@
-# en_ecs_image
+Use this resource to create and manage ECS custom images.
 
-Provides an EdgeNext ECS image resource. This allows you to manage images within your ECS environment.
-
-## Example Usage
+Example Usage
 
 ```hcl
 resource "edgenext_ecs_image" "example" {
-  name = "example-image"
+  region      = "tokyo-a"
+  name        = "example-image"
+  instance_id = "80e47fca-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  description = "created from instance"
 }
 ```
 
-## Argument Reference
+Import
 
-The following arguments are supported:
+Import format is `region/image_id`.
 
-* `name` - (Required) The name of the image.
+```shell
+terraform import edgenext_ecs_image.example tokyo-a/7b6387c5-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
 
-## Attributes Reference
+Argument Reference
 
-The following attributes are exported:
+* `region` - (Required) Region.
+* `name` - (Required) Image name.
+* `instance_id` - (Optional) Source instance ID.
+* `description` - (Optional) Image description.
 
-* `id` - The ID of the image.
+Attributes Reference
+
+* `id` - Image ID.
+* `os_distro` - OS distribution reported by API.

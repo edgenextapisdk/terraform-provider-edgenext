@@ -2,6 +2,8 @@ package ecs
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/helper"
@@ -17,7 +19,7 @@ func ResourceENECSSecurityGroup() *schema.Resource {
 		UpdateContext: resourceENECSSecurityGroupUpdate,
 		DeleteContext: resourceENECSSecurityGroupDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceENECSSecurityGroupImport,
 		},
 		Description: "Provides an EdgeNext ECS security_group resource.",
 		Schema: map[string]*schema.Schema{
@@ -34,6 +36,37 @@ func ResourceENECSSecurityGroup() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSSecurityGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected import id as region/name, got %q", d.Id())
+	}
+	region := helper.NormalizeRegion(parts[0])
+	name := strings.TrimSpace(parts[1])
+	if region == "" || name == "" {
+		return nil, fmt.Errorf("expected import id as region/name, got %q", d.Id())
+	}
+	if err := d.Set("region", region); err != nil {
+		return nil, err
+	}
+	if err := d.Set("name", name); err != nil {
+		return nil, err
+	}
+	// Read uses name to query and then sets canonical id.
+	d.SetId(name)
+	if diags := resourceENECSSecurityGroupRead(ctx, d, meta); diags.HasError() {
+		errDiag := diags[0]
+		if errDiag.Detail != "" {
+			return nil, fmt.Errorf("%s: %s", errDiag.Summary, errDiag.Detail)
+		}
+		return nil, fmt.Errorf("%s", errDiag.Summary)
+	}
+	if d.Id() == "" {
+		return nil, fmt.Errorf("security group %q not found in region %q", name, region)
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceENECSSecurityGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

@@ -2,6 +2,9 @@ package ecs
 
 import (
 	"context"
+	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/helper"
@@ -17,7 +20,7 @@ func ResourceENECSResourceTag() *schema.Resource {
 		UpdateContext: resourceENECSResourceTagUpdate,
 		DeleteContext: resourceENECSResourceTagDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceENECSResourceTagImport,
 		},
 		Description: "Provides an EdgeNext ECS resource tag binding resource.",
 		Schema: map[string]*schema.Schema{
@@ -50,6 +53,48 @@ func ResourceENECSResourceTag() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSResourceTagImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 4 {
+		return nil, fmt.Errorf("expected import id as region/resource_uuid/resource_name/resource_type, got %q", d.Id())
+	}
+	region := helper.NormalizeRegion(parts[0])
+	resourceUUID := strings.TrimSpace(parts[1])
+	resourceName := strings.TrimSpace(parts[2])
+	resourceTypeRaw := strings.TrimSpace(parts[3])
+	if region == "" || resourceUUID == "" || resourceName == "" || resourceTypeRaw == "" {
+		return nil, fmt.Errorf("expected import id as region/resource_uuid/resource_name/resource_type, got %q", d.Id())
+	}
+	resourceType, err := strconv.Atoi(resourceTypeRaw)
+	if err != nil {
+		return nil, fmt.Errorf("invalid resource_type %q in import id %q", resourceTypeRaw, d.Id())
+	}
+	if err := d.Set("region", region); err != nil {
+		return nil, err
+	}
+	if err := d.Set("resource_uuid", resourceUUID); err != nil {
+		return nil, err
+	}
+	if err := d.Set("resource_name", resourceName); err != nil {
+		return nil, err
+	}
+	if err := d.Set("resource_type", resourceType); err != nil {
+		return nil, err
+	}
+	d.SetId(resourceUUID)
+	if diags := resourceENECSResourceTagRead(ctx, d, meta); diags.HasError() {
+		errDiag := diags[0]
+		if errDiag.Detail != "" {
+			return nil, fmt.Errorf("%s: %s", errDiag.Summary, errDiag.Detail)
+		}
+		return nil, fmt.Errorf("%s", errDiag.Summary)
+	}
+	if d.Id() == "" {
+		return nil, fmt.Errorf("resource tag binding for resource %q not found in region %q", resourceUUID, region)
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 // Create binds the provided tag IDs to the target resource.

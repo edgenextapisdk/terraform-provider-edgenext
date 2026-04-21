@@ -2,6 +2,7 @@ package ecs
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
@@ -17,7 +18,7 @@ func ResourceENECSKeyPair() *schema.Resource {
 		ReadContext:   resourceENECSKeyPairRead,
 		DeleteContext: resourceENECSKeyPairDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: resourceENECSKeyPairImport,
 		},
 		Description: "Provides an EdgeNext ECS key_pair resource.",
 		Schema: map[string]*schema.Schema{
@@ -41,6 +42,36 @@ func ResourceENECSKeyPair() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSKeyPairImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.Split(d.Id(), "/")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected import id as region/name, got %q", d.Id())
+	}
+	region := helper.NormalizeRegion(parts[0])
+	name := strings.TrimSpace(parts[1])
+	if region == "" || name == "" {
+		return nil, fmt.Errorf("expected import id as region/name, got %q", d.Id())
+	}
+	if err := d.Set("region", region); err != nil {
+		return nil, err
+	}
+	if err := d.Set("name", name); err != nil {
+		return nil, err
+	}
+	d.SetId(name)
+	if diags := resourceENECSKeyPairRead(ctx, d, meta); diags.HasError() {
+		errDiag := diags[0]
+		if errDiag.Detail != "" {
+			return nil, fmt.Errorf("%s: %s", errDiag.Summary, errDiag.Detail)
+		}
+		return nil, fmt.Errorf("%s", errDiag.Summary)
+	}
+	if d.Id() == "" {
+		return nil, fmt.Errorf("key pair %q not found in region %q", name, region)
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceENECSKeyPairCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

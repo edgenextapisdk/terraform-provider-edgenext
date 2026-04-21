@@ -1,23 +1,33 @@
-# en_ecs_router
+Use this resource to create and manage ECS routers.
 
-Provides an EdgeNext ECS router resource. This allows you to manage routers within your ECS environment.
-
-## Example Usage
+Example Usage
 
 ```hcl
 resource "edgenext_ecs_router" "example" {
-  name = "example-router"
+  region              = "tokyo-a"
+  name                = "example-router"
+  description         = "router for app network"
+  external_network_id = "5c83af33-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 }
 ```
 
-## Argument Reference
+Import
 
-The following arguments are supported:
+Import format is `region/router_id`.
 
-* `name` - (Required) The name of the router.
+```shell
+terraform import edgenext_ecs_router.example tokyo-a/f9883769-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
 
-## Attributes Reference
+Argument Reference
 
-The following attributes are exported:
+* `region` - (Required) Region.
+* `name` - (Required) Router name.
+* `description` - (Optional) Router description.
+* `external_network_id` - (Optional) External gateway network ID.
 
-* `id` - The ID of the router.
+Attributes Reference
+
+* `id` - Router ID.
+* `tenant_id`, `admin_state_up`, `status`, `project_id`
+* `created_at`, `updated_at`, `revision_number`

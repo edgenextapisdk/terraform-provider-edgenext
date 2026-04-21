@@ -64,7 +64,7 @@ func listFromPayloadContent(payload interface{}) ([]interface{}, error) {
 	if !ok {
 		return nil, fmt.Errorf("expected list payload, got %T", payload)
 	}
-	for _, key := range []string{"list", "items", "records", "keypairs"} {
+	for _, key := range []string{"list", "items", "records", "keypairs", "ports"} {
 		if v, ok := m[key]; ok {
 			if l, ok := v.([]interface{}); ok {
 				return l, nil
