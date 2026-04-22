@@ -235,3 +235,35 @@ func TestScdnService_ListRuleTemplateDomains(t *testing.T) {
 		})
 	}
 }
+func TestScdnService_SwitchDomainTemplate(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		req  RuleTemplateSwitchDomainRequest
+	}{
+		{
+			name: "Test SwitchDomainTemplate",
+			req: RuleTemplateSwitchDomainRequest{
+				AppType:    "network_speed",
+				DomainIDs:  []int{115188},
+				NewTplID:   1636,
+				NewTplType: "more_domain",
+			},
+		},
+	}
+	if !isIntegrationTest() {
+		t.Skip("Skipping integration test: set EDGENEXT_ACCESS_KEY and EDGENEXT_SECRET_KEY to run")
+	}
+
+	client := createTestClient(t)
+	service := NewScdnService(client)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := service.SwitchDomainTemplate(tt.req)
+			if err != nil {
+				t.Errorf("ScdnService.SwitchDomainTemplate() error = %v", err)
+				return
+			}
+			t.Logf("Response: %+v", got)
+		})
+	}
+}

@@ -3,10 +3,13 @@ package domain
 import (
 	"fmt"
 	"log"
+	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn"
+	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/domain_group"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -37,7 +40,13 @@ func ResourceEdgenextScdnDomain() *schema.Resource {
 			"exclusive_resource_id": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "The ID of the exclusive resource package",
+				Description: "The ID of the exclusive resource package. This is only effective when protect_status is set to 'exclusive'.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if d.Get("protect_status").(string) != "exclusive" {
+						return true
+					}
+					return old == new
+				},
 			},
 			"remark": {
 				Type:        schema.TypeString,
@@ -53,7 +62,7 @@ func ResourceEdgenextScdnDomain() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "scdn",
-				Description: "The edge node type. Valid values: back_source, scdn, exclusive",
+				Description: "The edge node type. Valid values: back_source (back to source), scdn (shared SCDN nodes), exclusive (exclusive nodes).",
 			},
 			"tpl_recommend": {
 				Type:        schema.TypeString,
@@ -313,30 +322,22 @@ func resourceScdnDomainRead(d *schema.ResourceData, m interface{}) error {
 
 	// Build request - support both domain name and ID queries
 	req := scdn.DomainListRequest{
-		Page:     1,
-		PageSize: 100,
+		Page:      1,
+		PageSize:  100,
+		WithGroup: true,
 	}
 
-	// If domain name is not set (e.g., during import), try to use ID
-	if domainName == "" {
-		// Try to get domain ID from resource ID
-		domainID, err := strconv.Atoi(d.Id())
-		if err == nil && domainID > 0 {
-			log.Printf("[DEBUG] Domain name not set, using ID to query: %d", domainID)
-			req.ID = domainID
-		} else {
-			log.Printf("[DEBUG] Domain name not set and invalid ID, skipping read operation")
-			return nil
-		}
-	} else {
-		// Use domain name to query
-		req.Domain = domainName
-	}
-
-	if domainName != "" {
+	// Determine how to query the domain: ID has priority over name
+	domainID, err := strconv.Atoi(d.Id())
+	if err == nil && domainID > 0 {
+		log.Printf("[DEBUG] Reading SCDN domain by ID: %d", domainID)
+		req.ID = domainID
+	} else if domainName != "" {
 		log.Printf("[DEBUG] Reading SCDN domain by name: %s", domainName)
+		req.Domain = domainName
 	} else {
-		log.Printf("[DEBUG] Reading SCDN domain by ID: %d", req.ID)
+		log.Printf("[DEBUG] Neither domain ID nor name is available, skipping read operation")
+		return nil
 	}
 
 	response, err := service.ListDomains(req)
@@ -392,6 +393,9 @@ func resourceScdnDomainRead(d *schema.ResourceData, m interface{}) error {
 	if err := d.Set("remark", domainInfo.Remark); err != nil {
 		return fmt.Errorf("error setting remark: %w", err)
 	}
+	if err := d.Set("group_id", domainInfo.GroupID); err != nil {
+		return fmt.Errorf("error setting group_id: %w", err)
+	}
 	if err := d.Set("protect_status", domainInfo.ProtectStatus); err != nil {
 		return fmt.Errorf("error setting protect_status: %w", err)
 	}
@@ -413,8 +417,14 @@ func resourceScdnDomainRead(d *schema.ResourceData, m interface{}) error {
 	if err := d.Set("ca_status", domainInfo.CAStatus); err != nil {
 		return fmt.Errorf("error setting ca_status: %w", err)
 	}
-	if err := d.Set("exclusive_resource_id", domainInfo.ExclusiveResourceID); err != nil {
-		return fmt.Errorf("error setting exclusive_resource_id: %w", err)
+	currentExclusiveID := d.Get("exclusive_resource_id").(int)
+	if domainInfo.ExclusiveResourceID > 0 {
+		d.Set("exclusive_resource_id", domainInfo.ExclusiveResourceID)
+	} else if strings.EqualFold(domainInfo.ProtectStatus, "exclusive") {
+		d.Set("exclusive_resource_id", 0)
+	} else {
+		log.Printf("[DEBUG] API returned 0 and status is NOT exclusive (%s), keeping state value: %d", domainInfo.ProtectStatus, currentExclusiveID)
+		// Not calling d.Set preserves the current value in state
 	}
 	if err := d.Set("access_progress_desc", domainInfo.AccessProgressDesc); err != nil {
 		return fmt.Errorf("error setting access_progress_desc: %w", err)
@@ -468,15 +478,61 @@ func resourceScdnDomainRead(d *schema.ResourceData, m interface{}) error {
 			for j, record := range origin.Records {
 				records[j] = map[string]interface{}{
 					"view":     record.View,
-					"value":    record.Value,
+					"value":    strings.TrimSuffix(record.Value, "."),
 					"port":     record.Port,
 					"priority": record.Priority,
 				}
 			}
+
+			// Sort records for stability
+			sort.Slice(records, func(j, k int) bool {
+				rj := records[j]
+				rk := records[k]
+				if rj["view"].(string) != rk["view"].(string) {
+					return rj["view"].(string) < rk["view"].(string)
+				}
+				if rj["value"].(string) != rk["value"].(string) {
+					return rj["value"].(string) < rk["value"].(string)
+				}
+				return rj["port"].(int) < rk["port"].(int)
+			})
+
 			originMap["records"] = records
 
 			origins[i] = originMap
 		}
+
+		// Sort origins for stability and idempotency
+		sort.Slice(origins, func(i, j int) bool {
+			oi := origins[i]
+			oj := origins[j]
+
+			if oi["protocol"].(int) != oj["protocol"].(int) {
+				return oi["protocol"].(int) < oj["protocol"].(int)
+			}
+			if oi["origin_type"].(int) != oj["origin_type"].(int) {
+				return oi["origin_type"].(int) < oj["origin_type"].(int)
+			}
+
+			// Compare first listen port if available
+			pi, okI := oi["listen_ports"].([]int)
+			pj, okJ := oj["listen_ports"].([]int)
+			if okI && okJ && len(pi) > 0 && len(pj) > 0 {
+				if pi[0] != pj[0] {
+					return pi[0] < pj[0]
+				}
+			}
+
+			// Compare first record value if available
+			ri, okI2 := oi["records"].([]map[string]interface{})
+			rj, okJ2 := oj["records"].([]map[string]interface{})
+			if okI2 && okJ2 && len(ri) > 0 && len(rj) > 0 {
+				return ri[0]["value"].(string) < rj[0]["value"].(string)
+			}
+
+			return false
+		})
+
 		if err := d.Set("origins", origins); err != nil {
 			return fmt.Errorf("error setting origins: %w", err)
 		}
@@ -585,8 +641,8 @@ func resourceScdnDomainUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	// Update protect status if changed
-	if d.HasChange("protect_status") {
+	// Update protect status or exclusive resource ID if changed
+	if d.HasChange("protect_status") || d.HasChange("exclusive_resource_id") {
 		req := scdn.DomainNodeSwitchRequest{
 			DomainID:      domainID,
 			ProtectStatus: d.Get("protect_status").(string),
@@ -599,6 +655,49 @@ func resourceScdnDomainUpdate(d *schema.ResourceData, m interface{}) error {
 		_, err := service.SwitchDomainNodes(req)
 		if err != nil {
 			return fmt.Errorf("failed to switch domain nodes: %w", err)
+		}
+	}
+
+	// Update domain group if changed
+	if d.HasChange("group_id") {
+		oldGroupIDRaw, newGroupIDRaw := d.GetChange("group_id")
+		oldGroupID := oldGroupIDRaw.(int)
+		newGroupID := newGroupIDRaw.(int)
+		domainGroupService := domain_group.NewDomainGroupService(client)
+
+		if oldGroupID > 0 && newGroupID > 0 {
+			// Option 1: Move domain between groups (atomic operation)
+			log.Printf("[INFO] Moving domain %d from group %d to group %d", domainID, oldGroupID, newGroupID)
+			moveReq := domain_group.DomainGroupMoveDomainRequest{
+				FromGroupID: oldGroupID,
+				ToGroupID:   newGroupID,
+				DomainIDs:   []int{domainID},
+			}
+			if _, err := domainGroupService.MoveDomains(moveReq); err != nil {
+				return fmt.Errorf("failed to move domain between groups: %w", err)
+			}
+		} else if oldGroupID > 0 {
+			// Option 2: Remove from old group only
+			log.Printf("[INFO] Unbinding domain %d from group %d", domainID, oldGroupID)
+			unbindReq := domain_group.DomainGroupDomainSaveRequest{
+				GroupID:   oldGroupID,
+				DomainIDs: []string{strconv.Itoa(domainID)},
+				Action:    "del",
+			}
+			if _, err := domainGroupService.BindDomainsToGroup(unbindReq); err != nil {
+				return fmt.Errorf("failed to unbind domain from old group: %w", err)
+			}
+		} else if newGroupID > 0 {
+			// Option 3: Add to new group only
+			log.Printf("[INFO] Binding domain %d to group %d", domainID, newGroupID)
+			bindReq := domain_group.DomainGroupDomainSaveRequest{
+				GroupID:   newGroupID,
+				DomainIDs: []string{strconv.Itoa(domainID)},
+				Action:    "add",
+			}
+			if _, err := domainGroupService.BindDomainsToGroup(bindReq); err != nil {
+				return fmt.Errorf("failed to bind domain to new group: %w", err)
+			}
 		}
 	}
 

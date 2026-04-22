@@ -100,10 +100,10 @@ resource "edgenext_scdn_domain" "example" {
 The following arguments are supported:
 
 * `domain` - (Required, String, ForceNew) The domain name to be added to SCDN
-* `exclusive_resource_id` - (Optional, Int) The ID of the exclusive resource package
+* `exclusive_resource_id` - (Optional, Int) The ID of the exclusive resource package. This is only effective when protect_status is set to 'exclusive'.
 * `group_id` - (Optional, Int) The ID of the domain group
 * `origins` - (Optional, List) The origin server configuration
-* `protect_status` - (Optional, String) The edge node type. Valid values: back_source, scdn, exclusive
+* `protect_status` - (Optional, String) The edge node type. Valid values: back_source (back to source), scdn (shared SCDN nodes), exclusive (exclusive nodes).
 * `remark` - (Optional, String) The remark for the domain
 * `tpl_id` - (Optional, Int) The template ID to be applied to the domain
 * `tpl_recommend` - (Optional, String) The recommended configuration. Valid values: large_file (large file download), web_acce (website acceleration). This parameter is mutually exclusive with tpl_id
@@ -128,7 +128,6 @@ The `records` object of `origins` supports the following:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `access_mode` - The access mode (ns or cname)
 * `access_progress_desc` - The description of the access progress status
 * `access_progress` - The access progress status

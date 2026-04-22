@@ -50,14 +50,32 @@ resource "edgenext_scdn_cache_rule" "example" {
 }
 ```
 
+### Create cache rule with minimal config (server provides defaults)
+
+```hcl
+# When only nocache = false is set, the server will populate default values for
+# cache_rule and other sub-blocks. Terraform accepts these server-side defaults
+# without showing drift on subsequent plans.
+resource "edgenext_scdn_cache_rule" "example" {
+  business_id   = 12345
+  business_type = "tpl"
+  name          = "minimal-cache-rule"
+  remark        = "minimal config"
+
+  conf {
+    nocache = false
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `business_id` - (Required, Int, ForceNew) Business ID (template ID for 'tpl' type, domain ID for 'domain' type)
-* `business_type` - (Required, String, ForceNew) Business type: 'tpl' (template) or 'domain'
 * `conf` - (Required, List) Cache configuration
 * `name` - (Required, String) Rule name
+* `business_id` - (Optional, Int, ForceNew) Business ID (template ID for 'tpl' type, domain ID for 'domain' type)
+* `business_type` - (Optional, String, ForceNew) Business type: 'tpl' (template) or 'domain'
 * `expr` - (Optional, String) Wirefilter rule. Empty string means 'allow all'. If not set (null), keeps existing value.
 * `remark` - (Optional, String) Rule remark
 * `rule_id` - (Optional, Int) Rule ID for updating existing rule. If provided, this will update the rule instead of creating a new one.
@@ -83,7 +101,7 @@ The `cache_rule` object of `conf` supports the following:
 
 The `cache_share` object of `conf` supports the following:
 
-* `scheme` - (Required, String) HTTP/HTTPS cache sharing method: 'http' or 'https'
+* `scheme` - (Optional, String) HTTP/HTTPS cache sharing method: '', 'http' or 'https'
 
 The `cache_url_rewrite` object of `conf` supports the following:
 
@@ -94,11 +112,11 @@ The `cache_url_rewrite` object of `conf` supports the following:
 
 The `conf` object supports the following:
 
-* `cache_share` - (Required, List) Cache sharing configuration
 * `nocache` - (Required, Bool) Cache eligibility (true: bypass cache, false: cache)
 * `browser_cache_rule` - (Optional, List) Browser cache configuration
 * `cache_errstatus` - (Optional, List) Status code cache configuration
 * `cache_rule` - (Optional, List) Edge TTL cache configuration
+* `cache_share` - (Optional, List) Cache sharing configuration
 * `cache_url_rewrite` - (Optional, List) Custom cache key configuration
 
 The `cookies` object of `cache_url_rewrite` supports the following:
@@ -115,7 +133,6 @@ The `queries` object of `cache_url_rewrite` supports the following:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `id` - The rule ID
 * `status` - Status (1: enabled, 2: disabled)
 * `type` - Type: 'domain', 'tpl', or 'global'
@@ -124,9 +141,9 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-SCDN cache rules can be imported using the rule ID:
+SCDN cache rules can be imported using the composite ID: `{business_id}-{business_type}-{rule_id}`.
 
 ```shell
-terraform import edgenext_scdn_cache_rule.example 67890
+terraform import edgenext_scdn_cache_rule.example 12345-tpl-67890
 ```
 

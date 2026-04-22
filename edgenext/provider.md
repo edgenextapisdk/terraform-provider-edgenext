@@ -150,6 +150,17 @@ edgenext_ecs_security_group_rule
 edgenext_ecs_tag
 edgenext_ecs_resource_tag
 
+Security DNS (SDNS)
+Data Source
+edgenext_sdns_domains
+edgenext_sdns_domain_groups
+edgenext_sdns_records
+
+Resource
+edgenext_sdns_domain
+edgenext_sdns_domain_group
+edgenext_sdns_record
+
 Security CDN (SCDN)
 Data Source
 edgenext_scdn_domain
@@ -189,6 +200,10 @@ edgenext_scdn_cache_preheat_tasks
 edgenext_scdn_log_download_tasks
 edgenext_scdn_log_download_templates
 edgenext_scdn_log_download_fields
+edgenext_scdn_domain_groups
+edgenext_scdn_domain_group_domains
+edgenext_scdn_user_ips
+edgenext_scdn_user_ip_items
 
 Resource
 edgenext_scdn_domain
@@ -203,6 +218,7 @@ edgenext_scdn_certificate_apply
 edgenext_scdn_rule_template
 edgenext_scdn_rule_template_domain_bind
 edgenext_scdn_rule_template_domain_unbind
+edgenext_scdn_rule_template_switch
 edgenext_scdn_network_speed_config
 edgenext_scdn_network_speed_rule
 edgenext_scdn_network_speed_rules_sort
@@ -222,3 +238,6 @@ edgenext_scdn_cache_preheat_task
 edgenext_scdn_log_download_task
 edgenext_scdn_log_download_template
 edgenext_scdn_log_download_template_status
+edgenext_scdn_domain_group
+edgenext_scdn_user_ip
+edgenext_scdn_user_ip_item

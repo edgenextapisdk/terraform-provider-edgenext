@@ -39,7 +39,6 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `ca_id_domains` - The mapping of domain_id to domain
 * `ca_id_names` - The mapping of ca_id to ca_name
 * `id` - The ID of the certificate application

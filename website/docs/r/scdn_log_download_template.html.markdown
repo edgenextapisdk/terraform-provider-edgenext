@@ -65,7 +65,6 @@ The `search_terms` object supports the following:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - ID of the resource.
 * `created_at` - Creation timestamp
 * `id` - The ID of the log download template
 * `member_id` - The member ID

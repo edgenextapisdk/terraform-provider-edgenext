@@ -38,8 +38,8 @@ resource "edgenext_scdn_network_speed_config" "example" {
 
 The following arguments are supported:
 
-* `business_id` - (Required, Int, ForceNew) Business ID (template ID for 'tpl' type, user ID for 'global' type)
-* `business_type` - (Required, String, ForceNew) Business type: 'tpl' (template) or 'global'
+* `business_id` - (Optional, Int, ForceNew) Business ID (template ID for 'tpl' type, user ID for 'global' type)
+* `business_type` - (Optional, String, ForceNew) Business type: 'tpl' (template) or 'global'
 * `custom_page` - (Optional, List) Custom page configuration
 * `customized_req_headers` - (Optional, List) Customized request headers configuration
 * `domain_proxy_conf` - (Optional, List) Domain proxy configuration
@@ -149,7 +149,7 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-SCDN network speed configuration can be imported using the business ID, business type, and config groups:
+SCDN network speed configuration can be imported using the resource ID in the format `<business_id>-<business_type>`. The provider will automatically parse the ID and populate the required fields.
 
 ```shell
 terraform import edgenext_scdn_network_speed_config.example 12345-tpl
