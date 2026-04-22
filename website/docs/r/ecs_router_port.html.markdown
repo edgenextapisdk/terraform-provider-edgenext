@@ -26,10 +26,10 @@ resource "edgenext_ecs_router_port" "example" {
 
 The following arguments are supported:
 
-* `network_id` - (Required, String, ForceNew) The network ID to attach.
+* `network_id` - (Required, String) The network ID to attach. Cannot be changed after creation.
 * `region` - (Required, String, ForceNew) The region of the router.
-* `router_id` - (Required, String, ForceNew) The router ID.
-* `subnet_id` - (Required, String, ForceNew) The subnet ID to attach.
+* `router_id` - (Required, String) The router ID. Cannot be changed after creation.
+* `subnet_id` - (Required, String) The subnet ID to attach. Cannot be changed after creation.
 
 ## Attributes Reference
 
@@ -56,9 +56,9 @@ terraform import edgenext_ecs_router_port.example tokyo-a/f9883769-xxxx-xxxx-xxx
 Argument Reference
 
 * `region` - (Required) Region.
-* `router_id` - (Required, ForceNew) Router ID.
-* `network_id` - (Required, ForceNew) Network ID.
-* `subnet_id` - (Required, ForceNew) Subnet ID.
+* `router_id` - (Required) Router ID. Cannot be changed after creation.
+* `network_id` - (Required) Network ID. Cannot be changed after creation.
+* `subnet_id` - (Required) Subnet ID. Cannot be changed after creation.
 
 Attributes Reference
 

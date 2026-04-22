@@ -16,30 +16,29 @@ func ResourceENECSRouterPort() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceENECSRouterPortCreate,
 		ReadContext:   resourceENECSRouterPortRead,
+		UpdateContext: resourceENECSRouterPortUpdate,
 		DeleteContext: resourceENECSRouterPortDelete,
+		CustomizeDiff: resourceENECSRouterPortCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSRouterPortImport,
 		},
-		Description: "Provides an EdgeNext ECS router port attachment resource. There is no update API; changing any argument replaces the resource.",
+		Description: "Provides an EdgeNext ECS router port attachment resource. router_id, network_id, and subnet_id cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
 			"region": helper.RegionResourceSchema("The region of the router."),
 			"router_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "The router ID.",
+				Description: "The router ID. Cannot be changed after creation.",
 			},
 			"network_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "The network ID to attach.",
+				Description: "The network ID to attach. Cannot be changed after creation.",
 			},
 			"subnet_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "The subnet ID to attach.",
+				Description: "The subnet ID to attach. Cannot be changed after creation.",
 			},
 			"port_id": {
 				Type:        schema.TypeString,
@@ -78,6 +77,32 @@ func ResourceENECSRouterPort() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSRouterPortCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	// Skip this check during creation.
+	if d.Id() == "" {
+		return nil
+	}
+	if d.HasChange("router_id") {
+		oldRaw, newRaw := d.GetChange("router_id")
+		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
+			return fmt.Errorf("router_id cannot be modified after creation")
+		}
+	}
+	if d.HasChange("network_id") {
+		oldRaw, newRaw := d.GetChange("network_id")
+		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
+			return fmt.Errorf("network_id cannot be modified after creation")
+		}
+	}
+	if d.HasChange("subnet_id") {
+		oldRaw, newRaw := d.GetChange("subnet_id")
+		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
+			return fmt.Errorf("subnet_id cannot be modified after creation")
+		}
+	}
+	return nil
 }
 
 func resourceENECSRouterPortImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -188,6 +213,14 @@ func resourceENECSRouterPortRead(ctx context.Context, d *schema.ResourceData, m 
 	_ = d.Set("created_at", helper.StringFromMap(matched, "created_at"))
 
 	return nil
+}
+
+func resourceENECSRouterPortUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Defense in depth: CustomizeDiff blocks these at plan time; reject here if Update is still invoked.
+	if d.HasChange("router_id") || d.HasChange("network_id") || d.HasChange("subnet_id") {
+		return diag.Errorf("router_id, network_id, and subnet_id cannot be updated after creation")
+	}
+	return resourceENECSRouterPortRead(ctx, d, m)
 }
 
 func resourceENECSRouterPortDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

@@ -33,14 +33,14 @@ The following arguments are supported:
 
 * `name` - (Required, String) name description
 * `region` - (Required, String, ForceNew) region description
-* `subnet` - (Required, List, ForceNew) Subnet configuration used when creating the VPC.
+* `subnet` - (Required, List) Subnet configuration used when creating the VPC. Cannot be changed after creation.
 * `description` - (Optional, String) description description
 
 The `subnet` object supports the following:
 
-* `cidr` - (Required, String, ForceNew) Subnet CIDR.
-* `name` - (Required, String, ForceNew) Subnet name.
-* `ip_version` - (Optional, Int, ForceNew) Subnet IP version.
+* `cidr` - (Required, String) Subnet CIDR. Cannot be changed after creation.
+* `name` - (Required, String) Subnet name. Cannot be changed after creation.
+* `ip_version` - (Optional, Int) Subnet IP version. Cannot be changed after creation.
 
 ## Attributes Reference
 
@@ -69,10 +69,10 @@ Argument Reference
 * `region` - (Required) Region.
 * `name` - (Required) VPC name.
 * `description` - (Optional) VPC description.
-* `subnet` - (Required, ForceNew) Initial subnet block with:
-  * `name` - (Required) Subnet name.
-  * `ip_version` - (Optional) IP version, default `4`.
-  * `cidr` - (Required) Subnet CIDR.
+* `subnet` - (Required) Initial subnet block. Cannot be changed after creation:
+  * `name` - (Required) Subnet name. Cannot be changed after creation.
+  * `ip_version` - (Optional) IP version, default `4`. Cannot be changed after creation.
+  * `cidr` - (Required) Subnet CIDR. Cannot be changed after creation.
 
 Attributes Reference
 

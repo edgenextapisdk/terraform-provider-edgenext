@@ -100,14 +100,18 @@ resource "edgenext_oss_object" "logo" {
 resource "edgenext_ecs_vpc" "example" {
   region = "tokyo-a"
   name   = "example-vpc"
-  cidr   = "172.31.0.0/16"
+  subnet {
+    name       = "example-subnet"
+    ip_version = 4
+    cidr       = "172.31.1.0/24"
+  }
 }
 
 resource "edgenext_ecs_vpc_subnet" "example" {
   region     = "tokyo-a"
   network_id = edgenext_ecs_vpc.example.id
-  name       = "example-subnet"
-  cidr       = "172.31.1.0/24"
+  name       = "example-subnet-2"
+  cidr       = "172.31.2.0/24"
 }
 ```
 
@@ -143,6 +147,8 @@ Currently registered ECS resources:
 - `edgenext_ecs_security_group_rule`
 - `edgenext_ecs_tag`
 - `edgenext_ecs_resource_tag`
+
+ECS immutable argument updates are validated as errors (plan/apply) for a subset of resources, instead of forcing automatic replacement.
 
 `edgenext_ecs_instance`, `edgenext_ecs_image`, `edgenext_ecs_floating_ip`, and `edgenext_ecs_disk` exist in code but are not currently registered as resources in `provider.go`.
 

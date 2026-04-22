@@ -164,6 +164,8 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_ecs_security_group_rules`](data-sources/ecs_security_group_rules) - Query ECS security group rules
 * [`edgenext_ecs_resource_tags`](data-sources/ecs_resource_tags) - Query ECS resource tag relations
 
+### Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically (for example key pair name/public_key, ENI network/subnet, and VPC subnet settings).
+
 ### Security DNS (SDNS)
 
 #### Resources

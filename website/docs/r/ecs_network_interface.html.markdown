@@ -81,8 +81,8 @@ Argument Reference
 * `region` - (Required) Region.
 * `name` - (Required) Port name.
 * `description` - (Optional) Port description.
-* `network_id` - (Required) Network ID. Changing this value recreates the resource.
-* `subnet_id` - (Required) Subnet ID. Changing this value recreates the resource.
+* `network_id` - (Required) Network ID. Cannot be changed after creation.
+* `subnet_id` - (Required) Subnet ID. Cannot be changed after creation.
 * `device_id` - (Optional) Server ID to attach.
 * `port_security_enabled` - (Optional) Port security switch.
 * `security_groups` - (Optional) Security group IDs.

@@ -18,10 +18,11 @@ func ResourceENECSVpc() *schema.Resource {
 		ReadContext:   resourceENECSVpcRead,
 		UpdateContext: resourceENECSVpcUpdate,
 		DeleteContext: resourceENECSVpcDelete,
+		CustomizeDiff: resourceENECSVpcCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSVpcImport,
 		},
-		Description: "Provides an EdgeNext ECS vpc resource.",
+		Description: "Provides an EdgeNext ECS vpc resource. subnet and its nested fields cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
 			"region": helper.RegionResourceSchema("region description"),
 			"name": {
@@ -37,29 +38,25 @@ func ResourceENECSVpc() *schema.Resource {
 			"subnet": {
 				Type:        schema.TypeList,
 				Required:    true,
-				ForceNew:    true,
 				MaxItems:    1,
-				Description: "Subnet configuration used when creating the VPC.",
+				Description: "Subnet configuration used when creating the VPC. Cannot be changed after creation.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
-							Description: "Subnet name.",
+							Description: "Subnet name. Cannot be changed after creation.",
 						},
 						"ip_version": {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							ForceNew:    true,
 							Default:     4,
-							Description: "Subnet IP version.",
+							Description: "Subnet IP version. Cannot be changed after creation.",
 						},
 						"cidr": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
-							Description: "Subnet CIDR.",
+							Description: "Subnet CIDR. Cannot be changed after creation.",
 						},
 					},
 				},
@@ -101,6 +98,20 @@ func ResourceENECSVpc() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSVpcCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	// Skip this check during creation.
+	if d.Id() == "" {
+		return nil
+	}
+	if d.HasChange("subnet") {
+		oldRaw, newRaw := d.GetChange("subnet")
+		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
+			return fmt.Errorf("subnet cannot be modified after creation")
+		}
+	}
+	return nil
 }
 
 func resourceENECSVpcCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -241,6 +252,11 @@ func resourceENECSVpcUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	ecsClient, err := client.ECSClient()
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	// Defense in depth: CustomizeDiff blocks this at plan time; reject here if Update is still invoked.
+	if d.HasChange("subnet") {
+		return diag.Errorf("subnet cannot be updated after creation")
 	}
 
 	if !d.HasChanges("name", "description") {

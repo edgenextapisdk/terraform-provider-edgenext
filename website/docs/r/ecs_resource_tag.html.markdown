@@ -52,9 +52,9 @@ terraform import edgenext_ecs_resource_tag.example tokyo-a/55d747cd-xxxx-xxxx-xx
 Argument Reference
 
 * `region` - (Required) Region.
-* `resource_uuid` - (Required, ForceNew) Target resource UUID.
-* `resource_name` - (Required, ForceNew) Target resource name.
-* `resource_type` - (Required, ForceNew) Target resource type code.
+* `resource_uuid` - (Required) Target resource UUID. Cannot be changed after creation.
+* `resource_name` - (Required) Target resource name. Cannot be changed after creation.
+* `resource_type` - (Required) Target resource type code. Cannot be changed after creation.
 * `tag_ids` - (Required) Tag ID list to bind.
 
 Attributes Reference

@@ -150,6 +150,8 @@ edgenext_ecs_security_group_rule
 edgenext_ecs_tag
 edgenext_ecs_resource_tag
 
+Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically (for example key pair name/public_key, ENI network/subnet, and VPC subnet settings).
+
 Security DNS (SDNS)
 Data Source
 edgenext_sdns_domains
