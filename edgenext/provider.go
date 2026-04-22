@@ -7,6 +7,7 @@ import (
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/cdn"
+	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/ecs"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/oss"
 	scdncache "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cache"
 	scdncacheoperate "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cache_operate"
@@ -92,6 +93,22 @@ func Provider() *schema.Provider {
 		// OSS object management resources
 		"edgenext_oss_object":      oss.ResourceOSSObject(),
 		"edgenext_oss_object_copy": oss.ResourceOSSObjectCopy(),
+
+		// ECS resources
+		// "edgenext_ecs_instance":          ecs.ResourceENECSInstance(),
+		// "edgenext_ecs_image":             ecs.ResourceENECSImage(),
+		"edgenext_ecs_key_pair":    ecs.ResourceENECSKeyPair(),
+		"edgenext_ecs_vpc":         ecs.ResourceENECSVpc(),
+		"edgenext_ecs_vpc_subnet":  ecs.ResourceENECSVpcSubnet(),
+		"edgenext_ecs_router":      ecs.ResourceENECSRouter(),
+		"edgenext_ecs_router_port": ecs.ResourceENECSRouterPort(),
+		// "edgenext_ecs_floating_ip":       ecs.ResourceENECSFloatingIp(),
+		"edgenext_ecs_network_interface":   ecs.ResourceENECSNetworkInterface(),
+		"edgenext_ecs_security_group":      ecs.ResourceENECSSecurityGroup(),
+		"edgenext_ecs_security_group_rule": ecs.ResourceENECSSecurityGroupRule(),
+		// "edgenext_ecs_disk":                ecs.ResourceENECSDisk(),
+		"edgenext_ecs_tag":          ecs.ResourceENECSTag(),
+		"edgenext_ecs_resource_tag": ecs.ResourceENECSResourceTag(),
 
 		// SCDN domain management resources (from domain module)
 		// Note: These resources are organized under scdn/domain/ for better module management
@@ -184,6 +201,23 @@ func Provider() *schema.Provider {
 		"edgenext_oss_objects": oss.DataSourceOSSObjects(),
 		// OSS object management data sources
 		"edgenext_oss_object": oss.DataSourceOSSObject(),
+
+		// ECS data sources
+		"edgenext_ecs_instances":            ecs.DataSourceENECSInstances(),
+		"edgenext_ecs_images":               ecs.DataSourceENECSImages(),
+		"edgenext_ecs_key_pairs":            ecs.DataSourceENECSKeyPairs(),
+		"edgenext_ecs_vpcs":                 ecs.DataSourceENECSVpcs(),
+		"edgenext_ecs_external_gateways":    ecs.DataSourceENECSExternalGateways(),
+		"edgenext_ecs_vpc_subnets":          ecs.DataSourceENECSVpcSubnets(),
+		"edgenext_ecs_routers":              ecs.DataSourceENECSRouters(),
+		"edgenext_ecs_router_ports":         ecs.DataSourceENECSRouterPorts(),
+		"edgenext_ecs_floating_ips":         ecs.DataSourceENECSFloatingIps(),
+		"edgenext_ecs_network_interfaces":   ecs.DataSourceENECSNetworkInterfaces(),
+		"edgenext_ecs_security_groups":      ecs.DataSourceENECSSecurityGroups(),
+		"edgenext_ecs_disks":                ecs.DataSourceENECSDisks(),
+		"edgenext_ecs_tags":                 ecs.DataSourceENECSTags(),
+		"edgenext_ecs_security_group_rules": ecs.DataSourceENECSSecurityGroupRules(),
+		"edgenext_ecs_resource_tags":        ecs.DataSourceENECSResourceTags(),
 
 		// SCDN domain data sources (from domain module)
 		// Note: These data sources are organized under scdn/domain/ for better module management
