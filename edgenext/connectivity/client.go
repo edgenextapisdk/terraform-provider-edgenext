@@ -20,16 +20,19 @@ type EdgeNextClient struct {
 	apiClient  *APIClient  // For CDN/SSL
 	ossClient  *OSSClient  // For OSS
 	scdnClient *ScdnClient // For SCDN
+	ecsClient  *ECSClient  // For ECS
 
 	// Use sync.Once to ensure clients are initialized only once
 	apiClientOnce  sync.Once
 	ossClientOnce  sync.Once
 	scdnClientOnce sync.Once
+	ecsClientOnce  sync.Once
 
 	// Store initialization errors
 	apiClientErr  error
 	ossClientErr  error
 	scdnClientErr error
+	ecsClientErr  error
 }
 
 // Client returns the EdgeNext client
@@ -78,4 +81,13 @@ func (c *EdgeNextClient) ScdnClient() (*ScdnClient, error) {
 	})
 
 	return c.scdnClient, c.scdnClientErr
+}
+
+// ECSClient returns or initializes the ECS API client
+func (c *EdgeNextClient) ECSClient() (*ECSClient, error) {
+	c.ecsClientOnce.Do(func() {
+		c.ecsClient = NewECSClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint)
+	})
+
+	return c.ecsClient, c.ecsClientErr
 }

@@ -109,6 +109,137 @@
         }
       ]
     },
+    "ECS": {
+      "data_sources": [
+        {
+          "name": "ecs_disks",
+          "path": "docs/d/ecs_disks.html.markdown",
+          "display_name": "ecs disks"
+        },
+        {
+          "name": "ecs_external_gateways",
+          "path": "docs/d/ecs_external_gateways.html.markdown",
+          "display_name": "ecs external gateways"
+        },
+        {
+          "name": "ecs_floating_ips",
+          "path": "docs/d/ecs_floating_ips.html.markdown",
+          "display_name": "ecs floating ips"
+        },
+        {
+          "name": "ecs_images",
+          "path": "docs/d/ecs_images.html.markdown",
+          "display_name": "ecs images"
+        },
+        {
+          "name": "ecs_instances",
+          "path": "docs/d/ecs_instances.html.markdown",
+          "display_name": "ecs instances"
+        },
+        {
+          "name": "ecs_key_pairs",
+          "path": "docs/d/ecs_key_pairs.html.markdown",
+          "display_name": "ecs key pairs"
+        },
+        {
+          "name": "ecs_network_interfaces",
+          "path": "docs/d/ecs_network_interfaces.html.markdown",
+          "display_name": "ecs network interfaces"
+        },
+        {
+          "name": "ecs_resource_tags",
+          "path": "docs/d/ecs_resource_tags.html.markdown",
+          "display_name": "ecs resource tags"
+        },
+        {
+          "name": "ecs_router_ports",
+          "path": "docs/d/ecs_router_ports.html.markdown",
+          "display_name": "ecs router ports"
+        },
+        {
+          "name": "ecs_routers",
+          "path": "docs/d/ecs_routers.html.markdown",
+          "display_name": "ecs routers"
+        },
+        {
+          "name": "ecs_security_group_rules",
+          "path": "docs/d/ecs_security_group_rules.html.markdown",
+          "display_name": "ecs security group rules"
+        },
+        {
+          "name": "ecs_security_groups",
+          "path": "docs/d/ecs_security_groups.html.markdown",
+          "display_name": "ecs security groups"
+        },
+        {
+          "name": "ecs_tags",
+          "path": "docs/d/ecs_tags.html.markdown",
+          "display_name": "ecs tags"
+        },
+        {
+          "name": "ecs_vpc_subnets",
+          "path": "docs/d/ecs_vpc_subnets.html.markdown",
+          "display_name": "ecs vpc subnets"
+        },
+        {
+          "name": "ecs_vpcs",
+          "path": "docs/d/ecs_vpcs.html.markdown",
+          "display_name": "ecs vpcs"
+        }
+      ],
+      "resources": [
+        {
+          "name": "ecs_key_pair",
+          "path": "docs/r/ecs_key_pair.html.markdown",
+          "display_name": "ecs key pair"
+        },
+        {
+          "name": "ecs_network_interface",
+          "path": "docs/r/ecs_network_interface.html.markdown",
+          "display_name": "ecs network interface"
+        },
+        {
+          "name": "ecs_resource_tag",
+          "path": "docs/r/ecs_resource_tag.html.markdown",
+          "display_name": "ecs resource tag"
+        },
+        {
+          "name": "ecs_router",
+          "path": "docs/r/ecs_router.html.markdown",
+          "display_name": "ecs router"
+        },
+        {
+          "name": "ecs_router_port",
+          "path": "docs/r/ecs_router_port.html.markdown",
+          "display_name": "ecs router port"
+        },
+        {
+          "name": "ecs_security_group",
+          "path": "docs/r/ecs_security_group.html.markdown",
+          "display_name": "ecs security group"
+        },
+        {
+          "name": "ecs_security_group_rule",
+          "path": "docs/r/ecs_security_group_rule.html.markdown",
+          "display_name": "ecs security group rule"
+        },
+        {
+          "name": "ecs_tag",
+          "path": "docs/r/ecs_tag.html.markdown",
+          "display_name": "ecs tag"
+        },
+        {
+          "name": "ecs_vpc",
+          "path": "docs/r/ecs_vpc.html.markdown",
+          "display_name": "ecs vpc"
+        },
+        {
+          "name": "ecs_vpc_subnet",
+          "path": "docs/r/ecs_vpc_subnet.html.markdown",
+          "display_name": "ecs vpc subnet"
+        }
+      ]
+    },
     "SCDN": {
       "data_sources": [
         {
@@ -564,6 +695,81 @@
       "display_name": "cdn purges"
     },
     {
+      "name": "ecs_disks",
+      "path": "docs/d/ecs_disks.html.markdown",
+      "display_name": "ecs disks"
+    },
+    {
+      "name": "ecs_external_gateways",
+      "path": "docs/d/ecs_external_gateways.html.markdown",
+      "display_name": "ecs external gateways"
+    },
+    {
+      "name": "ecs_floating_ips",
+      "path": "docs/d/ecs_floating_ips.html.markdown",
+      "display_name": "ecs floating ips"
+    },
+    {
+      "name": "ecs_images",
+      "path": "docs/d/ecs_images.html.markdown",
+      "display_name": "ecs images"
+    },
+    {
+      "name": "ecs_instances",
+      "path": "docs/d/ecs_instances.html.markdown",
+      "display_name": "ecs instances"
+    },
+    {
+      "name": "ecs_key_pairs",
+      "path": "docs/d/ecs_key_pairs.html.markdown",
+      "display_name": "ecs key pairs"
+    },
+    {
+      "name": "ecs_network_interfaces",
+      "path": "docs/d/ecs_network_interfaces.html.markdown",
+      "display_name": "ecs network interfaces"
+    },
+    {
+      "name": "ecs_resource_tags",
+      "path": "docs/d/ecs_resource_tags.html.markdown",
+      "display_name": "ecs resource tags"
+    },
+    {
+      "name": "ecs_router_ports",
+      "path": "docs/d/ecs_router_ports.html.markdown",
+      "display_name": "ecs router ports"
+    },
+    {
+      "name": "ecs_routers",
+      "path": "docs/d/ecs_routers.html.markdown",
+      "display_name": "ecs routers"
+    },
+    {
+      "name": "ecs_security_group_rules",
+      "path": "docs/d/ecs_security_group_rules.html.markdown",
+      "display_name": "ecs security group rules"
+    },
+    {
+      "name": "ecs_security_groups",
+      "path": "docs/d/ecs_security_groups.html.markdown",
+      "display_name": "ecs security groups"
+    },
+    {
+      "name": "ecs_tags",
+      "path": "docs/d/ecs_tags.html.markdown",
+      "display_name": "ecs tags"
+    },
+    {
+      "name": "ecs_vpc_subnets",
+      "path": "docs/d/ecs_vpc_subnets.html.markdown",
+      "display_name": "ecs vpc subnets"
+    },
+    {
+      "name": "ecs_vpcs",
+      "path": "docs/d/ecs_vpcs.html.markdown",
+      "display_name": "ecs vpcs"
+    },
+    {
       "name": "oss_buckets",
       "path": "docs/d/oss_buckets.html.markdown",
       "display_name": "oss buckets"
@@ -824,6 +1030,56 @@
       "name": "cdn_purge",
       "path": "docs/r/cdn_purge.html.markdown",
       "display_name": "cdn purge"
+    },
+    {
+      "name": "ecs_key_pair",
+      "path": "docs/r/ecs_key_pair.html.markdown",
+      "display_name": "ecs key pair"
+    },
+    {
+      "name": "ecs_network_interface",
+      "path": "docs/r/ecs_network_interface.html.markdown",
+      "display_name": "ecs network interface"
+    },
+    {
+      "name": "ecs_resource_tag",
+      "path": "docs/r/ecs_resource_tag.html.markdown",
+      "display_name": "ecs resource tag"
+    },
+    {
+      "name": "ecs_router",
+      "path": "docs/r/ecs_router.html.markdown",
+      "display_name": "ecs router"
+    },
+    {
+      "name": "ecs_router_port",
+      "path": "docs/r/ecs_router_port.html.markdown",
+      "display_name": "ecs router port"
+    },
+    {
+      "name": "ecs_security_group",
+      "path": "docs/r/ecs_security_group.html.markdown",
+      "display_name": "ecs security group"
+    },
+    {
+      "name": "ecs_security_group_rule",
+      "path": "docs/r/ecs_security_group_rule.html.markdown",
+      "display_name": "ecs security group rule"
+    },
+    {
+      "name": "ecs_tag",
+      "path": "docs/r/ecs_tag.html.markdown",
+      "display_name": "ecs tag"
+    },
+    {
+      "name": "ecs_vpc",
+      "path": "docs/r/ecs_vpc.html.markdown",
+      "display_name": "ecs vpc"
+    },
+    {
+      "name": "ecs_vpc_subnet",
+      "path": "docs/r/ecs_vpc_subnet.html.markdown",
+      "display_name": "ecs vpc subnet"
     },
     {
       "name": "oss_bucket",
