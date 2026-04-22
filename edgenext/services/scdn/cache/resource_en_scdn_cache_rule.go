@@ -26,20 +26,27 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"business_id": {
 				Type:        schema.TypeInt,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "Business ID (template ID for 'tpl' type, domain ID for 'domain' type)",
 			},
 			"business_type": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "Business type: 'tpl' (template) or 'domain'",
 			},
 			"rule_id": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				Computed:    true,
 				Description: "Rule ID for updating existing rule. If provided, this will update the rule instead of creating a new one.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// Suppress diff if new value is "0" (not in HCL) and we have an old value (in state)
+					return (new == "0" || new == "") && old != "0" && old != ""
+				},
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -71,6 +78,7 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 						"cache_rule": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							MaxItems:    1,
 							Description: "Edge TTL cache configuration",
 							Elem: &schema.Resource{
@@ -106,6 +114,7 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 						"browser_cache_rule": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							MaxItems:    1,
 							Description: "Browser cache configuration",
 							Elem: &schema.Resource{
@@ -131,6 +140,7 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 						"cache_errstatus": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							Description: "Status code cache configuration",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -153,6 +163,7 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 						"cache_url_rewrite": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							MaxItems:    1,
 							Description: "Custom cache key configuration",
 							Elem: &schema.Resource{
@@ -218,15 +229,17 @@ func ResourceEdgenextScdnCacheRule() *schema.Resource {
 						},
 						"cache_share": {
 							Type:        schema.TypeList,
-							Required:    true,
+							Optional:    true,
+							Computed:    true,
 							MaxItems:    1,
 							Description: "Cache sharing configuration",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"scheme": {
 										Type:        schema.TypeString,
-										Required:    true,
-										Description: "HTTP/HTTPS cache sharing method: 'http' or 'https'",
+										Optional:    true,
+										Computed:    true,
+										Description: "HTTP/HTTPS cache sharing method: '', 'http' or 'https'",
 									},
 								},
 							},
@@ -263,8 +276,24 @@ func resourceScdnCacheRuleCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*connectivity.EdgeNextClient)
 	service := scdn.NewScdnService(client)
 
-	businessID := d.Get("business_id").(int)
-	businessType := d.Get("business_type").(string)
+	businessIDVal, businessIDSet := d.GetOk("business_id")
+	businessTypeVal, businessTypeSet := d.GetOk("business_type")
+
+	if !businessIDSet || !businessTypeSet {
+		// If not set in config, it's only okay if we are adopting an existing rule via rule_id
+		if _, ok := d.GetOk("rule_id"); !ok {
+			return fmt.Errorf("business_id and business_type are required when creating a new cache rule")
+		}
+	}
+
+	businessID := 0
+	if businessIDSet {
+		businessID = businessIDVal.(int)
+	}
+	businessType := ""
+	if businessTypeSet {
+		businessType = businessTypeVal.(string)
+	}
 
 	// Check if rule_id is provided - if so, read existing rule instead of creating
 	if ruleIDVal, ok := d.GetOk("rule_id"); ok {
@@ -416,6 +445,11 @@ func resourceScdnCacheRuleRead(d *schema.ResourceData, m interface{}) error {
 	log.Printf("[INFO] Reading SCDN cache rule: rule_id=%d (using id query parameter)", ruleID)
 	response, err := service.GetCacheRules(req)
 	if err != nil {
+		// Handle transient 521 errors gracefully if we already have resource state
+		if strings.Contains(err.Error(), "521") && d.Id() != "" {
+			log.Printf("[WARN] Transient 521 error during read for %s: %v. Maintaining existing state.", d.Id(), err)
+			return nil
+		}
 		return fmt.Errorf("failed to read cache rule: %w", err)
 	}
 
@@ -488,59 +522,7 @@ func resourceScdnCacheRuleRead(d *schema.ResourceData, m interface{}) error {
 		}
 
 		confMap := buildCacheRuleConfToSchema(foundRule.Conf)
-		log.Printf("[DEBUG] Built confMap cache_rule: %+v", confMap["cache_rule"])
-		log.Printf("[DEBUG] Built confMap cache_rule type: %T", confMap["cache_rule"])
-		if cacheRuleList, ok := confMap["cache_rule"].([]interface{}); ok {
-			log.Printf("[DEBUG] Built confMap cache_rule length: %d", len(cacheRuleList))
-		}
-		log.Printf("[DEBUG] API returned cache_errstatus: %+v (length: %d)", foundRule.Conf.CacheErrStatus, len(foundRule.Conf.CacheErrStatus))
-		log.Printf("[DEBUG] Built confMap cache_errstatus: %+v", confMap["cache_errstatus"])
-		if cacheErrStatusList, ok := confMap["cache_errstatus"].([]interface{}); ok {
-			log.Printf("[DEBUG] Built confMap cache_errstatus length: %d", len(cacheErrStatusList))
-		}
-
-		// Preserve optional fields from state if API returned null/empty
-		// This handles cases where API doesn't return these fields even though they exist in state
-		if stateConf, ok := d.GetOk("conf.0"); ok {
-			stateConfMap := stateConf.(map[string]interface{})
-
-			// Preserve cache_rule if API returned nil but state has it
-			if foundRule.Conf.CacheRule == nil {
-				log.Printf("[DEBUG] API returned cache_rule as nil, checking state...")
-				if stateCacheRule, ok := stateConfMap["cache_rule"]; ok {
-					log.Printf("[DEBUG] State cache_rule found: %+v", stateCacheRule)
-					if cacheRuleList, ok := stateCacheRule.([]interface{}); ok && len(cacheRuleList) > 0 {
-						confMap["cache_rule"] = cacheRuleList
-						log.Printf("[DEBUG] Preserved cache_rule from state: %+v", cacheRuleList)
-					}
-				}
-			} else {
-				log.Printf("[DEBUG] API returned cache_rule, using API value")
-			}
-
-			// Preserve browser_cache_rule if API returned nil but state has it
-			if foundRule.Conf.BrowserCacheRule == nil {
-				if stateBrowserCacheRule, ok := stateConfMap["browser_cache_rule"]; ok {
-					if browserCacheRuleList, ok := stateBrowserCacheRule.([]interface{}); ok && len(browserCacheRuleList) > 0 {
-						confMap["browser_cache_rule"] = browserCacheRuleList
-					}
-				}
-			}
-
-			// Note: cache_errstatus is an array that can contain multiple items
-			// If API returns empty array, it means "no configuration", so we should use empty array
-			// Do NOT preserve from state - always use API value to ensure consistency
-			// The buildCacheRuleConfToSchema function already initializes it as empty array if API returns nil/empty
-
-			// Preserve cache_url_rewrite if API returned nil but state has it
-			if foundRule.Conf.CacheURLRewrite == nil {
-				if stateCacheURLRewrite, ok := stateConfMap["cache_url_rewrite"]; ok {
-					if cacheURLRewriteList, ok := stateCacheURLRewrite.([]interface{}); ok && len(cacheURLRewriteList) > 0 {
-						confMap["cache_url_rewrite"] = cacheURLRewriteList
-					}
-				}
-			}
-		}
+		log.Printf("[DEBUG] Built confMap from API response: %+v", confMap)
 
 		if err := d.Set("conf", []interface{}{confMap}); err != nil {
 			log.Printf("[WARN] Failed to set conf: %v", err)
@@ -558,15 +540,6 @@ func resourceScdnCacheRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	businessID := d.Get("business_id").(int)
 	businessType := d.Get("business_type").(string)
 
-	// Check if rule_id is provided in config - if not, create a new rule instead of updating
-	if _, ok := d.GetOk("rule_id"); !ok {
-		// No rule_id in config means user wants to create a new rule
-		log.Printf("[INFO] rule_id not provided in config, creating new rule instead of updating")
-		// Clear the old resource ID so Create function will create a new rule
-		d.SetId("")
-		return resourceScdnCacheRuleCreate(d, m)
-	}
-
 	var ruleID int
 	var err error
 
@@ -579,19 +552,14 @@ func resourceScdnCacheRuleUpdate(d *schema.ResourceData, m interface{}) error {
 			if ruleIDVal, ok := d.GetOk("rule_id"); ok {
 				ruleID = ruleIDVal.(int)
 			} else {
-				// No rule_id and invalid resource ID, create new rule
-				log.Printf("[INFO] Invalid resource ID and no rule_id, creating new rule")
-				d.SetId("")
-				return resourceScdnCacheRuleCreate(d, m)
+				return fmt.Errorf("failed to parse rule_id from resource ID %q and no rule_id provided in config", d.Id())
 			}
 		}
 	} else {
 		if ruleIDVal, ok := d.GetOk("rule_id"); ok {
 			ruleID = ruleIDVal.(int)
 		} else {
-			// No rule_id and no resource ID, create new rule
-			log.Printf("[INFO] No resource ID and no rule_id, creating new rule")
-			return resourceScdnCacheRuleCreate(d, m)
+			return fmt.Errorf("rule_id is required for update")
 		}
 	}
 
@@ -913,14 +881,14 @@ func buildCacheRuleConfFromSchema(d *schema.ResourceData) (*scdn.CacheRuleConf, 
 		}
 	}
 
-	// Build cache_share (required)
+	// Build cache_share (optional)
 	if cacheShareList, ok := confMap["cache_share"].([]interface{}); ok && len(cacheShareList) > 0 {
 		cacheShareMap := cacheShareList[0].(map[string]interface{})
 		conf.CacheShare = &scdn.CacheShare{
 			Scheme: cacheShareMap["scheme"].(string),
 		}
 	} else {
-		return nil, fmt.Errorf("cache_share is required")
+		log.Printf("[DEBUG] cache_share not provided in configuration")
 	}
 
 	return conf, nil
@@ -935,6 +903,7 @@ func buildCacheRuleConfToSchema(conf *scdn.CacheRuleConf) map[string]interface{}
 		"browser_cache_rule": []interface{}{},
 		"cache_errstatus":    []interface{}{},
 		"cache_url_rewrite":  []interface{}{},
+		"cache_share":        []interface{}{},
 	}
 
 	// Override with actual values if API returned them
@@ -995,7 +964,7 @@ func buildCacheRuleConfToSchema(conf *scdn.CacheRuleConf) map[string]interface{}
 		confMap["cache_url_rewrite"] = []interface{}{urlRewriteMap}
 	}
 
-	// cache_share is required, so it should always be present
+	// cache_share is optional, so it might be nil
 	if conf.CacheShare != nil {
 		cacheShareMap := map[string]interface{}{
 			"scheme": conf.CacheShare.Scheme,

@@ -41,7 +41,8 @@ def get_doc_files():
         "SSL": {"data_sources": [], "resources": []},
         "OSS": {"data_sources": [], "resources": []},
         "ECS": {"data_sources": [], "resources": []},
-        "SCDN": {"data_sources": [], "resources": []}
+        "SCDN": {"data_sources": [], "resources": []},
+        "SDNS": {"data_sources": [], "resources": []}
     }
     
     for ds in data_sources:
@@ -55,6 +56,8 @@ def get_doc_files():
             categories["ECS"]["data_sources"].append(ds)
         elif ds["name"].startswith("scdn_"):
             categories["SCDN"]["data_sources"].append(ds)
+        elif ds["name"].startswith("sdns_"):
+            categories["SDNS"]["data_sources"].append(ds)
     
     for res in resources:
         if res["name"].startswith("cdn_"):
@@ -67,6 +70,8 @@ def get_doc_files():
             categories["ECS"]["resources"].append(res)
         elif res["name"].startswith("scdn_"):
             categories["SCDN"]["resources"].append(res)
+        elif res["name"].startswith("sdns_"):
+            categories["SDNS"]["resources"].append(res)
     
     return {
         "index": "docs/index.html.markdown",

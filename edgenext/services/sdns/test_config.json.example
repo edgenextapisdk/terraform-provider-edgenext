@@ -1,0 +1,7 @@
+{
+  "access_key": "your_access_key_here",
+  "secret_key": "your_secret_key_here",
+  "endpoint": "https://api.edgenextscdn.com",
+  "timeout_seconds": 30,
+  "enable_integration_tests": true
+}

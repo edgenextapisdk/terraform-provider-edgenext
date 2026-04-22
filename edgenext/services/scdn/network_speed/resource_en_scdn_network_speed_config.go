@@ -1,8 +1,10 @@
 package networkspeed
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
@@ -19,19 +21,56 @@ func ResourceEdgenextScdnNetworkSpeedConfig() *schema.Resource {
 		Delete: resourceScdnNetworkSpeedConfigDelete,
 
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: func(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+				idParts := strings.Split(d.Id(), "-")
+				if len(idParts) != 2 {
+					return nil, fmt.Errorf("invalid ID format, expected <business_id>-<business_type>, got: %s", d.Id())
+				}
+
+				businessID, err := strconv.Atoi(idParts[0])
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse business_id from ID: %w", err)
+				}
+
+				if err := d.Set("business_id", businessID); err != nil {
+					return nil, fmt.Errorf("failed to set business_id: %w", err)
+				}
+				if err := d.Set("business_type", idParts[1]); err != nil {
+					return nil, fmt.Errorf("failed to set business_type: %w", err)
+				}
+
+				return []*schema.ResourceData{d}, nil
+			},
+		},
+
+		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+			// If it's a new resource (ID is empty), business_id and business_type must be provided
+			if diff.Id() == "" {
+				vID, okID := diff.GetOk("business_id")
+				vType, okType := diff.GetOk("business_type")
+
+				if !okID || vID.(int) == 0 {
+					return fmt.Errorf("business_id is required for new resources")
+				}
+				if !okType || vType.(string) == "" {
+					return fmt.Errorf("business_type is required for new resources")
+				}
+			}
+			return nil
 		},
 
 		Schema: map[string]*schema.Schema{
 			"business_id": {
 				Type:        schema.TypeInt,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "Business ID (template ID for 'tpl' type, user ID for 'global' type)",
 			},
 			"business_type": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "Business type: 'tpl' (template) or 'global'",
 			},

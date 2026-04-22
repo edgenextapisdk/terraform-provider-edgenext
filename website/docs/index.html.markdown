@@ -164,6 +164,20 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_ecs_security_group_rules`](data-sources/ecs_security_group_rules) - Query ECS security group rules
 * [`edgenext_ecs_resource_tags`](data-sources/ecs_resource_tags) - Query ECS resource tag relations
 
+### Security DNS (SDNS)
+
+#### Resources
+
+* [`edgenext_sdns_domain`](resources/sdns_domain) - Manage sdns domain
+* [`edgenext_sdns_domain_group`](resources/sdns_domain_group) - Manage sdns domain group
+* [`edgenext_sdns_record`](resources/sdns_record) - Manage sdns record
+
+#### Data Sources
+
+* [`edgenext_sdns_domains`](data-sources/sdns_domains) - Query sdns domains
+* [`edgenext_sdns_domain_groups`](data-sources/sdns_domain_groups) - Query sdns domain groups
+* [`edgenext_sdns_records`](data-sources/sdns_records) - Query sdns records
+
 ### Security CDN (SCDN)
 
 #### Resources
@@ -180,6 +194,7 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_scdn_rule_template`](resources/scdn_rule_template) - Manage SCDN rule templates
 * [`edgenext_scdn_rule_template_domain_bind`](resources/scdn_rule_template_domain_bind) - Manage SCDN rule template domain bindings
 * [`edgenext_scdn_rule_template_domain_unbind`](resources/scdn_rule_template_domain_unbind) - Manage SCDN rule template domain unbindings
+* [`edgenext_scdn_rule_template_switch`](resources/scdn_rule_template_switch) - Manage scdn rule template switch
 * [`edgenext_scdn_network_speed_config`](resources/scdn_network_speed_config) - Manage SCDN network speed configuration
 * [`edgenext_scdn_network_speed_rule`](resources/scdn_network_speed_rule) - Manage SCDN network speed rules
 * [`edgenext_scdn_network_speed_rules_sort`](resources/scdn_network_speed_rules_sort) - Manage SCDN network speed rules sorting
@@ -199,6 +214,9 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_scdn_log_download_task`](resources/scdn_log_download_task) - Manage SCDN log download tasks
 * [`edgenext_scdn_log_download_template`](resources/scdn_log_download_template) - Manage SCDN log download templates
 * [`edgenext_scdn_log_download_template_status`](resources/scdn_log_download_template_status) - Manage SCDN log download template status
+* [`edgenext_scdn_domain_group`](resources/scdn_domain_group) - Manage scdn domain group
+* [`edgenext_scdn_user_ip`](resources/scdn_user_ip) - Manage scdn user ip
+* [`edgenext_scdn_user_ip_item`](resources/scdn_user_ip_item) - Manage scdn user ip item
 
 #### Data Sources
 
@@ -239,4 +257,8 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_scdn_log_download_tasks`](data-sources/scdn_log_download_tasks) - Query SCDN log download tasks
 * [`edgenext_scdn_log_download_templates`](data-sources/scdn_log_download_templates) - Query SCDN log download templates
 * [`edgenext_scdn_log_download_fields`](data-sources/scdn_log_download_fields) - Query SCDN log download fields
+* [`edgenext_scdn_domain_groups`](data-sources/scdn_domain_groups) - Query scdn domain groups
+* [`edgenext_scdn_domain_group_domains`](data-sources/scdn_domain_group_domains) - Query scdn domain group domains
+* [`edgenext_scdn_user_ips`](data-sources/scdn_user_ips) - Query scdn user ips
+* [`edgenext_scdn_user_ip_items`](data-sources/scdn_user_ip_items) - Query scdn user ip items
 
