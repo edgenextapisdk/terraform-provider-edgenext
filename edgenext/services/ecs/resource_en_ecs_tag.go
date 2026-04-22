@@ -17,26 +17,54 @@ func ResourceENECSTag() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceENECSTagCreate,
 		ReadContext:   resourceENECSTagRead,
+		UpdateContext: resourceENECSTagUpdate,
 		DeleteContext: resourceENECSTagDelete,
+		CustomizeDiff: resourceENECSTagCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSTagImport,
 		},
-		Description: "Provides an EdgeNext ECS tag resource.",
+		Description: "Provides an EdgeNext ECS tag resource. key and value cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
 			"key": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "key description",
+				Description: "Tag key. Cannot be changed after creation.",
 			},
 			"value": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "value description",
+				Description: "Tag value. Cannot be changed after creation.",
 			},
 		},
 	}
+}
+
+func resourceENECSTagCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	// Skip this check during creation.
+	if d.Id() == "" {
+		return nil
+	}
+	if d.HasChange("key") {
+		oldRaw, newRaw := d.GetChange("key")
+		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
+			return fmt.Errorf("key cannot be modified after creation")
+		}
+	}
+	if d.HasChange("value") {
+		oldRaw, newRaw := d.GetChange("value")
+		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
+			return fmt.Errorf("value cannot be modified after creation")
+		}
+	}
+	return nil
+}
+
+func resourceENECSTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// No update API; UpdateContext exists so key/value do not require ForceNew in the schema (SDK rule).
+	if d.HasChange("key") || d.HasChange("value") {
+		return diag.Errorf("ECS tag does not support updating key or value in place; destroy and recreate the resource if you need different key/value")
+	}
+	return resourceENECSTagRead(ctx, d, m)
 }
 
 func resourceENECSTagImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

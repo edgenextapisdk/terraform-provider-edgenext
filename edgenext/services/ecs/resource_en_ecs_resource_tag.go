@@ -19,29 +19,27 @@ func ResourceENECSResourceTag() *schema.Resource {
 		ReadContext:   resourceENECSResourceTagRead,
 		UpdateContext: resourceENECSResourceTagUpdate,
 		DeleteContext: resourceENECSResourceTagDelete,
+		CustomizeDiff: resourceENECSResourceTagCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSResourceTagImport,
 		},
-		Description: "Provides an EdgeNext ECS resource tag binding resource.",
+		Description: "Provides an EdgeNext ECS resource tag binding resource. resource_uuid, resource_name, and resource_type cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
+			"region": helper.RegionResourceSchema("region description"),
 			"resource_uuid": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "The target resource UUID.",
+				Description: "The target resource UUID. Cannot be changed after creation.",
 			},
 			"resource_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "The target resource name.",
+				Description: "The target resource name. Cannot be changed after creation.",
 			},
-			"region": helper.RegionResourceSchema("region description"),
 			"resource_type": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				ForceNew:    true,
-				Description: "The target resource type code.",
+				Description: "The target resource type code. Cannot be changed after creation.",
 			},
 			"tag_ids": {
 				Type:        schema.TypeList,
@@ -53,6 +51,32 @@ func ResourceENECSResourceTag() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSResourceTagCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	// Skip this check during creation.
+	if d.Id() == "" {
+		return nil
+	}
+	if d.HasChange("resource_uuid") {
+		oldRaw, newRaw := d.GetChange("resource_uuid")
+		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
+			return fmt.Errorf("resource_uuid cannot be modified after creation")
+		}
+	}
+	if d.HasChange("resource_name") {
+		oldRaw, newRaw := d.GetChange("resource_name")
+		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
+			return fmt.Errorf("resource_name cannot be modified after creation")
+		}
+	}
+	if d.HasChange("resource_type") {
+		oldRaw, newRaw := d.GetChange("resource_type")
+		if fmt.Sprintf("%v", oldRaw) != fmt.Sprintf("%v", newRaw) {
+			return fmt.Errorf("resource_type cannot be modified after creation")
+		}
+	}
+	return nil
 }
 
 func resourceENECSResourceTagImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -164,8 +188,13 @@ func resourceENECSResourceTagRead(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-// Update only syncs tag_ids changes; identity fields are ForceNew.
+// Update only syncs tag_ids changes.
 func resourceENECSResourceTagUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Defense in depth: CustomizeDiff blocks these at plan time; reject here if Update is still invoked.
+	if d.HasChange("resource_uuid") || d.HasChange("resource_name") || d.HasChange("resource_type") {
+		return diag.Errorf("resource_uuid, resource_name, and resource_type cannot be updated after creation")
+	}
+
 	if !d.HasChange("tag_ids") {
 		return resourceENECSResourceTagRead(ctx, d, m)
 	}

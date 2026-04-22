@@ -24,8 +24,8 @@ resource "edgenext_ecs_tag" "example" {
 
 The following arguments are supported:
 
-* `key` - (Required, String, ForceNew) key description
-* `value` - (Required, String, ForceNew) value description
+* `key` - (Required, String) Tag key. Cannot be changed after creation.
+* `value` - (Required, String) Tag value. Cannot be changed after creation.
 
 ## Attributes Reference
 

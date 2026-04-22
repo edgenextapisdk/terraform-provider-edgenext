@@ -18,10 +18,11 @@ func ResourceENECSNetworkInterface() *schema.Resource {
 		ReadContext:   resourceENECSNetworkInterfaceRead,
 		UpdateContext: resourceENECSNetworkInterfaceUpdate,
 		DeleteContext: resourceENECSNetworkInterfaceDelete,
+		CustomizeDiff: resourceENECSNetworkInterfaceCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSNetworkInterfaceImport,
 		},
-		Description: "Provides an EdgeNext ECS network interface (ENI). Updating name/description is supported in place, while changing network_id or subnet_id forces replacement.",
+		Description: "Provides an EdgeNext ECS network interface (ENI). Updating name/description is supported in place. network_id and subnet_id cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
 			"region": helper.RegionResourceSchema("The region of the port."),
 			"name": {
@@ -38,14 +39,12 @@ func ResourceENECSNetworkInterface() *schema.Resource {
 			"network_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "VPC network ID.",
+				Description: "VPC network ID. Cannot be changed after creation.",
 			},
 			"subnet_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "Subnet ID for the primary fixed IP.",
+				Description: "Subnet ID for the primary fixed IP. Cannot be changed after creation.",
 			},
 			"port_security_enabled": {
 				Type:        schema.TypeBool,
@@ -177,6 +176,26 @@ func ResourceENECSNetworkInterface() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSNetworkInterfaceCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	// Skip this check during creation.
+	if d.Id() == "" {
+		return nil
+	}
+	if d.HasChange("network_id") {
+		oldRaw, newRaw := d.GetChange("network_id")
+		if networkInterfaceNormalizeString(oldRaw) != networkInterfaceNormalizeString(newRaw) {
+			return fmt.Errorf("network_id cannot be modified after creation")
+		}
+	}
+	if d.HasChange("subnet_id") {
+		oldRaw, newRaw := d.GetChange("subnet_id")
+		if networkInterfaceNormalizeString(oldRaw) != networkInterfaceNormalizeString(newRaw) {
+			return fmt.Errorf("subnet_id cannot be modified after creation")
+		}
+	}
+	return nil
 }
 
 func parseNetworkInterfaceResourceID(id string) (region, portID string, err error) {
@@ -419,6 +438,11 @@ func resourceENECSNetworkInterfaceEnrichFixedIPs(ctx context.Context, ecsClient 
 }
 
 func resourceENECSNetworkInterfaceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Defense in depth: CustomizeDiff blocks these at plan time; reject here if Update is still invoked.
+	if d.HasChange("network_id") || d.HasChange("subnet_id") {
+		return diag.Errorf("network_id and subnet_id cannot be updated after creation")
+	}
+
 	nameOrDescChanged := d.HasChange("name") || d.HasChange("description")
 	deviceChanged := d.HasChange("device_id")
 	securityRelationChanged := d.HasChange("port_security_enabled") || d.HasChange("security_groups")
