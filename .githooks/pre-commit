@@ -21,20 +21,13 @@ if [ -d "gendoc" ]; then
         exit 1
     fi
     
-    # Check if there are any changes in website/ directory
-    if git diff --cached --quiet website/; then
-        echo "Documentation is up to date."
+    # If documentation changed, auto-stage website/ instead of blocking commit.
+    if ! git diff --quiet -- website/ || ! git diff --cached --quiet -- website/; then
+        echo "Documentation has changed. Auto-staging website/ ..."
+        git add website/
+        echo "Documentation changes have been staged."
     else
-        echo "Warning: Documentation has been updated. Please review and add the changes to your commit."
-        echo "Modified files:"
-        git diff --cached --name-only website/
-        echo ""
-        echo "To add documentation changes to your commit, run:"
-        echo "  git add website/"
-        echo ""
-        echo "If you want to proceed without documentation changes, run:"
-        echo "  git commit --no-verify"
-        exit 1
+        echo "Documentation is up to date."
     fi
 fi
 

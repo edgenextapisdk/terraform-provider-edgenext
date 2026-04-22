@@ -40,6 +40,7 @@ def get_doc_files():
         "CDN": {"data_sources": [], "resources": []},
         "SSL": {"data_sources": [], "resources": []},
         "OSS": {"data_sources": [], "resources": []},
+        "ECS": {"data_sources": [], "resources": []},
         "SCDN": {"data_sources": [], "resources": []},
         "SDNS": {"data_sources": [], "resources": []}
     }
@@ -51,6 +52,8 @@ def get_doc_files():
             categories["SSL"]["data_sources"].append(ds)
         elif ds["name"].startswith("oss_"):
             categories["OSS"]["data_sources"].append(ds)
+        elif ds["name"].startswith("ecs_"):
+            categories["ECS"]["data_sources"].append(ds)
         elif ds["name"].startswith("scdn_"):
             categories["SCDN"]["data_sources"].append(ds)
         elif ds["name"].startswith("sdns_"):
@@ -63,6 +66,8 @@ def get_doc_files():
             categories["SSL"]["resources"].append(res)
         elif res["name"].startswith("oss_"):
             categories["OSS"]["resources"].append(res)
+        elif res["name"].startswith("ecs_"):
+            categories["ECS"]["resources"].append(res)
         elif res["name"].startswith("scdn_"):
             categories["SCDN"]["resources"].append(res)
         elif res["name"].startswith("sdns_"):
