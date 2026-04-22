@@ -23,10 +23,10 @@ terraform import edgenext_ecs_vpc_subnet.example tokyo-a/68451a78-xxxx-xxxx-xxxx
 Argument Reference
 
 * `region` - (Required) Region.
-* `network_id` - (Required, ForceNew) VPC network ID.
-* `name` - (Required, ForceNew) Subnet name.
-* `ip_version` - (Optional, ForceNew) IP version, default `4`.
-* `cidr` - (Required, ForceNew) Subnet CIDR.
+* `network_id` - (Required) VPC network ID. Cannot be changed after creation.
+* `name` - (Required) Subnet name. Cannot be changed after creation.
+* `ip_version` - (Optional) IP version, default `4`. Cannot be changed after creation.
+* `cidr` - (Required) Subnet CIDR. Cannot be changed after creation.
 
 Attributes Reference
 

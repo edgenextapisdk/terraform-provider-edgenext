@@ -54,6 +54,19 @@ This package provides Terraform resources and data sources for managing EdgeNext
 - **File**: `resource_en_ecs_resource_tag.go`
 - **Description**: Bind tags to ECS resources
 
+## ECS Update Behavior
+
+Several ECS resources now reject immutable argument changes directly during plan/apply instead of replacing resources automatically:
+
+- `edgenext_ecs_key_pair`: `name`, `public_key`
+- `edgenext_ecs_network_interface`: `network_id`, `subnet_id`
+- `edgenext_ecs_tag`: `key`, `value`
+- `edgenext_ecs_resource_tag`: `resource_uuid`, `resource_name`, `resource_type`
+- `edgenext_ecs_router_port`: `router_id`, `network_id`, `subnet_id`
+- `edgenext_ecs_security_group_rule`: all arguments except `region`
+- `edgenext_ecs_vpc_subnet`: all arguments except `region`
+- `edgenext_ecs_vpc`: `subnet` and all nested subnet fields
+
 ## Data Sources
 
 ### ECS Instances
@@ -150,14 +163,18 @@ edgenext/services/ecs/
 resource "edgenext_ecs_vpc" "example" {
   region = "tokyo-a"
   name   = "example-vpc"
-  cidr   = "172.31.0.0/16"
+  subnet {
+    name       = "example-subnet"
+    ip_version = 4
+    cidr       = "172.31.1.0/24"
+  }
 }
 
 resource "edgenext_ecs_vpc_subnet" "example" {
   region     = "tokyo-a"
   network_id = edgenext_ecs_vpc.example.id
-  name       = "example-subnet"
-  cidr       = "172.31.1.0/24"
+  name       = "example-subnet-2"
+  cidr       = "172.31.2.0/24"
 }
 ```
 

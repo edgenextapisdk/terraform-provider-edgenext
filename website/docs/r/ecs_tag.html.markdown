@@ -45,8 +45,8 @@ terraform import edgenext_ecs_tag.example 52/env/dev
 
 Argument Reference
 
-* `key` - (Required) Tag key.
-* `value` - (Required) Tag value.
+* `key` - (Required) Tag key. Cannot be changed after creation.
+* `value` - (Required) Tag value. Cannot be changed after creation.
 
 Attributes Reference
 

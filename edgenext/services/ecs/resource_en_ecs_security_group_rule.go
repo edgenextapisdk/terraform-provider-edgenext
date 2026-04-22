@@ -16,66 +16,59 @@ func ResourceENECSSecurityGroupRule() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceENECSSecurityGroupRuleCreate,
 		ReadContext:   resourceENECSSecurityGroupRuleRead,
+		UpdateContext: resourceENECSSecurityGroupRuleUpdate,
 		DeleteContext: resourceENECSSecurityGroupRuleDelete,
+		CustomizeDiff: resourceENECSSecurityGroupRuleCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSSecurityGroupRuleImport,
 		},
-		Description: "Provides a single EdgeNext ECS security group rule. There is no update API; changing any argument replaces the rule.",
+		Description: "Provides a single EdgeNext ECS security group rule. Except region, arguments cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
 			"region": helper.RegionResourceSchema("The region of the security group."),
 			"security_group_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "The security group ID this rule belongs to.",
+				Description: "The security group ID this rule belongs to. Cannot be changed after creation.",
 			},
 			"protocol": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "Protocol name (e.g. tcp, udp, icmp).",
+				Description: "Protocol name (e.g. tcp, udp, icmp). Cannot be changed after creation.",
 			},
 			"direction": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "Traffic direction: ingress or egress.",
+				Description: "Traffic direction: ingress or egress. Cannot be changed after creation.",
 			},
 			"ethertype": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "IP version (e.g. IPv4, IPv6).",
+				Description: "IP version (e.g. IPv4, IPv6). Cannot be changed after creation.",
 			},
 			"port_range_min": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				ForceNew:    true,
-				Description: "Minimum port number.",
+				Description: "Minimum port number. Cannot be changed after creation.",
 			},
 			"port_range_max": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				ForceNew:    true,
-				Description: "Maximum port number.",
+				Description: "Maximum port number. Cannot be changed after creation.",
 			},
 			"remote_ip_prefix": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
-				Description: "Remote CIDR (e.g. 192.168.0.0/24).",
+				Description: "Remote CIDR (e.g. 192.168.0.0/24). Cannot be changed after creation.",
 			},
 			"remote_group_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
-				Description: "Remote security group ID. Leave empty when using remote_ip_prefix only.",
+				Description: "Remote security group ID. Leave empty when using remote_ip_prefix only. Cannot be changed after creation.",
 			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
-				Description: "Rule description.",
+				Description: "Rule description. Cannot be changed after creation.",
 			},
 			"tenant_id": {
 				Type:        schema.TypeString,
@@ -110,6 +103,34 @@ func ResourceENECSSecurityGroupRule() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceENECSSecurityGroupRuleCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	// Skip this check during creation.
+	if d.Id() == "" {
+		return nil
+	}
+	immutableFields := []string{
+		"security_group_id",
+		"protocol",
+		"direction",
+		"ethertype",
+		"port_range_min",
+		"port_range_max",
+		"remote_ip_prefix",
+		"remote_group_id",
+		"description",
+	}
+	for _, field := range immutableFields {
+		if !d.HasChange(field) {
+			continue
+		}
+		oldRaw, newRaw := d.GetChange(field)
+		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
+			return fmt.Errorf("%s cannot be modified after creation", field)
+		}
+	}
+	return nil
 }
 
 func resourceENECSSecurityGroupRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
@@ -258,6 +279,27 @@ func resourceENECSSecurityGroupRuleRead(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 	return nil
+}
+
+func resourceENECSSecurityGroupRuleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Defense in depth: CustomizeDiff blocks these at plan time; reject here if Update is still invoked.
+	immutableFields := []string{
+		"security_group_id",
+		"protocol",
+		"direction",
+		"ethertype",
+		"port_range_min",
+		"port_range_max",
+		"remote_ip_prefix",
+		"remote_group_id",
+		"description",
+	}
+	for _, field := range immutableFields {
+		if d.HasChange(field) {
+			return diag.Errorf("%s cannot be updated after creation", field)
+		}
+	}
+	return resourceENECSSecurityGroupRuleRead(ctx, d, m)
 }
 
 func resourceENECSSecurityGroupRuleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

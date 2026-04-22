@@ -29,10 +29,10 @@ Argument Reference
 * `region` - (Required) Region.
 * `name` - (Required) VPC name.
 * `description` - (Optional) VPC description.
-* `subnet` - (Required, ForceNew) Initial subnet block with:
-  * `name` - (Required) Subnet name.
-  * `ip_version` - (Optional) IP version, default `4`.
-  * `cidr` - (Required) Subnet CIDR.
+* `subnet` - (Required) Initial subnet block. Cannot be changed after creation:
+  * `name` - (Required) Subnet name. Cannot be changed after creation.
+  * `ip_version` - (Optional) IP version, default `4`. Cannot be changed after creation.
+  * `cidr` - (Required) Subnet CIDR. Cannot be changed after creation.
 
 Attributes Reference
 

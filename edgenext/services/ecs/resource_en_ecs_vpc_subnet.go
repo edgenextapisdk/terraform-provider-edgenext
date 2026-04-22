@@ -16,37 +16,35 @@ func ResourceENECSVpcSubnet() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceENECSVpcSubnetCreate,
 		ReadContext:   resourceENECSVpcSubnetRead,
+		UpdateContext: resourceENECSVpcSubnetUpdate,
 		DeleteContext: resourceENECSVpcSubnetDelete,
+		CustomizeDiff: resourceENECSVpcSubnetCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSVpcSubnetImport,
 		},
-		Description: "Provides an EdgeNext ECS vpc subnet resource. There is no update API; changing any argument replaces the subnet.",
+		Description: "Provides an EdgeNext ECS vpc subnet resource. Except region, arguments cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
 			"region": helper.RegionResourceSchema("The region of the subnet."),
 			"network_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "The VPC network ID.",
+				Description: "The VPC network ID. Cannot be changed after creation.",
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "Subnet name.",
+				Description: "Subnet name. Cannot be changed after creation.",
 			},
 			"ip_version": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     4,
-				ForceNew:    true,
-				Description: "IP version.",
+				Description: "IP version. Cannot be changed after creation.",
 			},
 			"cidr": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "Subnet CIDR.",
+				Description: "Subnet CIDR. Cannot be changed after creation.",
 			},
 			"tenant_id": {
 				Type:        schema.TypeString,
@@ -188,6 +186,24 @@ func ResourceENECSVpcSubnet() *schema.Resource {
 	}
 }
 
+func resourceENECSVpcSubnetCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	// Skip this check during creation.
+	if d.Id() == "" {
+		return nil
+	}
+	immutableFields := []string{"network_id", "name", "ip_version", "cidr"}
+	for _, field := range immutableFields {
+		if !d.HasChange(field) {
+			continue
+		}
+		oldRaw, newRaw := d.GetChange(field)
+		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
+			return fmt.Errorf("%s cannot be modified after creation", field)
+		}
+	}
+	return nil
+}
+
 func resourceENECSVpcSubnetImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
 	if len(parts) != 3 {
@@ -306,6 +322,17 @@ func resourceENECSVpcSubnetRead(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	return nil
+}
+
+func resourceENECSVpcSubnetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// Defense in depth: CustomizeDiff blocks these at plan time; reject here if Update is still invoked.
+	immutableFields := []string{"network_id", "name", "ip_version", "cidr"}
+	for _, field := range immutableFields {
+		if d.HasChange(field) {
+			return diag.Errorf("%s cannot be updated after creation", field)
+		}
+	}
+	return resourceENECSVpcSubnetRead(ctx, d, m)
 }
 
 func resourceENECSVpcSubnetDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

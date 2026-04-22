@@ -31,16 +31,16 @@ resource "edgenext_ecs_security_group_rule" "example" {
 
 The following arguments are supported:
 
-* `direction` - (Required, String, ForceNew) Traffic direction: ingress or egress.
-* `ethertype` - (Required, String, ForceNew) IP version (e.g. IPv4, IPv6).
-* `port_range_max` - (Required, Int, ForceNew) Maximum port number.
-* `port_range_min` - (Required, Int, ForceNew) Minimum port number.
-* `protocol` - (Required, String, ForceNew) Protocol name (e.g. tcp, udp, icmp).
+* `direction` - (Required, String) Traffic direction: ingress or egress. Cannot be changed after creation.
+* `ethertype` - (Required, String) IP version (e.g. IPv4, IPv6). Cannot be changed after creation.
+* `port_range_max` - (Required, Int) Maximum port number. Cannot be changed after creation.
+* `port_range_min` - (Required, Int) Minimum port number. Cannot be changed after creation.
+* `protocol` - (Required, String) Protocol name (e.g. tcp, udp, icmp). Cannot be changed after creation.
 * `region` - (Required, String, ForceNew) The region of the security group.
-* `security_group_id` - (Required, String, ForceNew) The security group ID this rule belongs to.
-* `description` - (Optional, String, ForceNew) Rule description.
-* `remote_group_id` - (Optional, String, ForceNew) Remote security group ID. Leave empty when using remote_ip_prefix only.
-* `remote_ip_prefix` - (Optional, String, ForceNew) Remote CIDR (e.g. 192.168.0.0/24).
+* `security_group_id` - (Required, String) The security group ID this rule belongs to. Cannot be changed after creation.
+* `description` - (Optional, String) Rule description. Cannot be changed after creation.
+* `remote_group_id` - (Optional, String) Remote security group ID. Leave empty when using remote_ip_prefix only. Cannot be changed after creation.
+* `remote_ip_prefix` - (Optional, String) Remote CIDR (e.g. 192.168.0.0/24). Cannot be changed after creation.
 
 ## Attributes Reference
 
@@ -66,15 +66,15 @@ terraform import edgenext_ecs_security_group_rule.example tokyo-a/12f8f386-xxxx-
 Argument Reference
 
 * `region` - (Required) Region.
-* `security_group_id` - (Required, ForceNew) Security group ID.
-* `protocol` - (Required, ForceNew) Protocol, for example `tcp`, `udp`, `icmp`.
-* `direction` - (Required, ForceNew) Rule direction, `ingress` or `egress`.
-* `ethertype` - (Required, ForceNew) IP type, such as `IPv4` or `IPv6`.
-* `port_range_min` - (Required, ForceNew) Minimum port.
-* `port_range_max` - (Required, ForceNew) Maximum port.
-* `remote_ip_prefix` - (Optional, ForceNew) Remote CIDR.
-* `remote_group_id` - (Optional, ForceNew) Remote security group ID.
-* `description` - (Optional, ForceNew) Rule description.
+* `security_group_id` - (Required) Security group ID. Cannot be changed after creation.
+* `protocol` - (Required) Protocol, for example `tcp`, `udp`, `icmp`. Cannot be changed after creation.
+* `direction` - (Required) Rule direction, `ingress` or `egress`. Cannot be changed after creation.
+* `ethertype` - (Required) IP type, such as `IPv4` or `IPv6`. Cannot be changed after creation.
+* `port_range_min` - (Required) Minimum port. Cannot be changed after creation.
+* `port_range_max` - (Required) Maximum port. Cannot be changed after creation.
+* `remote_ip_prefix` - (Optional) Remote CIDR. Cannot be changed after creation.
+* `remote_group_id` - (Optional) Remote security group ID. Cannot be changed after creation.
+* `description` - (Optional) Rule description. Cannot be changed after creation.
 
 Attributes Reference
 
