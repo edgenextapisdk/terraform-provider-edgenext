@@ -32,9 +32,9 @@ resource "edgenext_ecs_network_interface" "example" {
 The following arguments are supported:
 
 * `name` - (Required, String) Port name.
-* `network_id` - (Required, String, ForceNew) VPC network ID.
+* `network_id` - (Required, String) VPC network ID. Cannot be changed after creation.
 * `region` - (Required, String, ForceNew) The region of the port.
-* `subnet_id` - (Required, String, ForceNew) Subnet ID for the primary fixed IP.
+* `subnet_id` - (Required, String) Subnet ID for the primary fixed IP. Cannot be changed after creation.
 * `description` - (Optional, String) Port description.
 * `device_id` - (Optional, String) Attached server ID (instance ID).
 * `floating_ip_address` - (Optional, String) Floating IP address bound to this port.

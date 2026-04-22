@@ -28,9 +28,9 @@ resource "edgenext_ecs_resource_tag" "example" {
 The following arguments are supported:
 
 * `region` - (Required, String, ForceNew) region description
-* `resource_name` - (Required, String, ForceNew) The target resource name.
-* `resource_type` - (Required, Int, ForceNew) The target resource type code.
-* `resource_uuid` - (Required, String, ForceNew) The target resource UUID.
+* `resource_name` - (Required, String) The target resource name. Cannot be changed after creation.
+* `resource_type` - (Required, Int) The target resource type code. Cannot be changed after creation.
+* `resource_uuid` - (Required, String) The target resource UUID. Cannot be changed after creation.
 * `tag_ids` - (Required, List: [`Int`]) Tag IDs to bind to the target resource.
 
 ## Attributes Reference

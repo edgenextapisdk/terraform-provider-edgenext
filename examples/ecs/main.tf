@@ -135,6 +135,7 @@ resource "edgenext_ecs_network_interface" "example" {
 # resource "edgenext_ecs_key_pair" "example" {
 #   region = "tokyo-a"
 #   name = "example-key"
+#   # public_key = file("~/.ssh/id_rsa.pub")
 # }
 
 # #
