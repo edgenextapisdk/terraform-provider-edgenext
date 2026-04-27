@@ -92,12 +92,25 @@ resource "edgenext_scdn_security_protection_template_batch_config" "this" {
         iterator = policy
         for_each = try(precise.value.policies, [])
         content {
-          type        = try(policy.value.type, null)
+          rule_type   = try(policy.value.rule_type, null)
           action      = try(policy.value.action, null)
           action_data = try(policy.value.action_data, null)
-          rules       = try(policy.value.rules, null)
           from        = try(policy.value.from, null)
           status      = try(policy.value.status, null)
+          remark      = try(policy.value.remark, null)
+          type        = try(policy.value.type, null)
+          id          = try(policy.value.id, null)
+          sort        = try(policy.value.sort, null)
+
+          dynamic "rules" {
+            iterator = rule
+            for_each = try(policy.value.rules, [])
+            content {
+              rule_type = rule.value.rule_type
+              logic     = rule.value.logic
+              data      = rule.value.data
+            }
+          }
         }
       }
     }
