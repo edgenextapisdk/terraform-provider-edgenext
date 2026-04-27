@@ -473,7 +473,7 @@ func resourceScdnSecurityProtectionTemplateBatchConfigUpdate(d *schema.ResourceD
 					policyMap := policy.(map[string]interface{})
 					policyCfg := scdn.PreciseAccessControlPolicy{}
 					if val, ok := policyMap["type"].(string); ok {
-						policyCfg.Type = val
+						policyCfg.RuleType = val
 					}
 					if val, ok := policyMap["action"].(string); ok {
 						policyCfg.Action = val
