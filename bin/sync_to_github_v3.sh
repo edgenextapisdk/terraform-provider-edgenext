@@ -183,13 +183,19 @@ echo -e "${YELLOW}   将所有提交的作者改为：${NEW_NAME} <${NEW_EMAIL}>
 # 设置环境变量禁用警告
 export FILTER_BRANCH_SQUELCH_WARNING=1
 
-# 执行 filter-branch
+# 构建 index-filter 命令移除排除的文件夹
+INDEX_FILTER_CMD=""
+for dir in $EXCLUDE_DIRS; do
+  INDEX_FILTER_CMD="${INDEX_FILTER_CMD}git rm -rf --cached --ignore-unmatch ${dir} 2>/dev/null || true; "
+done
+
+# 执行 filter-branch（同时重写作者信息和移除排除文件夹）
 git filter-branch -f --env-filter "
   export GIT_AUTHOR_NAME='${NEW_NAME}'
   export GIT_AUTHOR_EMAIL='${NEW_EMAIL}'
   export GIT_COMMITTER_NAME='${NEW_NAME}'
   export GIT_COMMITTER_EMAIL='${NEW_EMAIL}'
-" HEAD 2>&1 | grep -v "WARNING:" | grep -v "git-filter-branch" || true
+" --index-filter "${INDEX_FILTER_CMD}" HEAD 2>&1 | grep -v "WARNING:" | grep -v "git-filter-branch" || true
 
 # 清理 filter-branch 的备份
 rm -rf .git/refs/original/
@@ -197,36 +203,8 @@ git reflog expire --expire=now --all
 git gc --prune=now --quiet
 
 echo ""
-echo -e "${GREEN}✅ 作者信息重写完成！${NC}"
-
-# 从 GitHub 分支移除指定的文件夹
-echo ""
-echo -e "${BLUE}🗑️  从 GitHub 分支移除排除文件夹...${NC}"
-for dir in $EXCLUDE_DIRS; do
-  if [ -d "$dir" ] || git ls-files --error-unmatch "$dir" >/dev/null 2>&1; then
-    echo -e "${YELLOW}   移除: ${dir}${NC}"
-    git rm -rf --cached "$dir" 2>/dev/null || true
-  fi
-done
-
-# 更新 .gitignore 添加排除规则
-echo ""
-echo -e "${BLUE}📝 更新 .gitignore...${NC}"
-GITIGNORE_UPDATED=false
-for dir in $EXCLUDE_DIRS; do
-  if ! grep -q "^${dir}$" .gitignore 2>/dev/null; then
-    echo "${dir}" >> .gitignore
-    GITIGNORE_UPDATED=true
-  fi
-done
-
-if [ "$GITIGNORE_UPDATED" = true ]; then
-  git add .gitignore
-  git -c user.name="${NEW_NAME}" -c user.email="${NEW_EMAIL}" commit -m "chore: update .gitignore" --allow-empty 2>/dev/null || true
-fi
-
-echo ""
-echo -e "${GREEN}✅ 排除文件夹处理完成！${NC}"
+echo -e "${GREEN}✅ 重写完成！${NC}"
+echo -e "${BLUE}   已移除排除文件夹并统一作者信息${NC}"
 
 echo ""
 echo -e "${BLUE}📋 查看修改后的提交：${NC}"
