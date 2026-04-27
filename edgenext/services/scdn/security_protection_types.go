@@ -441,12 +441,16 @@ type UpdatePreciseAccessControlConfigRequest struct {
 
 // PreciseAccessControlPolicy precise access control policy
 type PreciseAccessControlPolicy struct {
-	RuleType   string                   `json:"rule_type"`   // Rule type (was "type")
-	Action     string                   `json:"action"`      // Policy action
-	ActionData map[string]interface{}   `json:"action_data"` // Action data
-	Rules      []map[string]interface{} `json:"rules"`       // Rules list
-	From       string                   `json:"from"`        // From source
-	Status     int                      `json:"status"`      // Status
+	RuleType   string                   `json:"type,omitempty"`        // Policy type (maps to "type" in API)
+	Action     string                   `json:"action,omitempty"`      // Policy action
+	ActionData map[string]interface{}   `json:"action_data,omitempty"` // Action data
+	Rules      []map[string]interface{} `json:"rules,omitempty"`       // Rules list (flexible key-value pairs)
+	From       string                   `json:"from,omitempty"`        // From source
+	Status     int                      `json:"status,omitempty"`      // Status
+	Remark     string                   `json:"remark,omitempty"`      // Remark
+	Type       string                   `json:"type,omitempty"`        // Policy type: plus
+	ID         int                      `json:"id,omitempty"`          // Policy ID
+	Sort       int                      `json:"sort,omitempty"`        // Sort order
 }
 
 // ============================================================================

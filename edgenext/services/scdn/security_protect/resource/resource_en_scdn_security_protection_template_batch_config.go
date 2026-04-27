@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"sort"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -234,10 +236,10 @@ func ResourceEdgenextScdnSecurityProtectionTemplateBatchConfig() *schema.Resourc
 							Description: "Policy list",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"type": {
+									"rule_type": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Description: "Policy type",
+										Description: "Rule type (was 'type')",
 									},
 									"action": {
 										Type:        schema.TypeString,
@@ -256,9 +258,45 @@ func ResourceEdgenextScdnSecurityProtectionTemplateBatchConfig() *schema.Resourc
 										Type:        schema.TypeList,
 										Optional:    true,
 										Description: "Rules list",
-										Elem: &schema.Schema{
-											Type: schema.TypeMap,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"rule_type": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Rule type: url, referer_domain, referer, postfix, region",
+												},
+												"logic": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Logic: contains, equals, not_equals, not_belongs, len_greater_than",
+												},
+												"data": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Rule data (JSON string for array/object, or plain string)",
+												},
+											},
 										},
+									},
+									"remark": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Policy remark",
+									},
+									"type": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Policy type: plus",
+									},
+									"id": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: "Policy ID",
+									},
+									"sort": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: "Sort order",
 									},
 									"from": {
 										Type:        schema.TypeString,
@@ -279,7 +317,8 @@ func ResourceEdgenextScdnSecurityProtectionTemplateBatchConfig() *schema.Resourc
 			"fail_templates": {
 				Type:        schema.TypeMap,
 				Computed:    true,
-				Description: "Failed templates",
+				Deprecated:  "This attribute is deprecated and will be removed in a future version. Please check the apply output or logs for failure details.",
+				Description: "Failed templates (Deprecated)",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -300,12 +339,8 @@ func resourceScdnSecurityProtectionTemplateBatchConfigRead(d *schema.ResourceDat
 		return nil
 	}
 
-	// Try to parse template_ids from ID if not set in state
-	if _, ok := d.GetOk("template_ids"); !ok {
-		// ID format: template-batch-config-[template_ids]
-		// For simplicity, we'll just ensure the resource exists
-		// The actual template_ids should be preserved in state
-	}
+	// For compatibility and to avoid perpetual diff, set an empty map
+	_ = d.Set("fail_templates", map[string]string{})
 
 	return nil
 }
@@ -316,11 +351,46 @@ func resourceScdnSecurityProtectionTemplateBatchConfigUpdate(d *schema.ResourceD
 
 	req := scdn.SecurityProtectionTemplateBatchConfigRequest{}
 
-	// Set template_ids
-	templateIDs := d.Get("template_ids").([]interface{})
-	req.TemplateIDs = make([]int, len(templateIDs))
-	for i, v := range templateIDs {
-		req.TemplateIDs[i] = v.(int)
+	// Set template_ids and validate types
+	templateIDsInterface := d.Get("template_ids").([]interface{})
+	templateIDs := make([]int, len(templateIDsInterface))
+	for i, v := range templateIDsInterface {
+		templateIDs[i] = v.(int)
+	}
+	req.TemplateIDs = templateIDs
+
+	// Validation: Only single domain templates (only_domain) are allowed
+	// We verify this in a single API call using TplIDs and TplType="all"
+	searchReq := scdn.SecurityProtectionTemplateSearchRequest{
+		TplType:  "all",
+		Page:     1,
+		PageSize: len(templateIDs),
+		TplIDs:   templateIDs,
+	}
+	searchResp, err := service.SearchSecurityProtectionTemplates(searchReq)
+	if err != nil {
+		return fmt.Errorf("failed to verify template types: %w", err)
+	}
+
+	// Map to track found templates and their types
+	foundTemplates := make(map[int]string)
+	for _, t := range searchResp.Data.Templates {
+		foundTemplates[t.ID] = t.Type // Using .Type which now holds global, only_domain, more_domain
+	}
+
+	// Identify invalid IDs and their types
+	var invalidIDMessages []string
+	for _, id := range templateIDs {
+		actualType, exists := foundTemplates[id]
+		if !exists {
+			invalidIDMessages = append(invalidIDMessages, fmt.Sprintf("ID %d (not found)", id))
+		} else if actualType != "only_domain" {
+			invalidIDMessages = append(invalidIDMessages, fmt.Sprintf("ID %d (actual type: %s)", id, actualType))
+		}
+	}
+
+	if len(invalidIDMessages) > 0 {
+		return fmt.Errorf("the following template IDs are not single domain type templates: [%s]. Only single domain type templates (only_domain) are allowed for batch configuration", strings.Join(invalidIDMessages, ", "))
 	}
 
 	// Set all flag
@@ -472,7 +542,7 @@ func resourceScdnSecurityProtectionTemplateBatchConfigUpdate(d *schema.ResourceD
 				for i, policy := range policies {
 					policyMap := policy.(map[string]interface{})
 					policyCfg := scdn.PreciseAccessControlPolicy{}
-					if val, ok := policyMap["type"].(string); ok {
+					if val, ok := policyMap["rule_type"].(string); ok {
 						policyCfg.RuleType = val
 					}
 					if val, ok := policyMap["action"].(string); ok {
@@ -488,7 +558,27 @@ func resourceScdnSecurityProtectionTemplateBatchConfigUpdate(d *schema.ResourceD
 						policyCfg.Rules = make([]map[string]interface{}, len(val))
 						for j, rule := range val {
 							if ruleMap, ok := rule.(map[string]interface{}); ok {
-								policyCfg.Rules[j] = ruleMap
+								convertedRule := make(map[string]interface{})
+
+								// Convert rule_type and logic as strings
+								if rt, ok := ruleMap["rule_type"].(string); ok {
+									convertedRule["rule_type"] = rt
+								}
+								if lg, ok := ruleMap["logic"].(string); ok {
+									convertedRule["logic"] = lg
+								}
+								// Parse data field - it's a JSON string that needs to be parsed
+								if dataStr, ok := ruleMap["data"].(string); ok {
+									var dataValue interface{}
+									if err := json.Unmarshal([]byte(dataStr), &dataValue); err == nil {
+										convertedRule["data"] = dataValue
+									} else {
+										// If not valid JSON, use as plain string
+										convertedRule["data"] = dataStr
+									}
+								}
+
+								policyCfg.Rules[j] = convertedRule
 							}
 						}
 					}
@@ -521,15 +611,13 @@ func resourceScdnSecurityProtectionTemplateBatchConfigUpdate(d *schema.ResourceD
 	}
 	d.SetId(fmt.Sprintf("template-batch-config-%s", strings.Join(idParts, "-")))
 
-	// Set fail_templates if any
+	// Report fail_templates if any
 	if len(response.Data.FailTemplates) > 0 {
-		failTemplatesMap := make(map[string]interface{})
+		var failMsg []string
 		for k, v := range response.Data.FailTemplates {
-			failTemplatesMap[k] = v
+			failMsg = append(failMsg, fmt.Sprintf("%s: %s", k, v))
 		}
-		if err := d.Set("fail_templates", failTemplatesMap); err != nil {
-			log.Printf("[WARN] Failed to set fail_templates: %v", err)
-		}
+		return fmt.Errorf("batch configuration partial success, the following templates failed: %s", strings.Join(failMsg, "; "))
 	}
 
 	return nil
