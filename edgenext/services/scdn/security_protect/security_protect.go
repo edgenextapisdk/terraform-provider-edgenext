@@ -14,6 +14,7 @@ func Resources() map[string]*schema.Resource {
 		"edgenext_scdn_security_protection_ddos_config":           resource.ResourceEdgenextScdnSecurityProtectionDdosConfig(),
 		"edgenext_scdn_security_protection_waf_config":            resource.ResourceEdgenextScdnSecurityProtectionWafConfig(),
 		"edgenext_scdn_security_protection_template":              resource.ResourceEdgenextScdnSecurityProtectionTemplate(),
+		"edgenext_scdn_security_protection_domain_template":       resource.ResourceEdgenextScdnSecurityProtectionDomainTemplate(),
 		"edgenext_scdn_security_protection_template_domain_bind":  resource.ResourceEdgenextScdnSecurityProtectionTemplateDomainBind(),
 		"edgenext_scdn_security_protection_template_batch_config": resource.ResourceEdgenextScdnSecurityProtectionTemplateBatchConfig(),
 	}
