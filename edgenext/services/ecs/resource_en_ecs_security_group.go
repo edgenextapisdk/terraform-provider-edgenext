@@ -23,7 +23,6 @@ func ResourceENECSSecurityGroup() *schema.Resource {
 		},
 		Description: "Provides an EdgeNext ECS security_group resource.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("region description"),
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -39,23 +38,11 @@ func ResourceENECSSecurityGroup() *schema.Resource {
 }
 
 func resourceENECSSecurityGroupImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("expected import id as region/name, got %q", d.Id())
+	securityGroupID := strings.TrimSpace(d.Id())
+	if securityGroupID == "" {
+		return nil, fmt.Errorf("expected import id as security_group_id, got %q", d.Id())
 	}
-	region := helper.NormalizeRegion(parts[0])
-	name := strings.TrimSpace(parts[1])
-	if region == "" || name == "" {
-		return nil, fmt.Errorf("expected import id as region/name, got %q", d.Id())
-	}
-	if err := d.Set("region", region); err != nil {
-		return nil, err
-	}
-	if err := d.Set("name", name); err != nil {
-		return nil, err
-	}
-	// Read uses name to query and then sets canonical id.
-	d.SetId(name)
+	d.SetId(securityGroupID)
 	if diags := resourceENECSSecurityGroupRead(ctx, d, meta); diags.HasError() {
 		errDiag := diags[0]
 		if errDiag.Detail != "" {
@@ -64,7 +51,7 @@ func resourceENECSSecurityGroupImport(ctx context.Context, d *schema.ResourceDat
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("security group %q not found in region %q", name, region)
+		return nil, fmt.Errorf("security group %q not found", securityGroupID)
 	}
 	return []*schema.ResourceData{d}, nil
 }
@@ -77,7 +64,6 @@ func resourceENECSSecurityGroupCreate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
 		"security_group": map[string]interface{}{
 			"name":        d.Get("name").(string),
 			"description": d.Get("description").(string),
@@ -114,39 +100,32 @@ func resourceENECSSecurityGroupRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"name":   d.Get("name").(string),
-		"limit":  10,
+		"id": d.Id(),
 	}
 	var resp map[string]interface{}
 
-	err = ecsClient.Post(ctx, "/ecs/openapi/v2/security_group/list", req, &resp)
+	err = ecsClient.Post(ctx, "/ecs/openapi/v2/security_group/detail", req, &resp)
 	if err != nil {
 		d.SetId("") // assume destroyed
 		return nil
 	}
 	payload, err := helper.ParseAPIResponseMap(resp)
 	if err != nil {
-		return diag.Errorf("failed to parse ECS security_group list response: %s", err)
+		return diag.Errorf("failed to parse ECS security_group detail response: %s", err)
 	}
-	securityGroups := helper.ListFromMap(payload, "security_groups")
-	if len(securityGroups) == 0 {
+	securityGroup := helper.MapFromMap(payload, "security_group")
+	if securityGroup == nil {
 		d.SetId("")
 		return nil
 	}
-	first, ok := securityGroups[0].(map[string]interface{})
-	if !ok {
-		d.SetId("")
-		return nil
-	}
-	currentID := helper.StringFromMap(first, "id")
+	currentID := helper.StringFromMap(securityGroup, "id")
 	if currentID == "" {
 		d.SetId("")
 		return nil
 	}
 	d.SetId(currentID)
-	_ = d.Set("name", helper.StringFromMap(first, "name"))
-	_ = d.Set("description", helper.StringFromMap(first, "description"))
+	_ = d.Set("name", helper.StringFromMap(securityGroup, "name"))
+	_ = d.Set("description", helper.StringFromMap(securityGroup, "description"))
 	return nil
 }
 
@@ -162,8 +141,7 @@ func resourceENECSSecurityGroupUpdate(ctx context.Context, d *schema.ResourceDat
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"id":     d.Id(),
+		"id": d.Id(),
 		"security_group": map[string]interface{}{
 			"name":        d.Get("name").(string),
 			"description": d.Get("description").(string),
@@ -189,8 +167,7 @@ func resourceENECSSecurityGroupDelete(ctx context.Context, d *schema.ResourceDat
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"ids":    []string{d.Id()},
+		"ids": []string{d.Id()},
 	}
 	var resp map[string]interface{}
 

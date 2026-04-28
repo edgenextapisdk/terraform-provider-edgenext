@@ -15,11 +15,15 @@ func DataSourceENECSRouters() *schema.Resource {
 		ReadContext: dataSourceENECSRoutersRead,
 		Description: "Data source to query EdgeNext ECS routers.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
-			"name": {
+			"router_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name to filter routers.",
+				Description: "The router ID to filter routers.",
+			},
+			"router_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The router name to filter routers.",
 			},
 			"limit": {
 				Type:        schema.TypeInt,
@@ -188,9 +192,9 @@ func dataSourceENECSRoutersRead(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"name":   d.Get("name").(string),
-		"limit":  d.Get("limit").(int),
+		"id":    d.Get("router_id").(string),
+		"name":  d.Get("router_name").(string),
+		"limit": d.Get("limit").(int),
 	}
 	var resp map[string]interface{}
 
@@ -233,7 +237,7 @@ func dataSourceENECSRoutersRead(ctx context.Context, d *schema.ResourceData, m i
 	if err := d.Set("total", helper.IntFromMap(payload, "count")); err != nil {
 		return diag.FromErr(err)
 	}
-	helper.SetDataSourceStableID(d, "region", "name", "limit")
+	helper.SetDataSourceStableID(d, "router_id", "router_name", "limit")
 	if err := d.Set("routers", items); err != nil {
 		return diag.FromErr(err)
 	}

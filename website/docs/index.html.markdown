@@ -141,10 +141,14 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_ecs_router`](resources/ecs_router) - Manage ECS routers
 * [`edgenext_ecs_router_port`](resources/ecs_router_port) - Manage ECS router port attachments
 * [`edgenext_ecs_network_interface`](resources/ecs_network_interface) - Manage ECS network interfaces
+* [`edgenext_ecs_network_interface_instance_binding`](resources/ecs_network_interface_instance_binding) - Manage ECS network interface instance bindings
+* [`edgenext_ecs_network_interface_floating_ip_binding`](resources/ecs_network_interface_floating_ip_binding) - Manage ECS network interface floating IP bindings
 * [`edgenext_ecs_security_group`](resources/ecs_security_group) - Manage ECS security groups
 * [`edgenext_ecs_security_group_rule`](resources/ecs_security_group_rule) - Manage ECS security group rules
 * [`edgenext_ecs_tag`](resources/ecs_tag) - Manage ECS tags
-* [`edgenext_ecs_resource_tag`](resources/ecs_resource_tag) - Manage ECS resource tag bindings
+* [`edgenext_ecs_instance_tag`](resources/ecs_instance_tag) - Manage ECS instance tag bindings
+* [`edgenext_ecs_instance_power`](resources/ecs_instance_power) - Manage ECS instance power operations
+* [`edgenext_ecs_instance_reboot`](resources/ecs_instance_reboot) - Manage ECS instance reboot operations
 
 #### Data Sources
 
@@ -162,9 +166,9 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_ecs_disks`](data-sources/ecs_disks) - Query ECS disks
 * [`edgenext_ecs_tags`](data-sources/ecs_tags) - Query ECS tags
 * [`edgenext_ecs_security_group_rules`](data-sources/ecs_security_group_rules) - Query ECS security group rules
-* [`edgenext_ecs_resource_tags`](data-sources/ecs_resource_tags) - Query ECS resource tag relations
+* [`edgenext_ecs_instance_tags`](data-sources/ecs_instance_tags) - Query ECS instance tag relations
 
-### Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically (for example key pair name/public_key, ENI network/subnet, and VPC subnet settings).
+### Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically.
 
 ### Security DNS (SDNS)
 

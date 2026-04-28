@@ -4,14 +4,14 @@ Example Usage
 
 ```hcl
 resource "edgenext_ecs_tag" "example" {
-  key   = "env"
-  value = "dev"
+  tag_key   = "env"
+  tag_value = "dev"
 }
 ```
 
 Import
 
-Import format is `tag_id/key/value`.
+Import format is `tag_id/tag_key/tag_value`.
 
 ```shell
 terraform import edgenext_ecs_tag.example 52/env/dev
@@ -19,8 +19,8 @@ terraform import edgenext_ecs_tag.example 52/env/dev
 
 Argument Reference
 
-* `key` - (Required) Tag key. Cannot be changed after creation.
-* `value` - (Required) Tag value. Cannot be changed after creation.
+* `tag_key` - (Required) Tag key. Cannot be changed after creation.
+* `tag_value` - (Required) Tag value. Cannot be changed after creation.
 
 Attributes Reference
 

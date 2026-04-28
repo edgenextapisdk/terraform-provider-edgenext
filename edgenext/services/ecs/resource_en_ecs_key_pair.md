@@ -4,7 +4,6 @@ Example Usage
 
 ```hcl
 resource "edgenext_ecs_key_pair" "example" {
-  region     = "tokyo-a"
   name       = "example-key"
   public_key = file("~/.ssh/id_rsa.pub")
 }
@@ -12,15 +11,14 @@ resource "edgenext_ecs_key_pair" "example" {
 
 Import
 
-Import format is `region/name`.
+Import format is `name`.
 
 ```shell
-terraform import edgenext_ecs_key_pair.example tokyo-a/example-key
+terraform import edgenext_ecs_key_pair.example example-key
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `name` - (Required) Key pair name. Cannot be changed after creation.
 * `public_key` - (Optional) Public key content. Cannot be changed after creation.
 

@@ -4,14 +4,15 @@ Example Usage
 
 ```hcl
 data "edgenext_ecs_tags" "example" {
-  tag_key   = "env"
-  tag_value = "dev"
+  tag_key   = edgenext_ecs_tag.example.tag_key
+  tag_value = edgenext_ecs_tag.example.tag_value
   page_num  = 1
   page_size = 10
 }
 
-output "first_tag_id" {
-  value = try(data.edgenext_ecs_tags.example.tags[0].id, null)
+resource "edgenext_ecs_tag" "example" {
+  tag_key   = "env"
+  tag_value = "dev"
 }
 ```
 

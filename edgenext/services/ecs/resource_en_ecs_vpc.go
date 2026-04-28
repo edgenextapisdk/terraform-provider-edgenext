@@ -24,7 +24,6 @@ func ResourceENECSVpc() *schema.Resource {
 		},
 		Description: "Provides an EdgeNext ECS vpc resource. subnet and its nested fields cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("region description"),
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -126,7 +125,6 @@ func resourceENECSVpcCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
 		"network": map[string]interface{}{
 			"name":        d.Get("name").(string),
 			"description": d.Get("description").(string),
@@ -161,16 +159,11 @@ func resourceENECSVpcCreate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceENECSVpcImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("expected import id as region/network_id, got %q", d.Id())
+	vpcID := strings.TrimSpace(d.Id())
+	if vpcID == "" {
+		return nil, fmt.Errorf("expected import id as vpc_id, got %q", d.Id())
 	}
-
-	region := helper.NormalizeRegion(parts[0])
-	if err := d.Set("region", region); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[1])
+	d.SetId(vpcID)
 
 	if diags := resourceENECSVpcRead(ctx, d, meta); diags.HasError() {
 		errDiag := diags[0]
@@ -180,7 +173,7 @@ func resourceENECSVpcImport(ctx context.Context, d *schema.ResourceData, meta in
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("vpc %q not found in region %q", parts[1], region)
+		return nil, fmt.Errorf("vpc %q not found", vpcID)
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -194,7 +187,6 @@ func resourceENECSVpcRead(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	req := map[string]interface{}{
-		"region":     helper.NormalizeRegion(d.Get("region").(string)),
 		"network_id": d.Id(),
 	}
 	var resp map[string]interface{}
@@ -264,7 +256,6 @@ func resourceENECSVpcUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
 		"network": map[string]interface{}{
 			"network_id":  d.Id(),
 			"name":        d.Get("name"),
@@ -291,7 +282,6 @@ func resourceENECSVpcDelete(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	req := map[string]interface{}{
-		"region":      helper.NormalizeRegion(d.Get("region").(string)),
 		"network_ids": []string{d.Id()},
 	}
 	var resp map[string]interface{}

@@ -15,7 +15,6 @@ func DataSourceENECSKeyPairs() *schema.Resource {
 		ReadContext: dataSourceENECSKeyPairsRead,
 		Description: "Data source to query EdgeNext ECS key_pairs.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
 			"limit": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -50,6 +49,11 @@ func DataSourceENECSKeyPairs() *schema.Resource {
 					},
 				},
 			},
+			"total": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Total number of matched key_pairs.",
+			},
 		},
 	}
 }
@@ -61,9 +65,7 @@ func dataSourceENECSKeyPairsRead(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-	}
+	req := map[string]interface{}{}
 	if limit, ok := d.GetOk("limit"); ok {
 		req["limit"] = limit.(int)
 	}
@@ -79,6 +81,13 @@ func dataSourceENECSKeyPairsRead(ctx context.Context, d *schema.ResourceData, m 
 	if err != nil {
 		return diag.Errorf("failed to parse ECS key_pairs response: %s", err)
 	}
+	total := 0
+	if payload, err := helper.ParseAPIResponseMap(resp); err == nil {
+		total = helper.IntFromMap(payload, "count")
+		if total == 0 {
+			total = helper.IntFromMap(payload, "total")
+		}
+	}
 	flat := make([]interface{}, 0, len(dataList))
 	for _, raw := range dataList {
 		row, ok := raw.(map[string]interface{})
@@ -91,7 +100,13 @@ func dataSourceENECSKeyPairsRead(ctx context.Context, d *schema.ResourceData, m 
 		}
 		flat = append(flat, keyPairAttrsFromMap(row))
 	}
-	helper.SetDataSourceStableID(d, "region", "limit")
+	if total == 0 && len(flat) > 0 {
+		total = len(flat)
+	}
+	if err := d.Set("total", total); err != nil {
+		return diag.FromErr(err)
+	}
+	helper.SetDataSourceStableID(d, "limit")
 	if err := d.Set("key_pairs", flat); err != nil {
 		return diag.FromErr(err)
 	}

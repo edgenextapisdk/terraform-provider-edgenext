@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -19,10 +20,12 @@ type ECSClient struct {
 	client    *resty.Client
 	accessKey string
 	secretKey string
+	region    string
 }
 
 // NewECSClient creates a new ECS API client instance.
-func NewECSClient(accessKey, secretKey, endpoint string) *ECSClient {
+func NewECSClient(accessKey, secretKey, endpoint, region string) *ECSClient {
+	normalizedRegion := strings.ToLower(strings.TrimSpace(region))
 	client := resty.New().
 		SetBaseURL(endpoint).
 		SetTimeout(30*time.Second).
@@ -30,12 +33,14 @@ func NewECSClient(accessKey, secretKey, endpoint string) *ECSClient {
 		SetRetryWaitTime(1*time.Second).
 		SetRetryMaxWaitTime(5*time.Second).
 		SetHeader("Content-Type", "application/json").
-		SetHeader("User-Agent", "terraform-provider-edgenext/1.0.0")
+		SetHeader("User-Agent", "terraform-provider-edgenext/1.0.0").
+		SetHeader("X-Region", normalizedRegion)
 
 	return &ECSClient{
 		client:    client,
 		accessKey: accessKey,
 		secretKey: secretKey,
+		region:    normalizedRegion,
 	}
 }
 
@@ -93,6 +98,10 @@ func (c *ECSClient) authHeaders(timestamp, signature string) map[string]string {
 		"Edgenext-Timestamp": timestamp,
 		"Signature":          signature,
 	}
+}
+
+func (c *ECSClient) Region() string {
+	return c.region
 }
 
 func (c *ECSClient) sign(payload []byte) (string, string) {

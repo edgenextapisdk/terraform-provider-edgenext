@@ -132,6 +132,11 @@
           "display_name": "ecs images"
         },
         {
+          "name": "ecs_instance_tags",
+          "path": "docs/d/ecs_instance_tags.html.markdown",
+          "display_name": "ecs instance tags"
+        },
+        {
           "name": "ecs_instances",
           "path": "docs/d/ecs_instances.html.markdown",
           "display_name": "ecs instances"
@@ -145,11 +150,6 @@
           "name": "ecs_network_interfaces",
           "path": "docs/d/ecs_network_interfaces.html.markdown",
           "display_name": "ecs network interfaces"
-        },
-        {
-          "name": "ecs_resource_tags",
-          "path": "docs/d/ecs_resource_tags.html.markdown",
-          "display_name": "ecs resource tags"
         },
         {
           "name": "ecs_router_ports",
@@ -189,6 +189,21 @@
       ],
       "resources": [
         {
+          "name": "ecs_instance_power",
+          "path": "docs/r/ecs_instance_power.html.markdown",
+          "display_name": "ecs instance power"
+        },
+        {
+          "name": "ecs_instance_reboot",
+          "path": "docs/r/ecs_instance_reboot.html.markdown",
+          "display_name": "ecs instance reboot"
+        },
+        {
+          "name": "ecs_instance_tag",
+          "path": "docs/r/ecs_instance_tag.html.markdown",
+          "display_name": "ecs instance tag"
+        },
+        {
           "name": "ecs_key_pair",
           "path": "docs/r/ecs_key_pair.html.markdown",
           "display_name": "ecs key pair"
@@ -199,9 +214,14 @@
           "display_name": "ecs network interface"
         },
         {
-          "name": "ecs_resource_tag",
-          "path": "docs/r/ecs_resource_tag.html.markdown",
-          "display_name": "ecs resource tag"
+          "name": "ecs_network_interface_floating_ip_binding",
+          "path": "docs/r/ecs_network_interface_floating_ip_binding.html.markdown",
+          "display_name": "ecs network interface floating ip binding"
+        },
+        {
+          "name": "ecs_network_interface_instance_binding",
+          "path": "docs/r/ecs_network_interface_instance_binding.html.markdown",
+          "display_name": "ecs network interface instance binding"
         },
         {
           "name": "ecs_router",
@@ -715,6 +735,11 @@
       "display_name": "ecs images"
     },
     {
+      "name": "ecs_instance_tags",
+      "path": "docs/d/ecs_instance_tags.html.markdown",
+      "display_name": "ecs instance tags"
+    },
+    {
       "name": "ecs_instances",
       "path": "docs/d/ecs_instances.html.markdown",
       "display_name": "ecs instances"
@@ -728,11 +753,6 @@
       "name": "ecs_network_interfaces",
       "path": "docs/d/ecs_network_interfaces.html.markdown",
       "display_name": "ecs network interfaces"
-    },
-    {
-      "name": "ecs_resource_tags",
-      "path": "docs/d/ecs_resource_tags.html.markdown",
-      "display_name": "ecs resource tags"
     },
     {
       "name": "ecs_router_ports",
@@ -1032,6 +1052,21 @@
       "display_name": "cdn purge"
     },
     {
+      "name": "ecs_instance_power",
+      "path": "docs/r/ecs_instance_power.html.markdown",
+      "display_name": "ecs instance power"
+    },
+    {
+      "name": "ecs_instance_reboot",
+      "path": "docs/r/ecs_instance_reboot.html.markdown",
+      "display_name": "ecs instance reboot"
+    },
+    {
+      "name": "ecs_instance_tag",
+      "path": "docs/r/ecs_instance_tag.html.markdown",
+      "display_name": "ecs instance tag"
+    },
+    {
       "name": "ecs_key_pair",
       "path": "docs/r/ecs_key_pair.html.markdown",
       "display_name": "ecs key pair"
@@ -1042,9 +1077,14 @@
       "display_name": "ecs network interface"
     },
     {
-      "name": "ecs_resource_tag",
-      "path": "docs/r/ecs_resource_tag.html.markdown",
-      "display_name": "ecs resource tag"
+      "name": "ecs_network_interface_floating_ip_binding",
+      "path": "docs/r/ecs_network_interface_floating_ip_binding.html.markdown",
+      "display_name": "ecs network interface floating ip binding"
+    },
+    {
+      "name": "ecs_network_interface_instance_binding",
+      "path": "docs/r/ecs_network_interface_instance_binding.html.markdown",
+      "display_name": "ecs network interface instance binding"
     },
     {
       "name": "ecs_router",

@@ -22,18 +22,17 @@ func ResourceENECSRouterPort() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSRouterPortImport,
 		},
-		Description: "Provides an EdgeNext ECS router port attachment resource. router_id, network_id, and subnet_id cannot be changed after creation.",
+		Description: "Provides an EdgeNext ECS router port attachment resource. router_id, vpc_id, and subnet_id cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("The region of the router."),
 			"router_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The router ID. Cannot be changed after creation.",
 			},
-			"network_id": {
+			"vpc_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The network ID to attach. Cannot be changed after creation.",
+				Description: "The VPC ID to attach. Cannot be changed after creation.",
 			},
 			"subnet_id": {
 				Type:        schema.TypeString,
@@ -60,10 +59,10 @@ func ResourceENECSRouterPort() *schema.Resource {
 				Computed:    true,
 				Description: "Port MAC address.",
 			},
-			"network_name": {
+			"vpc_name": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Port network name.",
+				Description: "VPC name.",
 			},
 			"status": {
 				Type:        schema.TypeString,
@@ -90,10 +89,10 @@ func resourceENECSRouterPortCustomizeDiff(_ context.Context, d *schema.ResourceD
 			return fmt.Errorf("router_id cannot be modified after creation")
 		}
 	}
-	if d.HasChange("network_id") {
-		oldRaw, newRaw := d.GetChange("network_id")
+	if d.HasChange("vpc_id") {
+		oldRaw, newRaw := d.GetChange("vpc_id")
 		if strings.TrimSpace(fmt.Sprintf("%v", oldRaw)) != strings.TrimSpace(fmt.Sprintf("%v", newRaw)) {
-			return fmt.Errorf("network_id cannot be modified after creation")
+			return fmt.Errorf("vpc_id cannot be modified after creation")
 		}
 	}
 	if d.HasChange("subnet_id") {
@@ -107,18 +106,13 @@ func resourceENECSRouterPortCustomizeDiff(_ context.Context, d *schema.ResourceD
 
 func resourceENECSRouterPortImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("expected import id as region/router_id/port_id, got %q", d.Id())
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected import id as router_id/port_id, got %q", d.Id())
 	}
-
-	region := helper.NormalizeRegion(parts[0])
-	if err := d.Set("region", region); err != nil {
+	if err := d.Set("router_id", parts[0]); err != nil {
 		return nil, err
 	}
-	if err := d.Set("router_id", parts[1]); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[2])
+	d.SetId(parts[1])
 
 	if diags := resourceENECSRouterPortRead(ctx, d, meta); diags.HasError() {
 		errDiag := diags[0]
@@ -128,7 +122,7 @@ func resourceENECSRouterPortImport(ctx context.Context, d *schema.ResourceData, 
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("router port %q not found under router %q in region %q", d.Id(), parts[1], region)
+		return nil, fmt.Errorf("router port %q not found under router %q", d.Id(), parts[0])
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -142,9 +136,8 @@ func resourceENECSRouterPortCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	req := map[string]interface{}{
-		"region":     helper.NormalizeRegion(d.Get("region").(string)),
 		"id":         d.Get("router_id").(string),
-		"network_id": d.Get("network_id").(string),
+		"network_id": d.Get("vpc_id").(string),
 		"subnet_id":  d.Get("subnet_id").(string),
 	}
 	var resp map[string]interface{}
@@ -174,8 +167,7 @@ func resourceENECSRouterPortRead(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"id":     d.Get("router_id").(string),
+		"id": d.Get("router_id").(string),
 	}
 	var resp map[string]interface{}
 	if err := ecsClient.Post(ctx, "/ecs/openapi/v2/routers/port_list", req, &resp); err != nil {
@@ -208,7 +200,7 @@ func resourceENECSRouterPortRead(ctx context.Context, d *schema.ResourceData, m 
 	_ = d.Set("name", helper.StringFromMap(matched, "name"))
 	_ = d.Set("ip_address", helper.StringFromMap(matched, "ip_address"))
 	_ = d.Set("mac_address", helper.StringFromMap(matched, "mac_address"))
-	_ = d.Set("network_name", helper.StringFromMap(matched, "network_name"))
+	_ = d.Set("vpc_name", helper.StringFromMap(matched, "network_name"))
 	_ = d.Set("status", helper.StringFromMap(matched, "status"))
 	_ = d.Set("created_at", helper.StringFromMap(matched, "created_at"))
 
@@ -217,8 +209,8 @@ func resourceENECSRouterPortRead(ctx context.Context, d *schema.ResourceData, m 
 
 func resourceENECSRouterPortUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Defense in depth: CustomizeDiff blocks these at plan time; reject here if Update is still invoked.
-	if d.HasChange("router_id") || d.HasChange("network_id") || d.HasChange("subnet_id") {
-		return diag.Errorf("router_id, network_id, and subnet_id cannot be updated after creation")
+	if d.HasChange("router_id") || d.HasChange("vpc_id") || d.HasChange("subnet_id") {
+		return diag.Errorf("router_id, vpc_id, and subnet_id cannot be updated after creation")
 	}
 	return resourceENECSRouterPortRead(ctx, d, m)
 }
@@ -231,7 +223,6 @@ func resourceENECSRouterPortDelete(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	req := map[string]interface{}{
-		"region":    helper.NormalizeRegion(d.Get("region").(string)),
 		"id":        d.Get("router_id").(string),
 		"subnet_id": d.Get("subnet_id").(string),
 	}

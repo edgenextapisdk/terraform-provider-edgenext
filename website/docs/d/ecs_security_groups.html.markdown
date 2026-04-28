@@ -15,13 +15,12 @@ Use this data source to query ECS security groups.
 
 ```hcl
 data "edgenext_ecs_security_groups" "example" {
-  region = "tokyo-a"
-  name   = ""
-  limit  = 10
+  name  = edgenext_ecs_security_group.example.name
+  limit = 10
 }
 
-output "first_security_group_id" {
-  value = try(data.edgenext_ecs_security_groups.example.security_groups[0].id, null)
+resource "edgenext_ecs_security_group" "example" {
+  name = "example-sg"
 }
 ```
 
@@ -29,7 +28,6 @@ output "first_security_group_id" {
 
 The following arguments are supported:
 
-* `region` - (Required, String) region description
 * `limit` - (Optional, Int) Maximum number of security_groups to return.
 * `name` - (Optional, String) The name to filter security_groups.
 

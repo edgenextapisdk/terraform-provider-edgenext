@@ -4,20 +4,17 @@ Example Usage
 
 ```hcl
 data "edgenext_ecs_vpc_subnets" "example" {
-  region     = "tokyo-a"
-  network_id = "0e07db22-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  router_id  = "f9883769-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  vpc_id = data.edgenext_ecs_vpcs.all.vpcs[0].id
 }
 
-output "vpc_subnet_total" {
-  value = data.edgenext_ecs_vpc_subnets.example.total
+data "edgenext_ecs_vpcs" "all" {
+  limit = 1
 }
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
-* `network_id` - (Required) VPC network ID.
+* `vpc_id` - (Required) VPC ID.
 * `router_id` - (Optional) Router ID filter.
 
 Attributes Reference

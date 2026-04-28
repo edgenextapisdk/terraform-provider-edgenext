@@ -15,8 +15,7 @@ Use this resource to manage a single ECS security group rule.
 
 ```hcl
 resource "edgenext_ecs_security_group_rule" "example" {
-  region            = "tokyo-a"
-  security_group_id = "12f8f386-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  security_group_id = edgenext_ecs_security_group.example.id
   protocol          = "tcp"
   direction         = "ingress"
   ethertype         = "IPv4"
@@ -24,6 +23,10 @@ resource "edgenext_ecs_security_group_rule" "example" {
   port_range_max    = 22
   remote_ip_prefix  = "0.0.0.0/0"
   description       = "allow ssh"
+}
+
+resource "edgenext_ecs_security_group" "example" {
+  name = "example-sg"
 }
 ```
 
@@ -36,7 +39,6 @@ The following arguments are supported:
 * `port_range_max` - (Required, Int) Maximum port number. Cannot be changed after creation.
 * `port_range_min` - (Required, Int) Minimum port number. Cannot be changed after creation.
 * `protocol` - (Required, String) Protocol name (e.g. tcp, udp, icmp). Cannot be changed after creation.
-* `region` - (Required, String, ForceNew) The region of the security group.
 * `security_group_id` - (Required, String) The security group ID this rule belongs to. Cannot be changed after creation.
 * `description` - (Optional, String) Rule description. Cannot be changed after creation.
 * `remote_group_id` - (Optional, String) Remote security group ID. Leave empty when using remote_ip_prefix only. Cannot be changed after creation.
@@ -57,15 +59,14 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-Import format is `region/security_group_id/rule_id`.
+Import format is `security_group_id/rule_id`.
 
 ```shell
-terraform import edgenext_ecs_security_group_rule.example tokyo-a/12f8f386-xxxx-xxxx-xxxx-xxxxxxxxxxxx/df58bf0a-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import edgenext_ecs_security_group_rule.example 12f8f386-xxxx-xxxx-xxxx-xxxxxxxxxxxx/df58bf0a-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `security_group_id` - (Required) Security group ID. Cannot be changed after creation.
 * `protocol` - (Required) Protocol, for example `tcp`, `udp`, `icmp`. Cannot be changed after creation.
 * `direction` - (Required) Rule direction, `ingress` or `egress`. Cannot be changed after creation.
