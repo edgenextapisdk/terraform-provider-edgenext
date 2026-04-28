@@ -4,8 +4,7 @@ Example Usage
 
 ```hcl
 resource "edgenext_ecs_security_group_rule" "example" {
-  region            = "tokyo-a"
-  security_group_id = "12f8f386-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  security_group_id = edgenext_ecs_security_group.example.id
   protocol          = "tcp"
   direction         = "ingress"
   ethertype         = "IPv4"
@@ -14,19 +13,22 @@ resource "edgenext_ecs_security_group_rule" "example" {
   remote_ip_prefix  = "0.0.0.0/0"
   description       = "allow ssh"
 }
+
+resource "edgenext_ecs_security_group" "example" {
+  name = "example-sg"
+}
 ```
 
 Import
 
-Import format is `region/security_group_id/rule_id`.
+Import format is `security_group_id/rule_id`.
 
 ```shell
-terraform import edgenext_ecs_security_group_rule.example tokyo-a/12f8f386-xxxx-xxxx-xxxx-xxxxxxxxxxxx/df58bf0a-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import edgenext_ecs_security_group_rule.example 12f8f386-xxxx-xxxx-xxxx-xxxxxxxxxxxx/df58bf0a-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `security_group_id` - (Required) Security group ID. Cannot be changed after creation.
 * `protocol` - (Required) Protocol, for example `tcp`, `udp`, `icmp`. Cannot be changed after creation.
 * `direction` - (Required) Rule direction, `ingress` or `egress`. Cannot be changed after creation.

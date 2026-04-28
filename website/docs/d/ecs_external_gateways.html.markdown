@@ -15,12 +15,12 @@ Use this data source to query ECS external gateway networks.
 
 ```hcl
 data "edgenext_ecs_external_gateways" "example" {
-  region = "tokyo-a"
-  limit  = 10
+  limit = 10
 }
 
-output "external_gateway_total" {
-  value = data.edgenext_ecs_external_gateways.example.total
+resource "edgenext_ecs_router" "example" {
+  name                = "router-with-external-gateway"
+  external_network_id = data.edgenext_ecs_external_gateways.example.external_gateways[0].id
 }
 ```
 
@@ -28,7 +28,6 @@ output "external_gateway_total" {
 
 The following arguments are supported:
 
-* `region` - (Required, String) region description
 * `limit` - (Optional, Int) Maximum number of external gateways to return.
 
 ## Attributes Reference

@@ -1,3 +1,10 @@
+# EdgeNext ECS Terraform examples.
+# Schemas match edgenext/services/ecs. Region is taken from the provider block only.
+#
+# The following resources are implemented under services/ecs but commented out in
+# edgenext/provider.go until registered: edgenext_ecs_instance, edgenext_ecs_image,
+# edgenext_ecs_floating_ip, edgenext_ecs_disk.
+
 terraform {
   required_providers {
     edgenext = {
@@ -11,6 +18,7 @@ provider "edgenext" {
   access_key = var.access_key
   secret_key = var.secret_key
   endpoint   = var.endpoint
+  region     = var.region
 }
 
 variable "access_key" {
@@ -28,12 +36,16 @@ variable "endpoint" {
   type        = string
 }
 
+variable "region" {
+  description = "EdgeNext region"
+  type        = string
+}
 
 #
-# VPC and Networking
+# VPC and networking (registered in provider)
 #
+
 # resource "edgenext_ecs_vpc" "example" {
-#   region      = "tokyo-a"
 #   name        = "example-vpc"
 #   description = "Example VPC for ECS instances"
 #   subnet {
@@ -43,128 +55,92 @@ variable "endpoint" {
 #   }
 # }
 
-# Create an additional subnet under an existing VPC.
-# Any argument change forces replacement because update is not supported.
+# Subnet under an existing VPC. Arguments cannot be changed after creation (replace on change).
 # resource "edgenext_ecs_vpc_subnet" "example" {
-#   region     = "tokyo-a"
-#   network_id = data.edgenext_ecs_vpcs.all_vpcs.vpcs[0].id
+#   vpc_id     = data.edgenext_ecs_vpcs.all.vpcs[0].id
 #   name       = "example-subnet-extra"
 #   ip_version = 4
 #   cidr       = "192.168.1.0/24"
 # }
 
-# # Import format: region/network_id/subnet_id
-# # terraform import edgenext_ecs_vpc_subnet.example 'tokyo-a/0e07db22-e210-4138-b40b-6cbdb3580b12/50a0f20a-16a8-46e1-8271-0d1660c739d5'
-# resource "edgenext_ecs_vpc_subnet" "example" {}
-
 # resource "edgenext_ecs_router" "example" {
-#   region              = "tokyo-a"
 #   name                = "example-router"
 #   description         = "Example router"
-#   external_network_id = ""
+#   external_network_id = data.edgenext_ecs_external_gateways.all.external_gateways[0].id
 # }
-#
-# # Import format: region/router_id
-# # terraform import edgenext_ecs_router.example 'tokyo-a/32253e60-4cdc-4bcb-9944-30fd8e2dcefb'
-# resource "edgenext_ecs_router" "example" {}
-#
-# # Attach a subnet to router.
-# resource "edgenext_ecs_router_port" "example" {
-#   region     = "tokyo-a"
-#   router_id  = "f9883769-85e0-4cdb-ae9a-c49da3a89edb"
-#   # router_id  = edgenext_ecs_router.example.id
-#   # network_id = data.edgenext_ecs_vpcs.all_vpcs.vpcs[0].id
-#   # subnet_id  = data.edgenext_ecs_vpc_subnets.vpc_subnets.subnets[0].id
-#   network_id = "68451a78-fcd6-439b-81f6-e01ed7525c16"
-#   subnet_id  = "b34fe463-3930-4eb6-a177-c8039fd376b4"
-# }
-#
-# # Import format: region/router_id/port_id
-# # terraform import edgenext_ecs_router_port.example 'tokyo-a/1bac4223-a709-4639-92c7-e2f7eba9e33c/74f3a422-e0cd-4031-9f4e-cb6a2e85ca2b'
-# resource "edgenext_ecs_router_port" "example" {}
 
-# Standalone ENI (Neutron port): /ecs/openapi/v2/ports/add, detail, delete.
-# Only name and description are updatable in place; other changes replace the resource.
-resource "edgenext_ecs_network_interface" "example" {
-  region      = "tokyo-a"
-  name        = "tyd-eni"
-  description = "for test"
-  network_id  = "0e07db22-e210-4138-b40b-6cbdb3580b12"
-  subnet_id   = "50a0f20a-16a8-46e1-8271-0d1660c739d5"
-  # Optional: bind ENI to an existing ECS instance.
-  device_id = "80e47fca-7822-4a71-9e51-6fe8bd232a18"
-  # Optional: manage security relation.
-  port_security_enabled = true
-  security_groups       = ["aa2b7c0d-0e1e-4ab2-97af-14a5d5fe48cd"]
-  # Optional: bind/unbind floating IP by address.
-  floating_ip_address   = "148.222.161.86"
-}
-#
-# # Import format: region/port_id
-# # terraform import edgenext_ecs_network_interface.example 'tokyo-a/fa67c471-722b-4a0d-944b-9e2d741e5c5c'
-# resource "edgenext_ecs_network_interface" "example" {}
+# Attach subnet to router. router_id, vpc_id, subnet_id are ForceNew.
+# resource "edgenext_ecs_router_port" "example" {
+#   router_id = edgenext_ecs_router.example.id
+#   # vpc_id    = edgenext_ecs_vpc.example.id
+#   vpc_id    = "e3ab4cfe-1f43-4698-87cb-1eb3c5c78806"
+#   subnet_id = "17dd56f7-94f7-4617-92b1-029ea78c3cc8" # from edgenext_ecs_vpc_subnet or data.edgenext_ecs_vpc_subnets
+# }
+
+# ENI (Neutron port). vpc_id and subnet_id are ForceNew; name/description update in place.
+# resource "edgenext_ecs_network_interface" "example" {
+#   name        = "example-eni"
+#   description = "Example ENI"
+#   vpc_id      = "06b20160-6d47-4d80-84f1-6127c65f6f19"
+#   subnet_id   = "e9ada4b5-bccd-4b88-86c1-b515e6730ef6"
+#   # port_security_enabled = true
+#   # security_groups       = ["2af2b1e5-344f-4184-9173-cf1b5d43bf7d"]
+# }
+
+# Bind an instance to an ENI (separate from ENI create).
+# resource "edgenext_ecs_network_interface_instance_binding" "example" {
+#   network_interface_id = edgenext_ecs_network_interface.example.id
+#   instance_id          = "cb24704a-dda5-4287-978f-cec28ee1e816"
+# }
+
+# Bind floating IP to an ENI (separate resource; edgenext_ecs_floating_ip create is optional in provider).
+# resource "edgenext_ecs_network_interface_floating_ip_binding" "example" {
+#   network_interface_id  = "47b88552-2a31-4446-9306-6abd692051bd"
+#   floating_ip_address   = "156.246.18.218"
+# }
+
 
 # resource "edgenext_ecs_security_group" "example" {
-#   region      = "tokyo-a"
 #   name        = "example-sg-managed"
 #   description = "A standard example security group"
 # }
 
-# Managed rule (create via /ecs/openapi/v2/security_group_rule/add). Any argument change forces replacement.
+# Managed rule; argument changes force replacement.
 # resource "edgenext_ecs_security_group_rule" "example" {
-#   region            = "tokyo-a"
-#   security_group_id = data.edgenext_ecs_security_groups.all_security_groups.security_groups[0].id
+#   security_group_id = data.edgenext_ecs_security_groups.all.security_groups[0].id
 #   protocol          = "tcp"
 #   direction         = "ingress"
 #   ethertype         = "IPv4"
 #   port_range_min    = 100
 #   port_range_max    = 300
 #   remote_ip_prefix  = "192.168.0.0/24"
-#   # remote_group_id  = ""
+#   # remote_group_id  = data.edgenext_ecs_security_groups.all.security_groups[0].id
 # }
 
-# Import an existing rule into Terraform state. Import ID format: region/security_group_id/rule_id
-# (region is normalized to lower-case by the provider). Uncomment the resource block above and run:
-#
-#   terraform import edgenext_ecs_security_group_rule.example 'tokyo-a/aa2b7c0d-0e1e-4ab2-97af-14a5d5fe48cd/2d259a40-4657-4324-9f3a-3c9aae529f88'
-# resource "edgenext_ecs_security_group_rule" "example" {}
-
-# #
-# # SSH Key
-# #
 # resource "edgenext_ecs_key_pair" "example" {
-#   region = "tokyo-a"
-#   name = "example-key"
+#   name       = "example-key"
 #   # public_key = file("~/.ssh/id_rsa.pub")
 # }
 
-# #
-# # Disks
-# #
-# resource "edgenext_ecs_disk" "example" {
-#   name        = "example-disk"
-#   size        = 50
-#   volume_type = "SSD"
+#
+# Instance lifecycle helpers (no full instance resource unless enabled in provider)
+#
+
+# resource "edgenext_ecs_instance_power" "example" {
+#   instance_id   = "cb24704a-dda5-4287-978f-cec28ee1e816"
+#   desired_state = "ACTIVE" # or "SHUTOFF"
 # }
 
-# #
-# # Compute Instance
-# #
-# resource "edgenext_ecs_instance" "example" {
-#   name            = "example-instance"
-#   region          = var.region
-#   flavor_ref      = "s1.small"
-#   image_ref       = "centos-7.9"
-#   admin_pass      = "SecurePass123!"
-#   bandwidth       = 5
-#   key_name        = edgenext_ecs_key_pair.example.name
-#   networks        = [edgenext_ecs_vpc.example.id]
-#   security_groups = [edgenext_ecs_security_group.example.id]
+# resource "edgenext_ecs_instance_reboot" "example" {
+#   instance_id = "0d4dd8b5-e581-4097-92df-7085b4c94953"
+#   reboot_type = "reboot_soft"
+#   trigger     = "2026-04-24T00:00:00Z"
 # }
 
-# #
-# # Tagging
-# #
+#
+# Tags (edgenext_ecs_tag uses tag_key / tag_value; binding uses edgenext_ecs_instance_tag)
+#
+
 locals {
   ecs_tags = {
     "test-key" = "test-value"
@@ -174,247 +150,173 @@ locals {
 }
 
 # resource "edgenext_ecs_tag" "example" {
-#   for_each = local.ecs_tags
-
-#   key   = each.key
-#   value = each.value
+#   for_each  = local.ecs_tags
+#   tag_key   = each.key
+#   tag_value = each.value
 # }
 
-# #
-# # Bind Tag IDs to a Target Resource
-# #
-# # Replace the values below with a real ECS resource.
-# resource "edgenext_ecs_resource_tag" "example_binding" {
-#   resource_uuid = "55d747cd-497b-460a-8c3d-2cb6ab2673cd"
-#   resource_name = "ch11"
-#   region        = "tokyo-a"
-#   resource_type = 1
-#   # tag_ids = [
-#   #   for t in values(edgenext_ecs_tag.example) : tonumber(t.id)
-#   # ]
-#   tag_ids = [ 52,56,57 ]
+# Bind tag IDs to an instance (instance_id and instance_name are ForceNew as a pair in practice).
+# resource "edgenext_ecs_instance_tag" "example_binding" {
+#   instance_id   = "0d4dd8b5-e581-4097-92df-7085b4c94953"
+#   instance_name = "monitor-vnc"
+#   tag_ids       = [3,12,6]
 # }
 
-# #
-# # Floating IP
-# #
+#
+# Resources present in services/ecs but not registered in provider.go (uncomment there to use)
+#
+
+# resource "edgenext_ecs_disk" "example" {
+#   name        = "example-disk"
+#   size        = 50
+#   volume_type = "SSD"
+# }
+
 # resource "edgenext_ecs_floating_ip" "example" {
 #   bandwidth = 10
 # }
-#
-# data "edgenext_ecs_floating_ips" "all_floating_ips" {
-#   region = "tokyo-a"
-#   limit  = 10
-#   eid    = "c1eae862-7725-4595-96de-6b97db7d48d9"
-#   # floating_ip_address = "148.222.161.86"
-# }
-#
-# output "floating_ip_total" {
-#   value = data.edgenext_ecs_floating_ips.all_floating_ips.total
-# }
-#
-# output "first_floating_ip_id" {
-#   value = try(data.edgenext_ecs_floating_ips.all_floating_ips.floating_ips[0].id, null)
-# }
-#
-# data "edgenext_ecs_vpcs" "all_vpcs" {
-#   region = "tokyo-a"
-#   limit  = 10
-#   # network_id = "0e07db22-e210-4138-b40b-6cbdb3580b12"
-#   # name       = "default-vpc"
-# }
-#
-# output "vpc_total" {
-#   value = data.edgenext_ecs_vpcs.all_vpcs.total
-# }
-#
-# output "first_vpc_id" {
-#   value = try(data.edgenext_ecs_vpcs.all_vpcs.vpcs[0].id, null)
-# }
-#
-# data "edgenext_ecs_vpc_subnets" "vpc_subnets" {
-#   region = "tokyo-a"
-#   # network_id = data.edgenext_ecs_vpcs.all_vpcs.vpcs[0].id
-#   network_id = "68451a78-fcd6-439b-81f6-e01ed7525c16"
-#   router_id  = "f9883769-85e0-4cdb-ae9a-c49da3a89edb"
-# }
-#
-# output "vpc_subnet_total" {
-#   value = data.edgenext_ecs_vpc_subnets.vpc_subnets.total
-# }
-#
-# output "first_vpc_subnet_id" {
-#   value = try(data.edgenext_ecs_vpc_subnets.vpc_subnets.subnets[0].id, null)
-# }
-#
-# data "edgenext_ecs_routers" "all_routers" {
-#   region = "tokyo-a"
-#   name   = "default-router"
-#   limit  = 10
-# }
-#
-# output "router_total" {
-#   value = data.edgenext_ecs_routers.all_routers.total
-# }
-#
-# output "first_router_id" {
-#   value = try(data.edgenext_ecs_routers.all_routers.routers[0].id, null)
-# }
-#
-# data "edgenext_ecs_router_ports" "router_ports" {
-#   region = "tokyo-a"
-#   # id     = data.edgenext_ecs_routers.all_routers.routers[0].id
-#   id = "f9883769-85e0-4cdb-ae9a-c49da3a89edb"
+
+# resource "edgenext_ecs_instance" "example" {
+#   name            = "example-instance"
+#   flavor_ref      = "s1.small"
+#   image_ref       = "centos-7.9"
+#   admin_pass      = "SecurePass123!"
+#   bandwidth       = 5
+#   key_name        = edgenext_ecs_key_pair.example.name
+#   networks        = [edgenext_ecs_vpc.example.id]
+#   security_groups = [edgenext_ecs_security_group.example.id]
 # }
 
-# output "router_port_total" {
-#   value = data.edgenext_ecs_router_ports.router_ports.total
-# }
-#
-# output "first_router_port_id" {
-#   value = try(data.edgenext_ecs_router_ports.router_ports.ports[0].id, null)
-# }
-#
-# data "edgenext_ecs_external_gateways" "all_external_gateways" {
-#   region = "tokyo-a"
-#   limit  = 10
-# }
-#
-# output "external_gateway_total" {
-#   value = data.edgenext_ecs_external_gateways.all_external_gateways.total
-# }
-#
-# output "first_external_gateway_id" {
-#   value = try(data.edgenext_ecs_external_gateways.all_external_gateways.external_gateways[0].id, null)
+# resource "edgenext_ecs_image" "example" {
+#   name         = "my-custom-image"
+#   instance_id  = "" # optional source instance
+#   description  = "From instance snapshot"
 # }
 
-# Network interfaces (Neutron ports) via /ecs/openapi/v2/ports/extension/list
+#
+# Data sources
+#
+
+# data "edgenext_ecs_floating_ips" "all" {
+#   limit             = 10
+#   floating_ip_id    = "c48bf957-9dad-4aea-b572-911bed2ab5d3"
+#   floating_ip_address = "156.246.18.218"
+# }
+
+# data "edgenext_ecs_vpcs" "all" {
+#   limit   = 10
+#   # vpc_id  = ""
+#   # name    = ""
+# }
+
+# data "edgenext_ecs_vpc_subnets" "by_vpc" {
+#   vpc_id    = "e3ab4cfe-1f43-4698-87cb-1eb3c5c78806"
+# }
+
+# data "edgenext_ecs_routers" "all" {
+#   # router_id    = "ae6e88bb-b818-4ae4-8a15-763461fc08a1"
+#   # router_name  = "test"
+#   limit = 10
+# }
+
+# data "edgenext_ecs_router_ports" "ports" {
+#   router_id = "ae6e88bb-b818-4ae4-8a15-763461fc08a1"
+# }
+
+# data "edgenext_ecs_external_gateways" "all" {
+#   limit = 10
+# }
+
 # data "edgenext_ecs_network_interfaces" "all_ports" {
-#   region = "tokyo-a"
-#   name   = ""
-#   limit  = 10
-# }
-#
-# output "network_interface_total" {
-#   value = data.edgenext_ecs_network_interfaces.all_ports.total
-# }
-#
-# output "first_network_interface_id" {
-#   value = try(data.edgenext_ecs_network_interfaces.all_ports.network_interfaces[0].id, null)
-# }
-#
-# output "first_network_interface_server_name" {
-#   value = try(data.edgenext_ecs_network_interfaces.all_ports.network_interfaces[0].server_name, null)
-# }
-
-#
-# Data Source Usage
-#
-# data "edgenext_ecs_instances" "all_instances" {
-#   region = "tokyo-a"
-#   name = "ch11"
+#   network_interface_name  = "test9"
 #   limit = 10
 # }
 
-# output "instance_id" {
-#   value = try(data.edgenext_ecs_instances.all_instances.instances[0].id, null)
+# data "edgenext_ecs_instances" "all" {
+#   # instance_name = ""
+#   # instance_id   = ""
+#   limit         = 10
 # }
 
-# output "instance_id" {
-#   value = edgenext_ecs_instance.example.id
-# }
-
-# data "edgenext_ecs_key_pairs" "example" {
-#   region = "tokyo-a"
+# data "edgenext_ecs_key_pairs" "all" {
 #   limit = 10
-#   # depends_on = [ edgenext_ecs_key_pair.example ]
 # }
 
-# data "edgenext_ecs_images" "all_images" {
-#   region = "tokyo-a"
+# data "edgenext_ecs_images" "all" {
 #   visibility = "public"
-#   name = "Debian 11.11 64-bit-v1.1"
-#   page_num = 1
+#   name       = "OpenClaw 2026.03.08 64-bit"
+#   page_num   = 1
+#   page_size  = 10
+# }
+
+# data "edgenext_ecs_tags" "all" {
+#   tag_key    = "zyx_test"
+#   tag_value  = "zyx_test1"
+#   page_num   = 1
+#   page_size  = 10
+# }
+
+# data "edgenext_ecs_instance_tags" "by_tag" {
+#   # tag_id     = 6
+#   # tag_key    = "zyx_test"
+#   # tag_value  = "zyx_test2"
+#   page_num   = 1
+#   page_size  = 10
+# }
+
+# data "edgenext_ecs_security_groups" "all" {
+#   name  = ""
+#   limit = 10
+# }
+
+# data "edgenext_ecs_security_group_rules" "for_sg" {
+#   security_group_id = "2af2b1e5-344f-4184-9173-cf1b5d43bf7d"
+# }
+
+# GET /ecs/openapi/v2/volume/list — query params name, page_num, page_size
+# data "edgenext_ecs_disks" "all" {
+#   name      = ""
+#   page_num  = 1
 #   page_size = 10
 # }
 
-# output "image_id" {
-#   value = data.edgenext_ecs_images.all_images.images.0.id
-# }
 
-
-# data "edgenext_ecs_tags" "all_tags" {
-#   tag_key = "test-key"
-#   tag_value = "test-value"
-#   page_num = 1
-#   page_size = 10
-# }
-
-# output "tag_id" {
-#   value = data.edgenext_ecs_tags.all_tags.tags.0.id
-# }
-
-# data "edgenext_ecs_resource_tags" "all_resource_tags" {
-#   region = "tokyo-a"
-#   page_num = 1
-#   page_size = 10
-#   tag_key = "test-key"
-#   tag_value = "test-value"
-# }
-
-# data "edgenext_ecs_security_groups" "all_security_groups" {
-#   region = "tokyo-a"
-#   name   = ""
-#   limit  = 10
-# }
-
-# Rules for a specific security group (detail API). Requires a valid security group id.
-# Example A: use the first group from the list query above (plan fails if the list is empty).
-# data "edgenext_ecs_security_group_rules" "first_security_group_rules" {
-#   region = "tokyo-a"
-#   id     = data.edgenext_ecs_security_groups.all_security_groups.security_groups[0].id
-# }
-
-# Example B: fixed id (uncomment and replace when you already know the security group id).
-# data "edgenext_ecs_security_group_rules" "example_sg_rules" {
-#   region = "tokyo-a"
-#   id     = "9758e912-c7f6-4609-8f33-a1e0dccf0240"
-# }
-
-# output "managed_security_group_rule_id" {
-#   value = edgenext_ecs_security_group_rule.example.id
-# }
-
-# output "created_tag_ids" {
-#   value = [
-#     for t in values(edgenext_ecs_tag.example) : t.id
-#   ]
-# }
-
-# output "resource_tag_total" {
-#   value = data.edgenext_ecs_resource_tags.all_resource_tags.total
-# }
-
-# output "first_tagged_resource_id" {
-#   value = try(data.edgenext_ecs_resource_tags.all_resource_tags.resource_tags[0].resource_id, null)
-# }
-
-# output "security_group_count" {
-#   value = data.edgenext_ecs_security_groups.all_security_groups.count
-# }
-
-# output "first_security_group_id" {
-#   value = try(data.edgenext_ecs_security_groups.all_security_groups.security_groups[0].id, null)
-# }
-
-# output "security_group_rule_count" {
-#   value = length(data.edgenext_ecs_security_group_rules.first_security_group_rules.security_group_rules)
-# }
-
-# output "first_security_group_rule_id" {
-#   value = try(data.edgenext_ecs_security_group_rules.first_security_group_rules.security_group_rules[0].id, null)
-# }
-
-# output "managed_security_group_id" {
-#   value = edgenext_ecs_security_group.example.id
-# }
+#
+# Import examples (all in one place)
+# Registered resources (define stub first, then import):
+#
+# resource "edgenext_ecs_vpc" "imported_vpc" {}
+# terraform import edgenext_ecs_vpc.imported_vpc '<vpc_id>'
+#
+# resource "edgenext_ecs_vpc_subnet" "imported_vpc_subnet" {}
+# terraform import edgenext_ecs_vpc_subnet.imported_vpc_subnet '<vpc_id>/<subnet_id>'
+#
+# resource "edgenext_ecs_router" "imported_router" {}
+# terraform import edgenext_ecs_router.imported_router '<router_id>'
+#
+# resource "edgenext_ecs_router_port" "imported_router_port" {}
+# terraform import edgenext_ecs_router_port.imported_router_port '<router_id>/<router_port_id>'
+#
+# resource "edgenext_ecs_network_interface" "imported_network_interface" {}
+# terraform import edgenext_ecs_network_interface.imported_network_interface '<network_interface_id>'
+#
+# resource "edgenext_ecs_network_interface_instance_binding" "imported_eni_instance_binding" {}
+# terraform import edgenext_ecs_network_interface_instance_binding.imported_eni_instance_binding '<network_interface_id>/<instance_id>'
+#
+# resource "edgenext_ecs_network_interface_floating_ip_binding" "imported_eni_floating_ip_binding" {}
+# terraform import edgenext_ecs_network_interface_floating_ip_binding.imported_eni_floating_ip_binding '<network_interface_id>/<floating_ip_address>'
+#
+# resource "edgenext_ecs_security_group" "imported_security_group" {}
+# terraform import edgenext_ecs_security_group.imported_security_group '<security_group_id>'
+#
+# resource "edgenext_ecs_security_group_rule" "imported_security_group_rule" {}
+# terraform import edgenext_ecs_security_group_rule.imported_security_group_rule '<security_group_id>/<rule_id>'
+#
+# resource "edgenext_ecs_key_pair" "imported_key_pair" {}
+# terraform import edgenext_ecs_key_pair.imported_key_pair '<key_pair_name>'
+#
+# resource "edgenext_ecs_tag" "imported_tag" {}
+# terraform import edgenext_ecs_tag.imported_tag '<tag_id>/<tag_key>/<tag_value>'
+#
+# resource "edgenext_ecs_instance_tag" "imported_instance_tag" {}
+# terraform import edgenext_ecs_instance_tag.imported_instance_tag '<instance_id>'

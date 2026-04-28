@@ -15,11 +15,15 @@ func DataSourceENECSInstances() *schema.Resource {
 		ReadContext: dataSourceENECSInstancesRead,
 		Description: "Data source to query EdgeNext ECS instances.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
-			"name": {
+			"instance_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name to filter instances.",
+				Description: "The instance name to filter instances.",
+			},
+			"instance_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The instance ID to filter instances.",
 			},
 			"limit": {
 				Type:        schema.TypeInt,
@@ -76,13 +80,13 @@ func DataSourceENECSInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The image name of the instance.",
 						},
-						"fixed_addresses": {
+						"fixed_ip_addresses": {
 							Type:        schema.TypeList,
 							Computed:    true,
 							Description: "A list of fixed IP addresses.",
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
-						"floating_addresses": {
+						"floating_ip_addresses": {
 							Type:        schema.TypeList,
 							Computed:    true,
 							Description: "A list of floating IP addresses.",
@@ -147,12 +151,12 @@ func dataSourceENECSInstancesRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	region := d.Get("region").(string)
-	req := map[string]interface{}{
-		"region": region,
-	}
-	if name, ok := d.GetOk("name"); ok {
+	req := map[string]interface{}{}
+	if name, ok := d.GetOk("instance_name"); ok {
 		req["name"] = name.(string)
+	}
+	if instanceID, ok := d.GetOk("instance_id"); ok {
+		req["id"] = instanceID.(string)
 	}
 	if limit, ok := d.GetOk("limit"); ok {
 		req["limit"] = limit.(int)
@@ -192,7 +196,7 @@ func dataSourceENECSInstancesRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	helper.SetDataSourceStableID(d, "region", "name", "limit")
+	helper.SetDataSourceStableID(d, "instance_name", "instance_id", "limit")
 
 	return nil
 }
@@ -216,16 +220,16 @@ func instanceAttrsFromMap(m map[string]interface{}) map[string]interface{} {
 	}
 
 	return map[string]interface{}{
-		"id":                 helper.StringFromMap(m, "id"),
-		"name":               helper.StringFromMap(m, "name"),
-		"status":             helper.StringFromMap(m, "status"),
-		"flavor":             helper.StringFromMap(m, "flavor"),
-		"flavor_info":        flavorInfo,
-		"image_name":         helper.StringFromMap(m, "image_name"),
-		"fixed_addresses":    helper.InterfaceToStringSlice(m["fixed_addresses"]),
-		"floating_addresses": helper.InterfaceToStringSlice(m["floating_addresses"]),
-		"created_at":         helper.StringFromMap(m, "created_at"),
-		"instance_cost_info": instanceCostInfo,
-		"tags":               helper.InterfaceToStringSlice(m["tags"]),
+		"id":                    helper.StringFromMap(m, "id"),
+		"name":                  helper.StringFromMap(m, "name"),
+		"status":                helper.StringFromMap(m, "status"),
+		"flavor":                helper.StringFromMap(m, "flavor"),
+		"flavor_info":           flavorInfo,
+		"image_name":            helper.StringFromMap(m, "image_name"),
+		"fixed_ip_addresses":    helper.InterfaceToStringSlice(m["fixed_addresses"]),
+		"floating_ip_addresses": helper.InterfaceToStringSlice(m["floating_addresses"]),
+		"created_at":            helper.StringFromMap(m, "created_at"),
+		"instance_cost_info":    instanceCostInfo,
+		"tags":                  helper.InterfaceToStringSlice(m["tags"]),
 	}
 }

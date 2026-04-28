@@ -22,9 +22,8 @@ func ResourceENECSSecurityGroupRule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSSecurityGroupRuleImport,
 		},
-		Description: "Provides a single EdgeNext ECS security group rule. Except region, arguments cannot be changed after creation.",
+		Description: "Provides a single EdgeNext ECS security group rule. Arguments cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("The region of the security group."),
 			"security_group_id": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -135,17 +134,13 @@ func resourceENECSSecurityGroupRuleCustomizeDiff(_ context.Context, d *schema.Re
 
 func resourceENECSSecurityGroupRuleImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("expected import id as region/security_group_id/rule_id, got %q", d.Id())
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected import id as security_group_id/rule_id, got %q", d.Id())
 	}
-	region := helper.NormalizeRegion(parts[0])
-	if err := d.Set("region", region); err != nil {
+	if err := d.Set("security_group_id", parts[0]); err != nil {
 		return nil, err
 	}
-	if err := d.Set("security_group_id", parts[1]); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[2])
+	d.SetId(parts[1])
 
 	if diags := resourceENECSSecurityGroupRuleRead(ctx, d, meta); diags.HasError() {
 		errDiag := diags[0]
@@ -155,15 +150,14 @@ func resourceENECSSecurityGroupRuleImport(ctx context.Context, d *schema.Resourc
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("security group rule %q not found under security group %q in region %q", parts[2], parts[1], region)
+		return nil, fmt.Errorf("security group rule %q not found under security group %q", parts[1], parts[0])
 	}
 	return []*schema.ResourceData{d}, nil
 }
 
-func ecsSecurityGroupDetailRules(ctx context.Context, ecsClient *connectivity.ECSClient, region, securityGroupID string) ([]map[string]interface{}, error) {
+func ecsSecurityGroupDetailRules(ctx context.Context, ecsClient *connectivity.ECSClient, securityGroupID string) ([]map[string]interface{}, error) {
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(region),
-		"id":     securityGroupID,
+		"id": securityGroupID,
 	}
 	var resp map[string]interface{}
 	if err := ecsClient.Post(ctx, "/ecs/openapi/v2/security_group/detail", req, &resp); err != nil {
@@ -220,7 +214,6 @@ func resourceENECSSecurityGroupRuleCreate(ctx context.Context, d *schema.Resourc
 	}
 
 	req := map[string]interface{}{
-		"region":              helper.NormalizeRegion(d.Get("region").(string)),
 		"security_group_rule": sgRule,
 	}
 	var resp map[string]interface{}
@@ -251,7 +244,7 @@ func resourceENECSSecurityGroupRuleRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	sgID := d.Get("security_group_id").(string)
-	rules, err := ecsSecurityGroupDetailRules(ctx, ecsClient, d.Get("region").(string), sgID)
+	rules, err := ecsSecurityGroupDetailRules(ctx, ecsClient, sgID)
 	if err != nil {
 		return diag.Errorf("failed to read ECS security_group_rule: %s", err)
 	}
@@ -309,10 +302,9 @@ func resourceENECSSecurityGroupRuleDelete(ctx context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	// API body: {"region":"...","ids":["<rule_id>"]}; response data maps each id to status (e.g. "ok").
+	// API body: {"ids":["<rule_id>"]}; response data maps each id to status (e.g. "ok").
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"ids":    []string{d.Id()},
+		"ids": []string{d.Id()},
 	}
 	var resp map[string]interface{}
 	if err := ecsClient.Post(ctx, "/ecs/openapi/v2/security_group_rule/delete", req, &resp); err != nil {

@@ -15,15 +15,10 @@ Use this data source to query ECS images.
 
 ```hcl
 data "edgenext_ecs_images" "example" {
-  region     = "tokyo-a"
   visibility = "public"
   name       = "Debian"
   page_num   = 1
   page_size  = 10
-}
-
-output "first_image_id" {
-  value = try(data.edgenext_ecs_images.example.images[0].id, null)
 }
 ```
 
@@ -31,7 +26,6 @@ output "first_image_id" {
 
 The following arguments are supported:
 
-* `region` - (Required, String) region description
 * `name` - (Optional, String) The name to filter images.
 * `page_num` - (Optional, Int) Page number for image listing.
 * `page_size` - (Optional, Int) Page size for image listing.

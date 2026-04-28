@@ -4,7 +4,6 @@ Example Usage
 
 ```hcl
 resource "edgenext_ecs_vpc" "example" {
-  region      = "tokyo-a"
   name        = "example-vpc"
   description = "vpc for app"
 
@@ -18,15 +17,14 @@ resource "edgenext_ecs_vpc" "example" {
 
 Import
 
-Import format is `region/network_id`.
+Import format is `vpc_id`.
 
 ```shell
-terraform import edgenext_ecs_vpc.example tokyo-a/0e07db22-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import edgenext_ecs_vpc.example 0e07db22-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `name` - (Required) VPC name.
 * `description` - (Optional) VPC description.
 * `subnet` - (Required) Initial subnet block. Cannot be changed after creation:

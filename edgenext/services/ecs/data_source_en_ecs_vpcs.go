@@ -15,11 +15,10 @@ func DataSourceENECSVpcs() *schema.Resource {
 		ReadContext: dataSourceENECSVpcsRead,
 		Description: "Data source to query EdgeNext ECS vpcs.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
-			"network_id": {
+			"vpc_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The network ID to filter vpcs.",
+				Description: "The VPC ID to filter vpcs.",
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -99,8 +98,7 @@ func dataSourceENECSVpcsRead(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	req := map[string]interface{}{
-		"region":     helper.NormalizeRegion(d.Get("region").(string)),
-		"network_id": d.Get("network_id").(string),
+		"network_id": d.Get("vpc_id").(string),
 		"name":       d.Get("name").(string),
 		"limit":      d.Get("limit").(int),
 	}
@@ -137,7 +135,7 @@ func dataSourceENECSVpcsRead(ctx context.Context, d *schema.ResourceData, m inte
 	if err := d.Set("total", helper.IntFromMap(payload, "count")); err != nil {
 		return diag.FromErr(err)
 	}
-	helper.SetDataSourceStableID(d, "region", "network_id", "name", "limit")
+	helper.SetDataSourceStableID(d, "vpc_id", "name", "limit")
 	if err := d.Set("vpcs", items); err != nil {
 		return diag.FromErr(err)
 	}

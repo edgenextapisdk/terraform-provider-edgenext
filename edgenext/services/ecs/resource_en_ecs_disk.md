@@ -4,24 +4,28 @@ Example Usage
 
 ```hcl
 resource "edgenext_ecs_disk" "example" {
-  region      = "tokyo-a"
   name        = "example-disk"
   volume_type = "SSD"
   size        = 50
+}
+
+data "edgenext_ecs_disks" "all" {
+  name      = edgenext_ecs_disk.example.name
+  page_num  = 1
+  page_size = 10
 }
 ```
 
 Import
 
-Import format is `region/disk_id`.
+Import format is `disk_id`.
 
 ```shell
-terraform import edgenext_ecs_disk.example tokyo-a/2c5c9f8d-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import edgenext_ecs_disk.example 2c5c9f8d-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `name` - (Required) Disk name.
 * `volume_type` - (Required) Volume type.
 * `size` - (Required) Disk size in GiB.

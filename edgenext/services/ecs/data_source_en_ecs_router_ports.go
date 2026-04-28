@@ -15,8 +15,7 @@ func DataSourceENECSRouterPorts() *schema.Resource {
 		ReadContext: dataSourceENECSRouterPortsRead,
 		Description: "Data source to query EdgeNext ECS router ports.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
-			"id": {
+			"router_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "The router ID.",
@@ -47,10 +46,10 @@ func DataSourceENECSRouterPorts() *schema.Resource {
 							Computed:    true,
 							Description: "Port MAC address.",
 						},
-						"network_name": {
+						"vpc_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Network name.",
+							Description: "VPC name.",
 						},
 						"status": {
 							Type:        schema.TypeString,
@@ -82,8 +81,7 @@ func dataSourceENECSRouterPortsRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"id":     d.Get("id").(string),
+		"id": d.Get("router_id").(string),
 	}
 	var resp map[string]interface{}
 	if err := ecsClient.Post(ctx, "/ecs/openapi/v2/routers/port_list", req, &resp); err != nil {
@@ -102,20 +100,20 @@ func dataSourceENECSRouterPortsRead(ctx context.Context, d *schema.ResourceData,
 			continue
 		}
 		ports = append(ports, map[string]interface{}{
-			"id":           helper.StringFromMap(port, "id"),
-			"name":         helper.StringFromMap(port, "name"),
-			"ip_address":   helper.StringFromMap(port, "ip_address"),
-			"mac_address":  helper.StringFromMap(port, "mac_address"),
-			"network_name": helper.StringFromMap(port, "network_name"),
-			"status":       helper.StringFromMap(port, "status"),
-			"created_at":   helper.StringFromMap(port, "created_at"),
+			"id":          helper.StringFromMap(port, "id"),
+			"name":        helper.StringFromMap(port, "name"),
+			"ip_address":  helper.StringFromMap(port, "ip_address"),
+			"mac_address": helper.StringFromMap(port, "mac_address"),
+			"vpc_name":    helper.StringFromMap(port, "network_name"),
+			"status":      helper.StringFromMap(port, "status"),
+			"created_at":  helper.StringFromMap(port, "created_at"),
 		})
 	}
 
 	if err := d.Set("total", helper.IntFromMap(payload, "count")); err != nil {
 		return diag.FromErr(err)
 	}
-	helper.SetDataSourceStableID(d, "region", "id")
+	helper.SetDataSourceStableID(d, "router_id")
 	if err := d.Set("ports", ports); err != nil {
 		return diag.FromErr(err)
 	}

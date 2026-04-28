@@ -23,7 +23,6 @@ func ResourceENECSDisk() *schema.Resource {
 		},
 		Description: "Provides an EdgeNext ECS disk resource.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("region description"),
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -44,17 +43,9 @@ func ResourceENECSDisk() *schema.Resource {
 }
 
 func resourceENECSDiskImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("expected import id as region/disk_id, got %q", d.Id())
-	}
-	region := helper.NormalizeRegion(parts[0])
-	diskID := strings.TrimSpace(parts[1])
-	if region == "" || diskID == "" {
-		return nil, fmt.Errorf("expected import id as region/disk_id, got %q", d.Id())
-	}
-	if err := d.Set("region", region); err != nil {
-		return nil, err
+	diskID := strings.TrimSpace(d.Id())
+	if diskID == "" {
+		return nil, fmt.Errorf("expected import id as disk_id, got %q", d.Id())
 	}
 	d.SetId(diskID)
 	if diags := resourceENECSDiskRead(ctx, d, meta); diags.HasError() {
@@ -65,7 +56,7 @@ func resourceENECSDiskImport(ctx context.Context, d *schema.ResourceData, meta i
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("disk %q not found in region %q", diskID, region)
+		return nil, fmt.Errorf("disk %q not found", diskID)
 	}
 	return []*schema.ResourceData{d}, nil
 }
@@ -78,7 +69,6 @@ func resourceENECSDiskCreate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	req := map[string]interface{}{
-		"region":      helper.NormalizeRegion(d.Get("region").(string)),
 		"volume_type": d.Get("volume_type").(string),
 		"size":        d.Get("size").(int),
 	}

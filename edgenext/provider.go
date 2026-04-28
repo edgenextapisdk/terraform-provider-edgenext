@@ -103,12 +103,16 @@ func Provider() *schema.Provider {
 		"edgenext_ecs_router":      ecs.ResourceENECSRouter(),
 		"edgenext_ecs_router_port": ecs.ResourceENECSRouterPort(),
 		// "edgenext_ecs_floating_ip":       ecs.ResourceENECSFloatingIp(),
-		"edgenext_ecs_network_interface":   ecs.ResourceENECSNetworkInterface(),
-		"edgenext_ecs_security_group":      ecs.ResourceENECSSecurityGroup(),
-		"edgenext_ecs_security_group_rule": ecs.ResourceENECSSecurityGroupRule(),
+		"edgenext_ecs_network_interface":                     ecs.ResourceENECSNetworkInterface(),
+		"edgenext_ecs_network_interface_instance_binding":    ecs.ResourceENECSNetworkInterfaceInstanceBinding(),
+		"edgenext_ecs_network_interface_floating_ip_binding": ecs.ResourceENECSNetworkInterfaceFloatingIPBinding(),
+		"edgenext_ecs_security_group":                        ecs.ResourceENECSSecurityGroup(),
+		"edgenext_ecs_security_group_rule":                   ecs.ResourceENECSSecurityGroupRule(),
 		// "edgenext_ecs_disk":                ecs.ResourceENECSDisk(),
-		"edgenext_ecs_tag":          ecs.ResourceENECSTag(),
-		"edgenext_ecs_resource_tag": ecs.ResourceENECSResourceTag(),
+		"edgenext_ecs_tag":             ecs.ResourceENECSTag(),
+		"edgenext_ecs_instance_tag":    ecs.ResourceENECSInstanceTag(),
+		"edgenext_ecs_instance_power":  ecs.ResourceENECSInstancePower(),
+		"edgenext_ecs_instance_reboot": ecs.ResourceENECSInstanceReboot(),
 
 		// SCDN domain management resources (from domain module)
 		// Note: These resources are organized under scdn/domain/ for better module management
@@ -217,7 +221,7 @@ func Provider() *schema.Provider {
 		"edgenext_ecs_disks":                ecs.DataSourceENECSDisks(),
 		"edgenext_ecs_tags":                 ecs.DataSourceENECSTags(),
 		"edgenext_ecs_security_group_rules": ecs.DataSourceENECSSecurityGroupRules(),
-		"edgenext_ecs_resource_tags":        ecs.DataSourceENECSResourceTags(),
+		"edgenext_ecs_instance_tags":        ecs.DataSourceENECSInstanceTags(),
 
 		// SCDN domain data sources (from domain module)
 		// Note: These data sources are organized under scdn/domain/ for better module management

@@ -4,28 +4,44 @@ Example Usage
 
 ```hcl
 resource "edgenext_ecs_instance" "example" {
-  region          = "tokyo-a"
   name            = "example-instance"
   flavor_ref      = "s1.small"
-  image_ref       = "debian-11"
+  image_ref       = data.edgenext_ecs_images.example.images[0].id
   admin_pass      = "SecurePass123!"
   bandwidth       = 5
-  networks        = ["0e07db22-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
-  security_groups = ["aa2b7c0d-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+  key_name        = edgenext_ecs_key_pair.example.name
+  networks        = [data.edgenext_ecs_vpcs.all.vpcs[0].id]
+  security_groups = [data.edgenext_ecs_security_groups.all.security_groups[0].id]
+}
+
+resource "edgenext_ecs_key_pair" "example" {
+  name = "example-key"
+}
+
+data "edgenext_ecs_images" "example" {
+  visibility = "public"
+  page_size  = 1
+}
+
+data "edgenext_ecs_vpcs" "all" {
+  limit = 1
+}
+
+data "edgenext_ecs_security_groups" "all" {
+  limit = 1
 }
 ```
 
 Import
 
-Import format is `region/instance_id`.
+Import format is `instance_id`.
 
 ```shell
-terraform import edgenext_ecs_instance.example tokyo-a/80e47fca-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import edgenext_ecs_instance.example 80e47fca-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `name` - (Required) Instance name.
 * `flavor_ref` - (Required) Flavor ID or name.
 * `image_ref` - (Required) Image ID or name.

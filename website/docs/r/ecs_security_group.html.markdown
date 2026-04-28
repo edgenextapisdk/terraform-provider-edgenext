@@ -15,7 +15,6 @@ Use this resource to create and manage ECS security groups.
 
 ```hcl
 resource "edgenext_ecs_security_group" "example" {
-  region      = "tokyo-a"
   name        = "example-sg"
   description = "security group for app"
 }
@@ -26,7 +25,6 @@ resource "edgenext_ecs_security_group" "example" {
 The following arguments are supported:
 
 * `name` - (Required, String) name description
-* `region` - (Required, String, ForceNew) region description
 * `description` - (Optional, String) description description
 
 ## Attributes Reference
@@ -39,15 +37,14 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-Import format is `region/name`.
+Import format is `security_group_id`.
 
 ```shell
-terraform import edgenext_ecs_security_group.example tokyo-a/example-sg
+terraform import edgenext_ecs_security_group.example 2af2b1e5-344f-4184-9173-cf1b5d43bf7d
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `name` - (Required) Security group name.
 * `description` - (Optional) Security group description.
 

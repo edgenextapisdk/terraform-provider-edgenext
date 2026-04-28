@@ -86,7 +86,7 @@ func (c *EdgeNextClient) ScdnClient() (*ScdnClient, error) {
 // ECSClient returns or initializes the ECS API client
 func (c *EdgeNextClient) ECSClient() (*ECSClient, error) {
 	c.ecsClientOnce.Do(func() {
-		c.ecsClient = NewECSClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint)
+		c.ecsClient = NewECSClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint, c.config.Region)
 	})
 
 	return c.ecsClient, c.ecsClientErr

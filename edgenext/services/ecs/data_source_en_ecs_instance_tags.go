@@ -9,39 +9,43 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// DataSourceENECSResourceTags returns the data source schema for ECS resource tags.
-func DataSourceENECSResourceTags() *schema.Resource {
+// DataSourceENECSInstanceTags returns the data source schema for ECS instances by tag filters.
+func DataSourceENECSInstanceTags() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceENECSResourceTagsRead,
-		Description: "Data source to query EdgeNext ECS resources by tag filters.",
+		ReadContext: dataSourceENECSInstanceTagsRead,
+		Description: "Data source to query EdgeNext ECS instances by tag filters.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
+			"tag_id": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The tag ID to filter instances.",
+			},
 			"tag_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The tag key to filter resources.",
+				Description: "The tag key to filter instances.",
 			},
 			"tag_value": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The tag value to filter resources.",
+				Description: "The tag value to filter instances.",
 			},
 			"page_num": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     1,
-				Description: "Page number for resource tag listing.",
+				Description: "Page number for instance tag listing.",
 			},
 			"page_size": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     10,
-				Description: "Page size for resource tag listing.",
+				Description: "Page size for instance tag listing.",
 			},
-			"resource_tags": {
+			"instance_tags": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "A list of resources matched by tags.",
+				Description: "A list of instances matched by tags.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -49,35 +53,35 @@ func DataSourceENECSResourceTags() *schema.Resource {
 							Computed:    true,
 							Description: "The record ID.",
 						},
-						"resource_id": {
+						"instance_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The resource ID.",
+							Description: "The instance ID.",
 						},
-						"resource_name": {
+						"instance_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The resource name.",
+							Description: "The instance name.",
 						},
-						"product_type": {
+						"instance_type": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The product type, e.g. ECS.",
+							Description: "The instance type, e.g. ECS.",
 						},
 						"region": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The resource region.",
+							Description: "The instance region.",
 						},
 						"tag_count": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The number of tags on this resource.",
+							Description: "The number of tags on this instance.",
 						},
 						"tags": {
 							Type:        schema.TypeList,
 							Computed:    true,
-							Description: "Detailed tag items for the resource.",
+							Description: "Detailed tag items for the instance.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"id": {
@@ -104,13 +108,13 @@ func DataSourceENECSResourceTags() *schema.Resource {
 			"total": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "Total number of matched resources.",
+				Description: "Total number of matched instances.",
 			},
 		},
 	}
 }
 
-func dataSourceENECSResourceTagsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceENECSInstanceTagsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*connectivity.EdgeNextClient)
 	ecsClient, err := client.ECSClient()
 	if err != nil {
@@ -118,7 +122,8 @@ func dataSourceENECSResourceTagsRead(ctx context.Context, d *schema.ResourceData
 	}
 
 	req := map[string]interface{}{
-		"region":   helper.NormalizeRegion(d.Get("region").(string)),
+		"region":   ecsClient.Region(),
+		"tagId":    d.Get("tag_id").(int),
 		"tagKey":   d.Get("tag_key").(string),
 		"tagValue": d.Get("tag_value").(string),
 		"pageNum":  d.Get("page_num").(int),
@@ -128,12 +133,12 @@ func dataSourceENECSResourceTagsRead(ctx context.Context, d *schema.ResourceData
 
 	err = ecsClient.Get(ctx, "/ecs/openapi/v2/resource/list", req, &resp)
 	if err != nil {
-		return diag.Errorf("failed to read ECS resource tags: %s", err)
+		return diag.Errorf("failed to read ECS instance tags: %s", err)
 	}
 
 	payload, err := helper.ParseAPIResponseMap(resp)
 	if err != nil {
-		return diag.Errorf("failed to parse ECS resource tags response: %s", err)
+		return diag.Errorf("failed to parse ECS instance tags response: %s", err)
 	}
 	dataList := helper.ListFromMap(payload, "list")
 	items := make([]interface{}, 0, len(dataList))
@@ -144,12 +149,12 @@ func dataSourceENECSResourceTagsRead(ctx context.Context, d *schema.ResourceData
 		}
 		items = append(items, map[string]interface{}{
 			"id":            helper.IntFromMap(row, "id"),
-			"resource_id":   helper.StringFromMap(row, "resourceId"),
-			"resource_name": helper.StringFromMap(row, "resourceName"),
-			"product_type":  helper.StringFromMap(row, "productType"),
+			"instance_id":   helper.StringFromMap(row, "resourceId"),
+			"instance_name": helper.StringFromMap(row, "resourceName"),
+			"instance_type": helper.StringFromMap(row, "productType"),
 			"region":        helper.StringFromMap(row, "region"),
 			"tag_count":     helper.IntFromMap(row, "tagCount"),
-			"tags":          normalizeENECSResourceTagItems(helper.ListFromMap(row, "tags")),
+			"tags":          normalizeENECSInstanceTagItems(helper.ListFromMap(row, "tags")),
 		})
 	}
 
@@ -160,15 +165,15 @@ func dataSourceENECSResourceTagsRead(ctx context.Context, d *schema.ResourceData
 	if err := d.Set("total", total); err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("resource_tags", items); err != nil {
+	if err := d.Set("instance_tags", items); err != nil {
 		return diag.FromErr(err)
 	}
-	helper.SetDataSourceStableID(d, "region", "tag_key", "tag_value", "page_num", "page_size")
+	helper.SetDataSourceStableID(d, "tag_id", "tag_key", "tag_value", "page_num", "page_size")
 
 	return nil
 }
 
-func normalizeENECSResourceTagItems(items []interface{}) []interface{} {
+func normalizeENECSInstanceTagItems(items []interface{}) []interface{} {
 	out := make([]interface{}, 0, len(items))
 	for _, raw := range items {
 		item, ok := raw.(map[string]interface{})
