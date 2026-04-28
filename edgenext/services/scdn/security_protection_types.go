@@ -185,7 +185,7 @@ type SecurityProtectionTemplateGetMemberGlobalResponse struct {
 
 // SecurityProtectionTemplateGetMemberGlobalData get member global template data
 type SecurityProtectionTemplateGetMemberGlobalData struct {
-	Template        *SecurityProtectionTemplateInfo `json:"template,omitempty"`
+	Template        *SecurityProtectionTemplateInfo `json:"templates,omitempty"` // Note: API returns "templates" (plural)
 	BindDomainCount int                             `json:"bind_domain_count,omitempty"`
 }
 
@@ -193,12 +193,13 @@ type SecurityProtectionTemplateGetMemberGlobalData struct {
 type SecurityProtectionTemplateInfo struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
-	Type        string `json:"type"` // domain, template, global
+	Type        string `json:"type"` // global, only_domain, more_domain (updated in backend)
 	CreatedAt   string `json:"created_at"`
 	Remark      string `json:"remark,omitempty"`
 	SubMemberID int    `json:"sub_member_id,omitempty"`
 	DomainID    int    `json:"domain_id,omitempty"` // When querying domain template, this field has value
 	DomainCount int    `json:"domain_count,omitempty"`
+	AppType     string `json:"app_type,omitempty"` // security_protection
 }
 
 // SecurityProtectionTemplateCreateRequest create template request
@@ -239,15 +240,17 @@ type SecurityProtectionTemplateCreateDomainResponse struct {
 // SecurityProtectionTemplateCreateDomainData create domain template data
 type SecurityProtectionTemplateCreateDomainData struct {
 	FailDomains map[string]string `json:"fail_domains,omitempty"` // Failed domains
+	BusinessIDs []int             `json:"business_ids,omitempty"` // Business IDs (template IDs)
 }
 
 // SecurityProtectionTemplateSearchRequest search template list request
 type SecurityProtectionTemplateSearchRequest struct {
-	TplType    string `json:"tpl_type"`              // global, only_domain, more_domain
+	TplType    string `json:"tpl_type"`              // global, only_domain, more_domain, all
 	SearchType string `json:"search_type,omitempty"` // Search type
 	SearchKey  string `json:"search_key,omitempty"`  // Search keyword
 	Page       int    `json:"page"`                  // Page number
 	PageSize   int    `json:"page_size"`             // Page size
+	TplIDs     []int  `json:"tpl_ids,omitempty"`     // Template ID list
 }
 
 // SecurityProtectionTemplateSearchResponse search template list response
@@ -438,12 +441,16 @@ type UpdatePreciseAccessControlConfigRequest struct {
 
 // PreciseAccessControlPolicy precise access control policy
 type PreciseAccessControlPolicy struct {
-	Type       string                   `json:"type"`        // Policy type
-	Action     string                   `json:"action"`      // Policy action
-	ActionData map[string]interface{}   `json:"action_data"` // Action data
-	Rules      []map[string]interface{} `json:"rules"`       // Rules list
-	From       string                   `json:"from"`        // From source
-	Status     int                      `json:"status"`      // Status
+	RuleType   string                   `json:"type,omitempty"`        // Policy type (maps to "type" in API)
+	Action     string                   `json:"action,omitempty"`      // Policy action
+	ActionData map[string]interface{}   `json:"action_data,omitempty"` // Action data
+	Rules      []map[string]interface{} `json:"rules,omitempty"`       // Rules list (flexible key-value pairs)
+	From       string                   `json:"from,omitempty"`        // From source
+	Status     int                      `json:"status,omitempty"`      // Status
+	Remark     string                   `json:"remark,omitempty"`      // Remark
+	Type       string                   `json:"type,omitempty"`        // Policy type: plus
+	ID         int                      `json:"id,omitempty"`          // Policy ID
+	Sort       int                      `json:"sort,omitempty"`        // Sort order
 }
 
 // ============================================================================

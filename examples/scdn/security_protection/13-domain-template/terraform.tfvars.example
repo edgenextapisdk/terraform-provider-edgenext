@@ -1,0 +1,7 @@
+# EdgeNext API credentials
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://api.edgenextscdn.com"
+
+# Domain ID to create template for (single domain only)
+domain_id = 118181
