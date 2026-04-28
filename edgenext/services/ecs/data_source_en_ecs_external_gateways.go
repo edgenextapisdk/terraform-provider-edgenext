@@ -15,7 +15,6 @@ func DataSourceENECSExternalGateways() *schema.Resource {
 		ReadContext: dataSourceENECSExternalGatewaysRead,
 		Description: "Data source to query EdgeNext ECS external gateways.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
 			"limit": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -177,7 +176,6 @@ func dataSourceENECSExternalGatewaysRead(ctx context.Context, d *schema.Resource
 	}
 
 	req := map[string]interface{}{
-		"region":          helper.NormalizeRegion(d.Get("region").(string)),
 		"is_all":          true,
 		"limit":           d.Get("limit").(int),
 		"router_external": "true",
@@ -229,7 +227,7 @@ func dataSourceENECSExternalGatewaysRead(ctx context.Context, d *schema.Resource
 	if err := d.Set("total", helper.IntFromMap(payload, "count")); err != nil {
 		return diag.FromErr(err)
 	}
-	helper.SetDataSourceStableID(d, "region", "limit")
+	helper.SetDataSourceStableID(d, "limit")
 	if err := d.Set("external_gateways", networks); err != nil {
 		return diag.FromErr(err)
 	}

@@ -24,7 +24,6 @@ func ResourceENECSKeyPair() *schema.Resource {
 		},
 		Description: "Provides an EdgeNext ECS key_pair resource. name and public_key cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("region description"),
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -102,17 +101,9 @@ func resourceENECSKeyPairCustomizeDiff(_ context.Context, d *schema.ResourceDiff
 }
 
 func resourceENECSKeyPairImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("expected import id as region/name, got %q", d.Id())
-	}
-	region := helper.NormalizeRegion(parts[0])
-	name := strings.TrimSpace(parts[1])
-	if region == "" || name == "" {
-		return nil, fmt.Errorf("expected import id as region/name, got %q", d.Id())
-	}
-	if err := d.Set("region", region); err != nil {
-		return nil, err
+	name := strings.TrimSpace(d.Id())
+	if name == "" {
+		return nil, fmt.Errorf("expected import id as name, got %q", d.Id())
 	}
 	if err := d.Set("name", name); err != nil {
 		return nil, err
@@ -126,7 +117,7 @@ func resourceENECSKeyPairImport(ctx context.Context, d *schema.ResourceData, met
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("key pair %q not found in region %q", name, region)
+		return nil, fmt.Errorf("key pair %q not found", name)
 	}
 	return []*schema.ResourceData{d}, nil
 }
@@ -139,7 +130,6 @@ func resourceENECSKeyPairCreate(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	req := map[string]interface{}{
-		"region":     d.Get("region").(string),
 		"public_key": d.Get("public_key").(string),
 	}
 	if n, ok := d.GetOk("name"); ok {
@@ -192,8 +182,7 @@ func resourceENECSKeyPairRead(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"name":   d.Id(),
+		"name": d.Id(),
 	}
 	var resp map[string]interface{}
 
@@ -253,8 +242,7 @@ func resourceENECSKeyPairDelete(ctx context.Context, d *schema.ResourceData, m i
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"names":  []string{d.Id()},
+		"names": []string{d.Id()},
 	}
 	var resp map[string]interface{}
 

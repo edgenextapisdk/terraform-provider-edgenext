@@ -4,19 +4,18 @@ Example Usage
 
 ```hcl
 data "edgenext_ecs_router_ports" "example" {
-  region = "tokyo-a"
-  id     = "f9883769-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  router_id = data.edgenext_ecs_routers.example.routers[0].id
 }
 
-output "router_port_total" {
-  value = data.edgenext_ecs_router_ports.example.total
+data "edgenext_ecs_routers" "example" {
+  router_name = "default-router"
+  limit       = 1
 }
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
-* `id` - (Required) Router ID.
+* `router_id` - (Required) Router ID.
 
 Attributes Reference
 

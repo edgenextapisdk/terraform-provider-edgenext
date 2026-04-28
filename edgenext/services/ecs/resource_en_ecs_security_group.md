@@ -4,7 +4,6 @@ Example Usage
 
 ```hcl
 resource "edgenext_ecs_security_group" "example" {
-  region      = "tokyo-a"
   name        = "example-sg"
   description = "security group for app"
 }
@@ -12,15 +11,14 @@ resource "edgenext_ecs_security_group" "example" {
 
 Import
 
-Import format is `region/name`.
+Import format is `security_group_id`.
 
 ```shell
-terraform import edgenext_ecs_security_group.example tokyo-a/example-sg
+terraform import edgenext_ecs_security_group.example 2af2b1e5-344f-4184-9173-cf1b5d43bf7d
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `name` - (Required) Security group name.
 * `description` - (Optional) Security group description.
 

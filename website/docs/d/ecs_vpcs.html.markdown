@@ -15,14 +15,16 @@ Use this data source to query ECS VPC networks.
 
 ```hcl
 data "edgenext_ecs_vpcs" "example" {
-  region     = "tokyo-a"
-  network_id = ""
-  name       = "default-vpc"
-  limit      = 10
+  name  = edgenext_ecs_vpc.example.name
+  limit = 10
 }
 
-output "first_vpc_id" {
-  value = try(data.edgenext_ecs_vpcs.example.vpcs[0].id, null)
+resource "edgenext_ecs_vpc" "example" {
+  name = "default-vpc"
+  subnet {
+    name = "default-subnet"
+    cidr = "10.10.0.0/24"
+  }
 }
 ```
 
@@ -30,10 +32,9 @@ output "first_vpc_id" {
 
 The following arguments are supported:
 
-* `region` - (Required, String) region description
 * `limit` - (Optional, Int) Maximum number of vpcs to return.
 * `name` - (Optional, String) The name to filter vpcs.
-* `network_id` - (Optional, String) The network ID to filter vpcs.
+* `vpc_id` - (Optional, String) The VPC ID to filter vpcs.
 
 ## Attributes Reference
 

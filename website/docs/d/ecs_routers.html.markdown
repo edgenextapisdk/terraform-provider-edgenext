@@ -15,13 +15,12 @@ Use this data source to query ECS routers.
 
 ```hcl
 data "edgenext_ecs_routers" "example" {
-  region = "tokyo-a"
-  name   = "default-router"
-  limit  = 10
+  router_name = edgenext_ecs_router.example.name
+  limit       = 10
 }
 
-output "first_router_id" {
-  value = try(data.edgenext_ecs_routers.example.routers[0].id, null)
+resource "edgenext_ecs_router" "example" {
+  name = "default-router"
 }
 ```
 
@@ -29,9 +28,9 @@ output "first_router_id" {
 
 The following arguments are supported:
 
-* `region` - (Required, String) region description
 * `limit` - (Optional, Int) Maximum number of routers to return.
-* `name` - (Optional, String) The name to filter routers.
+* `router_id` - (Optional, String) The router ID to filter routers.
+* `router_name` - (Optional, String) The router name to filter routers.
 
 ## Attributes Reference
 

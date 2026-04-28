@@ -15,16 +15,10 @@ func DataSourceENECSVpcSubnets() *schema.Resource {
 		ReadContext: dataSourceENECSVpcSubnetsRead,
 		Description: "Data source to query EdgeNext ECS vpc subnets.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
-			"network_id": {
+			"vpc_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The VPC network ID.",
-			},
-			"router_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The router ID to filter subnets.",
+				Description: "The VPC ID to filter subnets.",
 			},
 			"subnets": {
 				Type:        schema.TypeList,
@@ -47,10 +41,10 @@ func DataSourceENECSVpcSubnets() *schema.Resource {
 							Computed:    true,
 							Description: "Tenant ID.",
 						},
-						"network_id": {
+						"vpc_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Network ID.",
+							Description: "VPC ID.",
 						},
 						"ip_version": {
 							Type:        schema.TypeInt,
@@ -213,9 +207,7 @@ func dataSourceENECSVpcSubnetsRead(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	req := map[string]interface{}{
-		"region":     helper.NormalizeRegion(d.Get("region").(string)),
-		"network_id": d.Get("network_id").(string),
-		"router_id":  d.Get("router_id").(string),
+		"network_id": d.Get("vpc_id").(string),
 	}
 	var resp map[string]interface{}
 
@@ -238,7 +230,7 @@ func dataSourceENECSVpcSubnetsRead(ctx context.Context, d *schema.ResourceData, 
 			"id":                helper.StringFromMap(subnet, "id"),
 			"name":              helper.StringFromMap(subnet, "name"),
 			"tenant_id":         helper.StringFromMap(subnet, "tenant_id"),
-			"network_id":        helper.StringFromMap(subnet, "network_id"),
+			"vpc_id":            helper.StringFromMap(subnet, "network_id"),
 			"ip_version":        helper.IntFromMap(subnet, "ip_version"),
 			"subnetpool_id":     helper.StringFromMap(subnet, "subnetpool_id"),
 			"enable_dhcp":       subnetBool(subnet, "enable_dhcp"),
@@ -263,11 +255,8 @@ func dataSourceENECSVpcSubnetsRead(ctx context.Context, d *schema.ResourceData, 
 			"router_id":         helper.StringFromMap(subnet, "router_id"),
 		})
 	}
-
-	if err := d.Set("total", helper.IntFromMap(payload, "count")); err != nil {
-		return diag.FromErr(err)
-	}
-	helper.SetDataSourceStableID(d, "region", "network_id", "router_id")
+	d.Set("total", len(subnets))
+	helper.SetDataSourceStableID(d, "vpc_id")
 	if err := d.Set("subnets", subnets); err != nil {
 		return diag.FromErr(err)
 	}

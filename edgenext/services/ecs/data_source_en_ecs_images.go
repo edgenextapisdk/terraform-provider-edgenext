@@ -15,7 +15,6 @@ func DataSourceENECSImages() *schema.Resource {
 		ReadContext: dataSourceENECSImagesRead,
 		Description: "Data source to query EdgeNext ECS images.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
 			"visibility": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -136,7 +135,6 @@ func dataSourceENECSImagesRead(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	req := map[string]interface{}{
-		"region":     d.Get("region").(string),
 		"visibility": d.Get("visibility").(string),
 		"name":       d.Get("name").(string),
 		"status":     d.Get("status").(string),
@@ -170,7 +168,7 @@ func dataSourceENECSImagesRead(ctx context.Context, d *schema.ResourceData, m in
 	if err := d.Set("total", total); err != nil {
 		return diag.FromErr(err)
 	}
-	helper.SetDataSourceStableID(d, "region", "visibility", "name", "status", "page_num", "page_size")
+	helper.SetDataSourceStableID(d, "visibility", "name", "status", "page_num", "page_size")
 	if err := d.Set("images", images); err != nil {
 		return diag.FromErr(err)
 	}

@@ -15,13 +15,11 @@ Use this data source to query subnets under an ECS VPC network.
 
 ```hcl
 data "edgenext_ecs_vpc_subnets" "example" {
-  region     = "tokyo-a"
-  network_id = "0e07db22-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  router_id  = "f9883769-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  vpc_id = data.edgenext_ecs_vpcs.all.vpcs[0].id
 }
 
-output "vpc_subnet_total" {
-  value = data.edgenext_ecs_vpc_subnets.example.total
+data "edgenext_ecs_vpcs" "all" {
+  limit = 1
 }
 ```
 
@@ -29,9 +27,7 @@ output "vpc_subnet_total" {
 
 The following arguments are supported:
 
-* `network_id` - (Required, String) The VPC network ID.
-* `region` - (Required, String) region description
-* `router_id` - (Optional, String) The router ID to filter subnets.
+* `vpc_id` - (Required, String) The VPC ID to filter subnets.
 
 ## Attributes Reference
 
@@ -55,7 +51,6 @@ In addition to all arguments above, the following attributes are exported:
   * `ipv6_address_mode` - IPv6 address mode.
   * `ipv6_ra_mode` - IPv6 RA mode.
   * `name` - Subnet name.
-  * `network_id` - Network ID.
   * `not_bind_reason` - Reason if subnet is not bindable.
   * `port_num` - Port count.
   * `project_id` - Project ID.
@@ -68,6 +63,7 @@ In addition to all arguments above, the following attributes are exported:
   * `total_ips` - Total IP count.
   * `updated_at` - Last update time.
   * `used_ips` - Used IP count.
+  * `vpc_id` - VPC ID.
 * `total` - Total number of matched subnets.
 
 

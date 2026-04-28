@@ -4,20 +4,19 @@ Example Usage
 
 ```hcl
 data "edgenext_ecs_routers" "example" {
-  region = "tokyo-a"
-  name   = "default-router"
-  limit  = 10
+  router_name = edgenext_ecs_router.example.name
+  limit       = 10
 }
 
-output "first_router_id" {
-  value = try(data.edgenext_ecs_routers.example.routers[0].id, null)
+resource "edgenext_ecs_router" "example" {
+  name = "default-router"
 }
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
-* `name` - (Optional) Router name filter.
+* `router_id` - (Optional) Router ID filter.
+* `router_name` - (Optional) Router name filter.
 * `limit` - (Optional) Maximum number of results, default `10`.
 
 Attributes Reference

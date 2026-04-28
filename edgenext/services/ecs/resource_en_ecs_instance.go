@@ -23,7 +23,6 @@ func ResourceENECSInstance() *schema.Resource {
 		},
 		Description: "Provides an EdgeNext ECS instance resource.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("region description"),
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -81,17 +80,9 @@ func ResourceENECSInstance() *schema.Resource {
 }
 
 func resourceENECSInstanceImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("expected import id as region/instance_id, got %q", d.Id())
-	}
-	region := helper.NormalizeRegion(parts[0])
-	instanceID := strings.TrimSpace(parts[1])
-	if region == "" || instanceID == "" {
-		return nil, fmt.Errorf("expected import id as region/instance_id, got %q", d.Id())
-	}
-	if err := d.Set("region", region); err != nil {
-		return nil, err
+	instanceID := strings.TrimSpace(d.Id())
+	if instanceID == "" {
+		return nil, fmt.Errorf("expected import id as instance_id, got %q", d.Id())
 	}
 	d.SetId(instanceID)
 	if diags := resourceENECSInstanceRead(ctx, d, meta); diags.HasError() {
@@ -102,7 +93,7 @@ func resourceENECSInstanceImport(ctx context.Context, d *schema.ResourceData, me
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("instance %q not found in region %q", instanceID, region)
+		return nil, fmt.Errorf("instance %q not found", instanceID)
 	}
 	return []*schema.ResourceData{d}, nil
 }
@@ -115,7 +106,6 @@ func resourceENECSInstanceCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	req := map[string]interface{}{
-		"region":     d.Get("region").(string),
 		"flavor_ref": d.Get("flavor_ref").(string),
 		"image_ref":  d.Get("image_ref").(string),
 		"admin_pass": d.Get("admin_pass").(string),
@@ -187,9 +177,6 @@ func resourceENECSInstanceRead(ctx context.Context, d *schema.ResourceData, m in
 
 	if name, ok := payload["name"].(string); ok {
 		d.Set("name", name)
-	}
-	if val, ok := payload["region"]; ok {
-		d.Set("region", val)
 	}
 	if val, ok := payload["flavor_ref"]; ok {
 		d.Set("flavor_ref", val)

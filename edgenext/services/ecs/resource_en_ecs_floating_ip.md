@@ -4,22 +4,25 @@ Example Usage
 
 ```hcl
 resource "edgenext_ecs_floating_ip" "example" {
-  region    = "tokyo-a"
   bandwidth = 10
+}
+
+data "edgenext_ecs_floating_ips" "example" {
+  floating_ip_id = edgenext_ecs_floating_ip.example.id
+  limit          = 1
 }
 ```
 
 Import
 
-Import format is `region/floating_ip_id`.
+Import format is `floating_ip_id`.
 
 ```shell
-terraform import edgenext_ecs_floating_ip.example tokyo-a/c1eae862-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import edgenext_ecs_floating_ip.example c1eae862-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `bandwidth` - (Required) Floating IP bandwidth in Mbps.
 
 Attributes Reference

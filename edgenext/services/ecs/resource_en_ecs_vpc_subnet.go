@@ -22,13 +22,12 @@ func ResourceENECSVpcSubnet() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSVpcSubnetImport,
 		},
-		Description: "Provides an EdgeNext ECS vpc subnet resource. Except region, arguments cannot be changed after creation.",
+		Description: "Provides an EdgeNext ECS vpc subnet resource. Arguments cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("The region of the subnet."),
-			"network_id": {
+			"vpc_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The VPC network ID. Cannot be changed after creation.",
+				Description: "The VPC ID. Cannot be changed after creation.",
 			},
 			"name": {
 				Type:        schema.TypeString,
@@ -191,7 +190,7 @@ func resourceENECSVpcSubnetCustomizeDiff(_ context.Context, d *schema.ResourceDi
 	if d.Id() == "" {
 		return nil
 	}
-	immutableFields := []string{"network_id", "name", "ip_version", "cidr"}
+	immutableFields := []string{"vpc_id", "name", "ip_version", "cidr"}
 	for _, field := range immutableFields {
 		if !d.HasChange(field) {
 			continue
@@ -206,18 +205,13 @@ func resourceENECSVpcSubnetCustomizeDiff(_ context.Context, d *schema.ResourceDi
 
 func resourceENECSVpcSubnetImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("expected import id as region/network_id/subnet_id, got %q", d.Id())
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("expected import id as vpc_id/subnet_id, got %q", d.Id())
 	}
-
-	region := helper.NormalizeRegion(parts[0])
-	if err := d.Set("region", region); err != nil {
+	if err := d.Set("vpc_id", parts[0]); err != nil {
 		return nil, err
 	}
-	if err := d.Set("network_id", parts[1]); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[2])
+	d.SetId(parts[1])
 
 	if diags := resourceENECSVpcSubnetRead(ctx, d, meta); diags.HasError() {
 		errDiag := diags[0]
@@ -227,7 +221,7 @@ func resourceENECSVpcSubnetImport(ctx context.Context, d *schema.ResourceData, m
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("subnet %q not found under network %q in region %q", parts[2], parts[1], region)
+		return nil, fmt.Errorf("subnet %q not found under vpc %q", parts[1], parts[0])
 	}
 	return []*schema.ResourceData{d}, nil
 }
@@ -240,9 +234,8 @@ func resourceENECSVpcSubnetCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
 		"network": map[string]interface{}{
-			"network_id": d.Get("network_id").(string),
+			"network_id": d.Get("vpc_id").(string),
 		},
 		"subnet": map[string]interface{}{
 			"name":       d.Get("name").(string),
@@ -279,7 +272,7 @@ func resourceENECSVpcSubnetRead(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 
-	subnets, err := ecsVPCSubnetsList(ctx, ecsClient, d.Get("region").(string), d.Get("network_id").(string))
+	subnets, err := ecsVPCSubnetsList(ctx, ecsClient, d.Get("vpc_id").(string))
 	if err != nil {
 		return diag.Errorf("failed to read ECS vpc subnet: %s", err)
 	}
@@ -291,7 +284,7 @@ func resourceENECSVpcSubnetRead(ctx context.Context, d *schema.ResourceData, m i
 
 	_ = d.Set("name", helper.StringFromMap(subnet, "name"))
 	_ = d.Set("tenant_id", helper.StringFromMap(subnet, "tenant_id"))
-	_ = d.Set("network_id", helper.StringFromMap(subnet, "network_id"))
+	_ = d.Set("vpc_id", helper.StringFromMap(subnet, "network_id"))
 	_ = d.Set("ip_version", helper.IntFromMap(subnet, "ip_version"))
 	_ = d.Set("subnetpool_id", helper.StringFromMap(subnet, "subnetpool_id"))
 	_ = d.Set("enable_dhcp", subnetBool(subnet, "enable_dhcp"))
@@ -326,7 +319,7 @@ func resourceENECSVpcSubnetRead(ctx context.Context, d *schema.ResourceData, m i
 
 func resourceENECSVpcSubnetUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Defense in depth: CustomizeDiff blocks these at plan time; reject here if Update is still invoked.
-	immutableFields := []string{"network_id", "name", "ip_version", "cidr"}
+	immutableFields := []string{"vpc_id", "name", "ip_version", "cidr"}
 	for _, field := range immutableFields {
 		if d.HasChange(field) {
 			return diag.Errorf("%s cannot be updated after creation", field)
@@ -343,7 +336,6 @@ func resourceENECSVpcSubnetDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	req := map[string]interface{}{
-		"region":     helper.NormalizeRegion(d.Get("region").(string)),
 		"subnet_ids": []string{d.Id()},
 	}
 	var resp map[string]interface{}
@@ -363,9 +355,8 @@ func resourceENECSVpcSubnetDelete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func ecsVPCSubnetsList(ctx context.Context, ecsClient *connectivity.ECSClient, region, networkID string) ([]map[string]interface{}, error) {
+func ecsVPCSubnetsList(ctx context.Context, ecsClient *connectivity.ECSClient, networkID string) ([]map[string]interface{}, error) {
 	req := map[string]interface{}{
-		"region":     helper.NormalizeRegion(region),
 		"network_id": networkID,
 	}
 	var resp map[string]interface{}

@@ -49,22 +49,22 @@ This package provides Terraform resources and data sources for managing EdgeNext
 - **File**: `resource_en_ecs_tag.go`
 - **Description**: Manage ECS tags
 
-### ECS Resource Tag
-- **Resource**: `edgenext_ecs_resource_tag` (`ResourceENECSResourceTag`)
-- **File**: `resource_en_ecs_resource_tag.go`
-- **Description**: Bind tags to ECS resources
+### ECS Instance Tag
+- **Resource**: `edgenext_ecs_instance_tag` (`ResourceENECSInstanceTag`)
+- **File**: `resource_en_ecs_instance_tag.go`
+- **Description**: Bind tags to ECS instances
 
 ## ECS Update Behavior
 
 Several ECS resources now reject immutable argument changes directly during plan/apply instead of replacing resources automatically:
 
 - `edgenext_ecs_key_pair`: `name`, `public_key`
-- `edgenext_ecs_network_interface`: `network_id`, `subnet_id`
-- `edgenext_ecs_tag`: `key`, `value`
-- `edgenext_ecs_resource_tag`: `resource_uuid`, `resource_name`, `resource_type`
-- `edgenext_ecs_router_port`: `router_id`, `network_id`, `subnet_id`
-- `edgenext_ecs_security_group_rule`: all arguments except `region`
-- `edgenext_ecs_vpc_subnet`: all arguments except `region`
+- `edgenext_ecs_network_interface`: `vpc_id`, `subnet_id`
+- `edgenext_ecs_tag`: `tag_key`, `tag_value`
+- `edgenext_ecs_instance_tag`: `instance_id`, `instance_name`
+- `edgenext_ecs_router_port`: `router_id`, `vpc_id`, `subnet_id`
+- `edgenext_ecs_security_group_rule`: all rule arguments
+- `edgenext_ecs_vpc_subnet`: all arguments
 - `edgenext_ecs_vpc`: `subnet` and all nested subnet fields
 
 ## Data Sources
@@ -139,10 +139,10 @@ Several ECS resources now reject immutable argument changes directly during plan
 - **File**: `data_source_en_ecs_security_group_rules.go`
 - **Description**: Query security group rule list
 
-### ECS Resource Tags
-- **Data Source**: `edgenext_ecs_resource_tags` (`DataSourceENECSResourceTags`)
-- **File**: `data_source_en_ecs_resource_tags.go`
-- **Description**: Query resource tag relations
+### ECS Instance Tags
+- **Data Source**: `edgenext_ecs_instance_tags` (`DataSourceENECSInstanceTags`)
+- **File**: `data_source_en_ecs_instance_tags.go`
+- **Description**: Query instances by tag filters
 
 ## File Structure
 
@@ -161,8 +161,7 @@ edgenext/services/ecs/
 
 ```hcl
 resource "edgenext_ecs_vpc" "example" {
-  region = "tokyo-a"
-  name   = "example-vpc"
+  name = "example-vpc"
   subnet {
     name       = "example-subnet"
     ip_version = 4
@@ -171,8 +170,7 @@ resource "edgenext_ecs_vpc" "example" {
 }
 
 resource "edgenext_ecs_vpc_subnet" "example" {
-  region     = "tokyo-a"
-  network_id = edgenext_ecs_vpc.example.id
+  vpc_id     = edgenext_ecs_vpc.example.id
   name       = "example-subnet-2"
   cidr       = "172.31.2.0/24"
 }
@@ -182,9 +180,8 @@ resource "edgenext_ecs_vpc_subnet" "example" {
 
 ```hcl
 data "edgenext_ecs_network_interfaces" "example" {
-  region = "tokyo-a"
-  name   = "example-eni"
-  limit  = 20
+  network_interface_name = "example-eni"
+  limit                  = 20
 }
 
 output "eni_ids" {
@@ -196,12 +193,10 @@ output "eni_ids" {
 
 ```hcl
 resource "edgenext_ecs_security_group" "example" {
-  region = "tokyo-a"
-  name   = "example-sg"
+  name = "example-sg"
 }
 
 resource "edgenext_ecs_security_group_rule" "ssh" {
-  region            = "tokyo-a"
   security_group_id = edgenext_ecs_security_group.example.id
   protocol          = "tcp"
   direction         = "ingress"

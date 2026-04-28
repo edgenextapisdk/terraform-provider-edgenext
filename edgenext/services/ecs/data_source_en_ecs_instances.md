@@ -4,20 +4,14 @@ Example Usage
 
 ```hcl
 data "edgenext_ecs_instances" "example" {
-  region = "tokyo-a"
-  name   = "example-instance"
-  limit  = 10
-}
-
-output "instance_count" {
-  value = data.edgenext_ecs_instances.example.total
+  limit = 10
 }
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
-* `name` - (Optional) Instance name filter.
+* `instance_name` - (Optional) Instance name filter.
+* `instance_id` - (Optional) Instance ID filter.
 * `limit` - (Optional) Maximum number of results.
 
 Attributes Reference

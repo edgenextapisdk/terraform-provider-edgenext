@@ -22,21 +22,20 @@ func ResourceENECSNetworkInterface() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENECSNetworkInterfaceImport,
 		},
-		Description: "Provides an EdgeNext ECS network interface (ENI). Updating name/description is supported in place. network_id and subnet_id cannot be changed after creation.",
+		Description: "Provides an EdgeNext ECS network interface (ENI). Updating name/description is supported in place. vpc_id and subnet_id cannot be changed after creation.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("The region of the port."),
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Port name.",
+				Description: "Network interface name.",
 			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
-				Description: "Port description.",
+				Description: "Network interface description.",
 			},
-			"network_id": {
+			"vpc_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "VPC network ID. Cannot be changed after creation.",
@@ -49,23 +48,23 @@ func ResourceENECSNetworkInterface() *schema.Resource {
 			"port_security_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Whether port security is enabled.",
+				Description: "Whether network interface security is enabled.",
 			},
 			"security_groups": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Security group IDs.",
+				Description: "Security group IDs to apply to the network interface.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
-			"device_id": {
+			"instance_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Attached server ID (instance ID).",
+				Computed:    true,
+				Description: "Attached instance ID to the network interface.",
 			},
 			"floating_ip_address": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Floating IP address bound to this port.",
+				Computed:    true,
+				Description: "Floating IP address bound to this network interface.",
 			},
 			"tenant_id": {
 				Type:        schema.TypeString,
@@ -75,17 +74,17 @@ func ResourceENECSNetworkInterface() *schema.Resource {
 			"admin_state_up": {
 				Type:        schema.TypeBool,
 				Computed:    true,
-				Description: "Administrative state of the port.",
+				Description: "Administrative state of the network interface.",
 			},
 			"status": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Port status.",
+				Description: "Network interface status.",
 			},
-			"device_owner": {
+			"instance_owner": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Device owner (e.g. compute:nova).",
+				Description: "Instance owner (e.g. compute:nova).",
 			},
 			"fixed_ips": {
 				Type:        schema.TypeList,
@@ -106,7 +105,7 @@ func ResourceENECSNetworkInterface() *schema.Resource {
 						"floating_ip": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Associated floating IP if any.",
+							Description: "Associated floating IP if present.",
 						},
 					},
 				},
@@ -152,15 +151,15 @@ func ResourceENECSNetworkInterface() *schema.Resource {
 				Computed:    true,
 				Description: "VNIC binding type.",
 			},
-			"server_name": {
+			"instance_name": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Resolved server name when attached.",
+				Description: "Resolved instance name when attached.",
 			},
-			"network_name": {
+			"vpc_name": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Resolved network name.",
+				Description: "Resolved VPC name.",
 			},
 			"ipv4": {
 				Type:        schema.TypeList,
@@ -183,10 +182,10 @@ func resourceENECSNetworkInterfaceCustomizeDiff(_ context.Context, d *schema.Res
 	if d.Id() == "" {
 		return nil
 	}
-	if d.HasChange("network_id") {
-		oldRaw, newRaw := d.GetChange("network_id")
+	if d.HasChange("vpc_id") {
+		oldRaw, newRaw := d.GetChange("vpc_id")
 		if networkInterfaceNormalizeString(oldRaw) != networkInterfaceNormalizeString(newRaw) {
-			return fmt.Errorf("network_id cannot be modified after creation")
+			return fmt.Errorf("vpc_id cannot be modified after creation")
 		}
 	}
 	if d.HasChange("subnet_id") {
@@ -198,28 +197,20 @@ func resourceENECSNetworkInterfaceCustomizeDiff(_ context.Context, d *schema.Res
 	return nil
 }
 
-func parseNetworkInterfaceResourceID(id string) (region, portID string, err error) {
-	parts := strings.Split(id, "/")
-	if len(parts) != 2 {
-		return "", "", fmt.Errorf("expected id as region/port_id, got %q", id)
+func parseNetworkInterfaceResourceID(id string) (networkInterfaceID string, err error) {
+	networkInterfaceID = strings.TrimSpace(id)
+	if networkInterfaceID == "" {
+		return "", fmt.Errorf("expected id as network_interface_id, got %q", id)
 	}
-	region = helper.NormalizeRegion(strings.TrimSpace(parts[0]))
-	portID = strings.TrimSpace(parts[1])
-	if region == "" || portID == "" {
-		return "", "", fmt.Errorf("expected id as region/port_id, got %q", id)
-	}
-	return region, portID, nil
+	return networkInterfaceID, nil
 }
 
 func resourceENECSNetworkInterfaceImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	region, portID, err := parseNetworkInterfaceResourceID(d.Id())
+	portID, err := parseNetworkInterfaceResourceID(d.Id())
 	if err != nil {
 		return nil, err
 	}
-	if err := d.Set("region", region); err != nil {
-		return nil, err
-	}
-	d.SetId(fmt.Sprintf("%s/%s", region, portID))
+	d.SetId(portID)
 
 	if diags := resourceENECSNetworkInterfaceRead(ctx, d, meta); diags.HasError() {
 		errDiag := diags[0]
@@ -229,7 +220,7 @@ func resourceENECSNetworkInterfaceImport(ctx context.Context, d *schema.Resource
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("network interface %q not found in region %q", portID, region)
+		return nil, fmt.Errorf("network interface %q not found", portID)
 	}
 	return []*schema.ResourceData{d}, nil
 }
@@ -241,14 +232,12 @@ func resourceENECSNetworkInterfaceCreate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	region := helper.NormalizeRegion(d.Get("region").(string))
 	req := map[string]interface{}{
-		"region": region,
 		"port": map[string]interface{}{
 			"id":          "",
 			"name":        d.Get("name").(string),
 			"description": d.Get("description").(string),
-			"network_id":  d.Get("network_id").(string),
+			"network_id":  d.Get("vpc_id").(string),
 			"subnet_id":   d.Get("subnet_id").(string),
 		},
 	}
@@ -269,20 +258,10 @@ func resourceENECSNetworkInterfaceCreate(ctx context.Context, d *schema.Resource
 	if portID == "" {
 		return diag.Errorf("failed to parse ECS network_interface create response: missing port id")
 	}
-	d.SetId(fmt.Sprintf("%s/%s", region, portID))
-	if serverID := strings.TrimSpace(d.Get("device_id").(string)); serverID != "" {
-		if err := resourceENECSNetworkInterfaceRelationServer(ctx, ecsClient, region, portID, "add", serverID); err != nil {
-			return diag.Errorf("failed to bind server to ECS network_interface on create: %s", err)
-		}
-	}
+	d.SetId(portID)
 	if relationEnabled, relationGroups, shouldCallRelation := networkInterfaceSecurityRelationInput(d); shouldCallRelation {
-		if err := resourceENECSNetworkInterfaceRelationSecurityGroup(ctx, ecsClient, region, portID, relationEnabled, relationGroups); err != nil {
+		if err := resourceENECSNetworkInterfaceRelationSecurityGroup(ctx, ecsClient, portID, relationEnabled, relationGroups); err != nil {
 			return diag.Errorf("failed to set security relation on create for ECS network_interface: %s", err)
-		}
-	}
-	if floatingIP := strings.TrimSpace(d.Get("floating_ip_address").(string)); floatingIP != "" {
-		if err := resourceENECSNetworkInterfaceRelationFloatingIPAdd(ctx, ecsClient, region, portID, floatingIP, networkInterfaceFirstFixedIPAddress(port)); err != nil {
-			return diag.Errorf("failed to bind floating IP on create for ECS network_interface: %s", err)
 		}
 	}
 
@@ -296,14 +275,13 @@ func resourceENECSNetworkInterfaceRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	region, portID, err := parseNetworkInterfaceResourceID(d.Id())
+	portID, err := parseNetworkInterfaceResourceID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	req := map[string]interface{}{
-		"region": region,
-		"id":     portID,
+		"id": portID,
 	}
 	var resp map[string]interface{}
 
@@ -319,7 +297,7 @@ func resourceENECSNetworkInterfaceRead(ctx context.Context, d *schema.ResourceDa
 		d.SetId("")
 		return nil
 	}
-	if err := resourceENECSNetworkInterfaceEnrichFixedIPs(ctx, ecsClient, region, portID, port); err != nil {
+	if err := resourceENECSNetworkInterfaceEnrichFixedIPs(ctx, ecsClient, portID, port); err != nil {
 		return diag.Errorf("failed to enrich ECS network_interface fixed IP details: %s", err)
 	}
 
@@ -356,19 +334,6 @@ func networkInterfaceFirstSubnetID(port map[string]interface{}) string {
 	return ""
 }
 
-func networkInterfaceFirstFixedIPAddress(port map[string]interface{}) string {
-	for _, raw := range helper.InterfaceToList(port["fixed_ips"]) {
-		m, ok := raw.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		if ip := helper.StringFromMap(m, "ip_address"); ip != "" {
-			return ip
-		}
-	}
-	return ""
-}
-
 func networkInterfaceFirstFloatingIPAddress(port map[string]interface{}) string {
 	for _, raw := range helper.InterfaceToList(port["fixed_ips"]) {
 		m, ok := raw.(map[string]interface{})
@@ -382,10 +347,9 @@ func networkInterfaceFirstFloatingIPAddress(port map[string]interface{}) string 
 	return ""
 }
 
-func resourceENECSNetworkInterfaceEnrichFixedIPs(ctx context.Context, ecsClient *connectivity.ECSClient, region, portID string, port map[string]interface{}) error {
+func resourceENECSNetworkInterfaceEnrichFixedIPs(ctx context.Context, ecsClient *connectivity.ECSClient, portID string, port map[string]interface{}) error {
 	req := map[string]interface{}{
-		"region": region,
-		"id":     portID,
+		"id": portID,
 	}
 	var resp map[string]interface{}
 	if err := ecsClient.Post(ctx, "/ecs/openapi/v2/ports/internal_ip_list", req, &resp); err != nil {
@@ -439,15 +403,13 @@ func resourceENECSNetworkInterfaceEnrichFixedIPs(ctx context.Context, ecsClient 
 
 func resourceENECSNetworkInterfaceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// Defense in depth: CustomizeDiff blocks these at plan time; reject here if Update is still invoked.
-	if d.HasChange("network_id") || d.HasChange("subnet_id") {
-		return diag.Errorf("network_id and subnet_id cannot be updated after creation")
+	if d.HasChange("vpc_id") || d.HasChange("subnet_id") {
+		return diag.Errorf("vpc_id and subnet_id cannot be updated after creation")
 	}
 
 	nameOrDescChanged := d.HasChange("name") || d.HasChange("description")
-	deviceChanged := d.HasChange("device_id")
 	securityRelationChanged := d.HasChange("port_security_enabled") || d.HasChange("security_groups")
-	floatingIPChanged := d.HasChange("floating_ip_address")
-	if !nameOrDescChanged && !deviceChanged && !securityRelationChanged && !floatingIPChanged {
+	if !nameOrDescChanged && !securityRelationChanged {
 		return resourceENECSNetworkInterfaceRead(ctx, d, m)
 	}
 
@@ -457,14 +419,13 @@ func resourceENECSNetworkInterfaceUpdate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	region, portID, err := parseNetworkInterfaceResourceID(d.Id())
+	portID, err := parseNetworkInterfaceResourceID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	if nameOrDescChanged {
 		req := map[string]interface{}{
-			"region": region,
 			"port": map[string]interface{}{
 				"id":          portID,
 				"name":        d.Get("name").(string),
@@ -480,55 +441,18 @@ func resourceENECSNetworkInterfaceUpdate(ctx context.Context, d *schema.Resource
 		}
 	}
 
-	if deviceChanged {
-		oldRaw, newRaw := d.GetChange("device_id")
-		oldServerID := strings.TrimSpace(fmt.Sprintf("%v", oldRaw))
-		newServerID := strings.TrimSpace(fmt.Sprintf("%v", newRaw))
-
-		if oldServerID != "" && oldServerID != newServerID {
-			if err := resourceENECSNetworkInterfaceRelationServer(ctx, ecsClient, region, portID, "remove", oldServerID); err != nil {
-				return diag.Errorf("failed to unbind old server from ECS network_interface: %s", err)
-			}
-		}
-		if newServerID != "" && oldServerID != newServerID {
-			if err := resourceENECSNetworkInterfaceRelationServer(ctx, ecsClient, region, portID, "add", newServerID); err != nil {
-				return diag.Errorf("failed to bind new server to ECS network_interface: %s", err)
-			}
-		}
-	}
 	if securityRelationChanged {
 		relationEnabled, relationGroups, _ := networkInterfaceSecurityRelationInput(d)
-		if err := resourceENECSNetworkInterfaceRelationSecurityGroup(ctx, ecsClient, region, portID, relationEnabled, relationGroups); err != nil {
+		if err := resourceENECSNetworkInterfaceRelationSecurityGroup(ctx, ecsClient, portID, relationEnabled, relationGroups); err != nil {
 			return diag.Errorf("failed to update security relation for ECS network_interface: %s", err)
-		}
-	}
-	if floatingIPChanged {
-		oldRaw, newRaw := d.GetChange("floating_ip_address")
-		oldFloatingIP := networkInterfaceNormalizeString(oldRaw)
-		newFloatingIP := networkInterfaceNormalizeString(newRaw)
-
-		if oldFloatingIP != "" && oldFloatingIP != newFloatingIP {
-			if err := resourceENECSNetworkInterfaceRelationFloatingIPRemove(ctx, ecsClient, region, oldFloatingIP); err != nil {
-				return diag.Errorf("failed to remove floating IP relation for ECS network_interface: %s", err)
-			}
-		}
-		if newFloatingIP != "" && oldFloatingIP != newFloatingIP {
-			port, err := resourceENECSNetworkInterfacePortDetail(ctx, ecsClient, region, portID)
-			if err != nil {
-				return diag.Errorf("failed to query port detail before floating IP add: %s", err)
-			}
-			if err := resourceENECSNetworkInterfaceRelationFloatingIPAdd(ctx, ecsClient, region, portID, newFloatingIP, networkInterfaceFirstFixedIPAddress(port)); err != nil {
-				return diag.Errorf("failed to add floating IP relation for ECS network_interface: %s", err)
-			}
 		}
 	}
 
 	return resourceENECSNetworkInterfaceRead(ctx, d, m)
 }
 
-func resourceENECSNetworkInterfaceRelationServer(ctx context.Context, ecsClient *connectivity.ECSClient, region, portID, action, serverID string) error {
+func resourceENECSNetworkInterfaceRelationServer(ctx context.Context, ecsClient *connectivity.ECSClient, portID, action, serverID string) error {
 	req := map[string]interface{}{
-		"region":    region,
 		"port_id":   portID,
 		"action":    action,
 		"server_id": serverID,
@@ -541,9 +465,8 @@ func resourceENECSNetworkInterfaceRelationServer(ctx context.Context, ecsClient 
 	return err
 }
 
-func resourceENECSNetworkInterfaceRelationSecurityGroup(ctx context.Context, ecsClient *connectivity.ECSClient, region, portID string, portSecurityEnabled bool, securityGroups []interface{}) error {
+func resourceENECSNetworkInterfaceRelationSecurityGroup(ctx context.Context, ecsClient *connectivity.ECSClient, portID string, portSecurityEnabled bool, securityGroups []interface{}) error {
 	req := map[string]interface{}{
-		"region": region,
 		"port": map[string]interface{}{
 			"id":                    portID,
 			"port_security_enabled": portSecurityEnabled,
@@ -575,81 +498,9 @@ func networkInterfaceSecurityRelationInput(d *schema.ResourceData) (bool, []inte
 	return enabled, helper.InterfaceToStringSlice(groupsRaw), true
 }
 
-func resourceENECSNetworkInterfaceRelationFloatingIPAdd(ctx context.Context, ecsClient *connectivity.ECSClient, region, portID, floatingIPAddr, fixedIPAddr string) error {
-	if fixedIPAddr == "" {
-		return fmt.Errorf("missing fixed_ip_address for port %s", portID)
-	}
-	floatingID, err := ecsFloatingIPIDByAddress(ctx, ecsClient, region, floatingIPAddr)
-	if err != nil {
-		return err
-	}
+func resourceENECSNetworkInterfacePortDetail(ctx context.Context, ecsClient *connectivity.ECSClient, portID string) (map[string]interface{}, error) {
 	req := map[string]interface{}{
-		"region": region,
-		"action": "add",
-		"floating_ip": map[string]interface{}{
-			"port_id":          portID,
-			"fixed_ip_address": fixedIPAddr,
-			"id":               floatingID,
-		},
-	}
-	var resp map[string]interface{}
-	if err := ecsClient.Post(ctx, "/ecs/openapi/v2/ports/relation/floatingip", req, &resp); err != nil {
-		return err
-	}
-	_, err = helper.ParseAPIResponsePayload(resp)
-	return err
-}
-
-func resourceENECSNetworkInterfaceRelationFloatingIPRemove(ctx context.Context, ecsClient *connectivity.ECSClient, region, floatingIPAddr string) error {
-	req := map[string]interface{}{
-		"region": region,
-		"action": "remove",
-		"floating_ip": map[string]interface{}{
-			"floating_ip_address": floatingIPAddr,
-		},
-	}
-	var resp map[string]interface{}
-	if err := ecsClient.Post(ctx, "/ecs/openapi/v2/ports/relation/floatingip", req, &resp); err != nil {
-		return err
-	}
-	_, err := helper.ParseAPIResponsePayload(resp)
-	return err
-}
-
-func ecsFloatingIPIDByAddress(ctx context.Context, ecsClient *connectivity.ECSClient, region, floatingIPAddr string) (string, error) {
-	req := map[string]interface{}{
-		"region":              region,
-		"floating_ip_address": floatingIPAddr,
-		"limit":               50,
-	}
-	var resp map[string]interface{}
-	if err := ecsClient.Post(ctx, "/ecs/openapi/v2/floatingips/list", req, &resp); err != nil {
-		return "", err
-	}
-	payload, err := helper.ParseAPIResponseMap(resp)
-	if err != nil {
-		return "", err
-	}
-	for _, raw := range helper.ListFromMap(payload, "floating_ip") {
-		row, ok := raw.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		if helper.StringFromMap(row, "floating_ip_address") == floatingIPAddr {
-			id := helper.StringFromMap(row, "id")
-			if id == "" {
-				break
-			}
-			return id, nil
-		}
-	}
-	return "", fmt.Errorf("floating IP address %q not found", floatingIPAddr)
-}
-
-func resourceENECSNetworkInterfacePortDetail(ctx context.Context, ecsClient *connectivity.ECSClient, region, portID string) (map[string]interface{}, error) {
-	req := map[string]interface{}{
-		"region": region,
-		"id":     portID,
+		"id": portID,
 	}
 	var resp map[string]interface{}
 	if err := ecsClient.Post(ctx, "/ecs/openapi/v2/ports/detail", req, &resp); err != nil {
@@ -684,14 +535,13 @@ func resourceENECSNetworkInterfaceDelete(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	region, portID, err := parseNetworkInterfaceResourceID(d.Id())
+	portID, err := parseNetworkInterfaceResourceID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	req := map[string]interface{}{
-		"region": region,
-		"ids":    []interface{}{portID},
+		"ids": []interface{}{portID},
 	}
 	var resp map[string]interface{}
 
