@@ -16,7 +16,7 @@ import (
 )
 
 func TestNewECSClient(t *testing.T) {
-	client := NewECSClient("test-access-key", "test-secret-key", "https://api.example.com")
+	client := NewECSClient("test-access-key", "test-secret-key", "https://api.example.com", "tokyo-a")
 	if client == nil {
 		t.Fatal("Expected ECS client, got nil")
 	}
@@ -57,7 +57,7 @@ func TestECSClientGet(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewECSClient(accessKey, secretKey, server.URL)
+	client := NewECSClient(accessKey, secretKey, server.URL, "tokyo-a")
 	query := map[string]interface{}{
 		"start_time": "2023-10-23 12:00",
 		"end_time":   "2023-10-23 12:05",
@@ -118,7 +118,7 @@ func TestECSClientPost(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewECSClient(accessKey, secretKey, server.URL)
+	client := NewECSClient(accessKey, secretKey, server.URL, "tokyo-a")
 	var result map[string]interface{}
 	err := client.Post(context.Background(), "/bms/openapi/v1/getFlow", requestBody, &result)
 	if err != nil {
@@ -188,7 +188,7 @@ func TestECSClientPostGetEcsAggregateBandwidth(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewECSClient(accessKey, secretKey, server.URL)
+	client := NewECSClient(accessKey, secretKey, server.URL, "tokyo-a")
 	var result map[string]interface{}
 	err := client.Post(context.Background(), path, requestBody, &result)
 	if err != nil {
@@ -217,7 +217,7 @@ func TestECSClientPostGetEcsAggregateBandwidth_Integration(t *testing.T) {
 		endpoint = "http://" + endpoint
 	}
 
-	client := NewECSClient(accessKey, secretKey, endpoint)
+	client := NewECSClient(accessKey, secretKey, endpoint, "tokyo-a")
 	body := map[string]interface{}{
 		"start_time": "2026-04-01 00:00:00",
 		"end_time":   "2026-04-01 23:59:59",
@@ -248,7 +248,7 @@ func TestECSClientPostInstanceList_Integration(t *testing.T) {
 		endpoint = "http://" + endpoint
 	}
 
-	client := NewECSClient(accessKey, secretKey, endpoint)
+	client := NewECSClient(accessKey, secretKey, endpoint, "tokyo-a")
 	body := map[string]interface{}{
 		"limit":  10,
 		"name":   "dsd",
@@ -281,7 +281,7 @@ func TestECSClientPostKeyPairCreate_Integration(t *testing.T) {
 		endpoint = "http://" + endpoint
 	}
 
-	client := NewECSClient(accessKey, secretKey, endpoint)
+	client := NewECSClient(accessKey, secretKey, endpoint, "tokyo-a")
 	body := map[string]interface{}{
 		"name":   "test-key-pair",
 		"region": "lianyungang-a",
@@ -313,7 +313,7 @@ func TestECSClientPostKeyPairList_Integration(t *testing.T) {
 		endpoint = "http://" + endpoint
 	}
 
-	client := NewECSClient(accessKey, secretKey, endpoint)
+	client := NewECSClient(accessKey, secretKey, endpoint, "tokyo-a")
 	body := map[string]interface{}{
 		"region": "lianyungang-a",
 	}
@@ -344,7 +344,7 @@ func TestECSClientPostImageList_Integration(t *testing.T) {
 		endpoint = "http://" + endpoint
 	}
 
-	client := NewECSClient(accessKey, secretKey, endpoint)
+	client := NewECSClient(accessKey, secretKey, endpoint, "tokyo-a")
 	body := map[string]interface{}{
 		"region":     "lianyungang-a",
 		"visibility": "public",
@@ -379,7 +379,7 @@ func TestECSClientPostTagList_Integration(t *testing.T) {
 		endpoint = "http://" + endpoint
 	}
 
-	client := NewECSClient(accessKey, secretKey, endpoint)
+	client := NewECSClient(accessKey, secretKey, endpoint, "tokyo-a")
 	body := map[string]interface{}{
 		"pageNum":  1,
 		"pageSize": 10,
@@ -413,7 +413,7 @@ func TestECSClientPostTagCreate_Integration(t *testing.T) {
 		endpoint = "http://" + endpoint
 	}
 
-	client := NewECSClient(accessKey, secretKey, endpoint)
+	client := NewECSClient(accessKey, secretKey, endpoint, "tokyo-a")
 	body := map[string]interface{}{
 		"tags": []map[string]interface{}{{
 			"key":   "test-key",
@@ -452,7 +452,7 @@ func TestSetQueryParamsFromValues(t *testing.T) {
 }
 
 func TestECSClientSign(t *testing.T) {
-	client := NewECSClient("ak", "sk", "https://api.example.com")
+	client := NewECSClient("ak", "sk", "https://api.example.com", "tokyo-a")
 	timestamp, signature := client.sign([]byte("a=1&b=2"))
 
 	if timestamp == "" {

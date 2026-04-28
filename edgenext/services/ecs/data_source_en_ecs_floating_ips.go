@@ -15,8 +15,7 @@ func DataSourceENECSFloatingIps() *schema.Resource {
 		ReadContext: dataSourceENECSFloatingIpsRead,
 		Description: "Data source to query EdgeNext ECS floating_ips.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
-			"eid": {
+			"floating_ip_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The floating IP ID to filter.",
@@ -63,10 +62,10 @@ func DataSourceENECSFloatingIps() *schema.Resource {
 							Computed:    true,
 							Description: "The router ID.",
 						},
-						"port_id": {
+						"network_interface_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The port ID.",
+							Description: "The network interface ID.",
 						},
 						"fixed_ip_address": {
 							Type:        schema.TypeString,
@@ -140,10 +139,10 @@ func DataSourceENECSFloatingIps() *schema.Resource {
 							Computed:    true,
 							Description: "Expiration time.",
 						},
-						"port_name": {
+						"network_interface_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Port name.",
+							Description: "Network interface name.",
 						},
 						"instance_name": {
 							Type:        schema.TypeString,
@@ -175,8 +174,7 @@ func dataSourceENECSFloatingIpsRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	req := map[string]interface{}{
-		"region":              helper.NormalizeRegion(d.Get("region").(string)),
-		"id":                  d.Get("eid").(string),
+		"id":                  d.Get("floating_ip_id").(string),
 		"limit":               d.Get("limit").(int),
 		"floating_ip_address": d.Get("floating_ip_address").(string),
 	}
@@ -200,35 +198,35 @@ func dataSourceENECSFloatingIpsRead(ctx context.Context, d *schema.ResourceData,
 			continue
 		}
 		items = append(items, map[string]interface{}{
-			"id":                    helper.StringFromMap(row, "id"),
-			"tenant_id":             helper.StringFromMap(row, "tenant_id"),
-			"floating_ip_address":   helper.StringFromMap(row, "floating_ip_address"),
-			"floating_network_id":   helper.StringFromMap(row, "floating_network_id"),
-			"router_id":             helper.StringFromMap(row, "router_id"),
-			"port_id":               helper.StringFromMap(row, "port_id"),
-			"fixed_ip_address":      helper.StringFromMap(row, "fixed_ip_address"),
-			"status":                helper.StringFromMap(row, "status"),
-			"description":           helper.StringFromMap(row, "description"),
-			"qos_policy_id":         helper.StringFromMap(row, "qos_policy_id"),
-			"port_forwardings":      helper.InterfaceToStringSlice(row["port_forwardings"]),
-			"tags":                  helper.InterfaceToStringSlice(row["tags"]),
-			"created_at":            helper.StringFromMap(row, "created_at"),
-			"updated_at":            helper.StringFromMap(row, "updated_at"),
-			"revision_number":       helper.IntFromMap(row, "revision_number"),
-			"project_id":            helper.StringFromMap(row, "project_id"),
-			"bandwidth":             helper.IntFromMap(row, "bandwidth"),
-			"charge_mode":           helper.StringFromMap(row, "charge_mode"),
-			"floating_network_name": helper.StringFromMap(row, "floating_network_name"),
-			"expiration_time":       helper.StringFromMap(row, "expiration_time"),
-			"port_name":             helper.StringFromMap(row, "port_name"),
-			"instance_name":         helper.StringFromMap(row, "instance_name"),
-			"billing_model":         helper.IntFromMap(row, "billing_model"),
+			"id":                     helper.StringFromMap(row, "id"),
+			"tenant_id":              helper.StringFromMap(row, "tenant_id"),
+			"floating_ip_address":    helper.StringFromMap(row, "floating_ip_address"),
+			"floating_network_id":    helper.StringFromMap(row, "floating_network_id"),
+			"router_id":              helper.StringFromMap(row, "router_id"),
+			"network_interface_id":   helper.StringFromMap(row, "port_id"),
+			"fixed_ip_address":       helper.StringFromMap(row, "fixed_ip_address"),
+			"status":                 helper.StringFromMap(row, "status"),
+			"description":            helper.StringFromMap(row, "description"),
+			"qos_policy_id":          helper.StringFromMap(row, "qos_policy_id"),
+			"port_forwardings":       helper.InterfaceToStringSlice(row["port_forwardings"]),
+			"tags":                   helper.InterfaceToStringSlice(row["tags"]),
+			"created_at":             helper.StringFromMap(row, "created_at"),
+			"updated_at":             helper.StringFromMap(row, "updated_at"),
+			"revision_number":        helper.IntFromMap(row, "revision_number"),
+			"project_id":             helper.StringFromMap(row, "project_id"),
+			"bandwidth":              helper.IntFromMap(row, "bandwidth"),
+			"charge_mode":            helper.StringFromMap(row, "charge_mode"),
+			"floating_network_name":  helper.StringFromMap(row, "floating_network_name"),
+			"expiration_time":        helper.StringFromMap(row, "expiration_time"),
+			"network_interface_name": helper.StringFromMap(row, "port_name"),
+			"instance_name":          helper.StringFromMap(row, "instance_name"),
+			"billing_model":          helper.IntFromMap(row, "billing_model"),
 		})
 	}
 	if err := d.Set("total", helper.IntFromMap(payload, "count")); err != nil {
 		return diag.FromErr(err)
 	}
-	helper.SetDataSourceStableID(d, "region", "eid", "floating_ip_address", "limit")
+	helper.SetDataSourceStableID(d, "floating_ip_id", "floating_ip_address", "limit")
 	if err := d.Set("floating_ips", items); err != nil {
 		return diag.FromErr(err)
 	}

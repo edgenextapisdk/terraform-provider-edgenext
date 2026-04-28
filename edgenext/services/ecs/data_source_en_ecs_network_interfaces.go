@@ -15,11 +15,10 @@ func DataSourceENECSNetworkInterfaces() *schema.Resource {
 		ReadContext: dataSourceENECSNetworkInterfacesRead,
 		Description: "Data source to query EdgeNext ECS network_interfaces (Neutron ports via extension list API).",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
-			"name": {
+			"network_interface_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Filter by port name (partial match per API behavior).",
+				Description: "Filter by network interface name (partial match per API behavior).",
 			},
 			"limit": {
 				Type:        schema.TypeInt,
@@ -41,17 +40,17 @@ func DataSourceENECSNetworkInterfaces() *schema.Resource {
 						"id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The port ID.",
+							Description: "The network interface ID.",
 						},
 						"name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The port name.",
+							Description: "The network interface name.",
 						},
-						"network_id": {
+						"vpc_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The network (VPC) ID.",
+							Description: "The VPC ID.",
 						},
 						"tenant_id": {
 							Type:        schema.TypeString,
@@ -61,22 +60,22 @@ func DataSourceENECSNetworkInterfaces() *schema.Resource {
 						"admin_state_up": {
 							Type:        schema.TypeBool,
 							Computed:    true,
-							Description: "Administrative state of the port.",
+							Description: "Administrative state of the network interface.",
 						},
 						"status": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Port status.",
+							Description: "Network interface status.",
 						},
-						"device_id": {
+						"instance_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Attached device (e.g. instance) ID.",
+							Description: "Attached instance ID.",
 						},
-						"device_owner": {
+						"instance_owner": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Device owner string (e.g. compute:nova).",
+							Description: "Instance owner (e.g. compute:nova).",
 						},
 						"fixed_ips": {
 							Type:        schema.TypeList,
@@ -115,7 +114,7 @@ func DataSourceENECSNetworkInterfaces() *schema.Resource {
 						"port_security_enabled": {
 							Type:        schema.TypeBool,
 							Computed:    true,
-							Description: "Whether port security is enabled.",
+							Description: "Whether network interface security is enabled.",
 						},
 						"security_groups": {
 							Type:        schema.TypeList,
@@ -159,15 +158,15 @@ func DataSourceENECSNetworkInterfaces() *schema.Resource {
 							Computed:    true,
 							Description: "VNIC binding type (from binding:vnic_type; may be filled from origin_data).",
 						},
-						"server_name": {
+						"instance_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Resolved server (instance) name.",
+							Description: "Resolved instance name.",
 						},
-						"network_name": {
+						"vpc_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Resolved network name.",
+							Description: "Resolved VPC name.",
 						},
 						"ipv4": {
 							Type:        schema.TypeList,
@@ -196,9 +195,8 @@ func dataSourceENECSNetworkInterfacesRead(ctx context.Context, d *schema.Resourc
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"name":   d.Get("name").(string),
-		"limit":  d.Get("limit").(int),
+		"name":  d.Get("network_interface_name").(string),
+		"limit": d.Get("limit").(int),
 	}
 	var resp map[string]interface{}
 
@@ -224,7 +222,7 @@ func dataSourceENECSNetworkInterfacesRead(ctx context.Context, d *schema.Resourc
 	if err := d.Set("total", helper.IntFromMap(payload, "count")); err != nil {
 		return diag.FromErr(err)
 	}
-	helper.SetDataSourceStableID(d, "region", "name", "limit")
+	helper.SetDataSourceStableID(d, "network_interface_name", "limit")
 	if err := d.Set("network_interfaces", items); err != nil {
 		return diag.FromErr(err)
 	}
@@ -263,12 +261,12 @@ func flattenNetworkInterfacePort(row map[string]interface{}) map[string]interfac
 	return map[string]interface{}{
 		"id":                    helper.StringFromMap(row, "id"),
 		"name":                  helper.StringFromMap(row, "name"),
-		"network_id":            helper.StringFromMap(row, "network_id"),
+		"vpc_id":                helper.StringFromMap(row, "network_id"),
 		"tenant_id":             tenantID,
 		"admin_state_up":        networkInterfaceBoolFromMap(row, "admin_state_up"),
 		"status":                helper.StringFromMap(row, "status"),
-		"device_id":             helper.StringFromMap(row, "device_id"),
-		"device_owner":          helper.StringFromMap(row, "device_owner"),
+		"instance_id":           helper.StringFromMap(row, "device_id"),
+		"instance_owner":        helper.StringFromMap(row, "device_owner"),
 		"fixed_ips":             flattenNetworkInterfaceFixedIPs(row["fixed_ips"]),
 		"project_id":            helper.StringFromMap(row, "project_id"),
 		"qos_policy_id":         helper.StringFromMap(row, "qos_policy_id"),
@@ -281,8 +279,8 @@ func flattenNetworkInterfacePort(row map[string]interface{}) map[string]interfac
 		"revision_number":       rev,
 		"mac_address":           helper.StringFromMap(row, "mac_address"),
 		"binding_vnic_type":     bindingVnic,
-		"server_name":           helper.StringFromMap(row, "server_name"),
-		"network_name":          helper.StringFromMap(row, "network_name"),
+		"instance_name":         helper.StringFromMap(row, "server_name"),
+		"vpc_name":              helper.StringFromMap(row, "network_name"),
 		"ipv4":                  helper.InterfaceToStringSlice(row["ipv4"]),
 		"ipv6":                  helper.InterfaceToStringSlice(row["ipv6"]),
 	}

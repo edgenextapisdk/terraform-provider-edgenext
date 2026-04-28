@@ -3,9 +3,16 @@ Use this resource to create and delete an ECS VPC subnet.
 Example Usage
 
 ```hcl
+resource "edgenext_ecs_vpc" "example" {
+  name = "example-vpc"
+  subnet {
+    name = "seed-subnet"
+    cidr = "172.31.1.0/24"
+  }
+}
+
 resource "edgenext_ecs_vpc_subnet" "example" {
-  region     = "tokyo-a"
-  network_id = "68451a78-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  vpc_id     = edgenext_ecs_vpc.example.id
   name       = "example-subnet"
   ip_version = 4
   cidr       = "172.31.10.0/24"
@@ -14,16 +21,15 @@ resource "edgenext_ecs_vpc_subnet" "example" {
 
 Import
 
-Import format is `region/network_id/subnet_id`.
+Import format is `vpc_id/subnet_id`.
 
 ```shell
-terraform import edgenext_ecs_vpc_subnet.example tokyo-a/68451a78-xxxx-xxxx-xxxx-xxxxxxxxxxxx/b34fe463-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+terraform import edgenext_ecs_vpc_subnet.example 68451a78-xxxx-xxxx-xxxx-xxxxxxxxxxxx/b34fe463-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
-* `network_id` - (Required) VPC network ID. Cannot be changed after creation.
+* `vpc_id` - (Required) VPC ID. Cannot be changed after creation.
 * `name` - (Required) Subnet name. Cannot be changed after creation.
 * `ip_version` - (Optional) IP version, default `4`. Cannot be changed after creation.
 * `cidr` - (Required) Subnet CIDR. Cannot be changed after creation.

@@ -4,21 +4,22 @@ Example Usage
 
 ```hcl
 data "edgenext_ecs_vpcs" "example" {
-  region     = "tokyo-a"
-  network_id = ""
-  name       = "default-vpc"
-  limit      = 10
+  name  = edgenext_ecs_vpc.example.name
+  limit = 10
 }
 
-output "first_vpc_id" {
-  value = try(data.edgenext_ecs_vpcs.example.vpcs[0].id, null)
+resource "edgenext_ecs_vpc" "example" {
+  name = "default-vpc"
+  subnet {
+    name = "default-subnet"
+    cidr = "10.10.0.0/24"
+  }
 }
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
-* `network_id` - (Optional) Network ID filter.
+* `vpc_id` - (Optional) VPC ID filter.
 * `name` - (Optional) VPC name filter.
 * `limit` - (Optional) Maximum number of results, default `10`.
 

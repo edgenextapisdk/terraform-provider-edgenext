@@ -23,7 +23,6 @@ func ResourceENECSFloatingIp() *schema.Resource {
 		},
 		Description: "Provides an EdgeNext ECS floating_ip resource.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("region description"),
 			"bandwidth": {
 				Type:        schema.TypeInt,
 				Required:    true,
@@ -39,17 +38,9 @@ func ResourceENECSFloatingIp() *schema.Resource {
 }
 
 func resourceENECSFloatingIpImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("expected import id as region/floating_ip_id, got %q", d.Id())
-	}
-	region := helper.NormalizeRegion(parts[0])
-	floatingIPID := strings.TrimSpace(parts[1])
-	if region == "" || floatingIPID == "" {
-		return nil, fmt.Errorf("expected import id as region/floating_ip_id, got %q", d.Id())
-	}
-	if err := d.Set("region", region); err != nil {
-		return nil, err
+	floatingIPID := strings.TrimSpace(d.Id())
+	if floatingIPID == "" {
+		return nil, fmt.Errorf("expected import id as floating_ip_id, got %q", d.Id())
 	}
 	d.SetId(floatingIPID)
 	if diags := resourceENECSFloatingIpRead(ctx, d, meta); diags.HasError() {
@@ -60,7 +51,7 @@ func resourceENECSFloatingIpImport(ctx context.Context, d *schema.ResourceData, 
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("floating IP %q not found in region %q", floatingIPID, region)
+		return nil, fmt.Errorf("floating IP %q not found", floatingIPID)
 	}
 	return []*schema.ResourceData{d}, nil
 }
@@ -73,7 +64,6 @@ func resourceENECSFloatingIpCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	req := map[string]interface{}{
-		"region":    helper.NormalizeRegion(d.Get("region").(string)),
 		"bandwidth": d.Get("bandwidth").(int),
 	}
 	if n, ok := d.GetOk("name"); ok {

@@ -23,7 +23,6 @@ func ResourceENECSRouter() *schema.Resource {
 		},
 		Description: "Provides an EdgeNext ECS router resource.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionResourceSchema("region description"),
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -79,16 +78,11 @@ func ResourceENECSRouter() *schema.Resource {
 }
 
 func resourceENECSRouterImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	parts := strings.Split(d.Id(), "/")
-	if len(parts) != 2 {
-		return nil, fmt.Errorf("expected import id as region/router_id, got %q", d.Id())
+	routerID := strings.TrimSpace(d.Id())
+	if routerID == "" {
+		return nil, fmt.Errorf("expected import id as router_id, got %q", d.Id())
 	}
-
-	region := helper.NormalizeRegion(parts[0])
-	if err := d.Set("region", region); err != nil {
-		return nil, err
-	}
-	d.SetId(parts[1])
+	d.SetId(routerID)
 
 	if diags := resourceENECSRouterRead(ctx, d, meta); diags.HasError() {
 		errDiag := diags[0]
@@ -98,7 +92,7 @@ func resourceENECSRouterImport(ctx context.Context, d *schema.ResourceData, meta
 		return nil, fmt.Errorf("%s", errDiag.Summary)
 	}
 	if d.Id() == "" {
-		return nil, fmt.Errorf("router %q not found in region %q", parts[1], region)
+		return nil, fmt.Errorf("router %q not found", routerID)
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -112,7 +106,6 @@ func resourceENECSRouterCreate(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
 		"router": map[string]interface{}{
 			"name":        d.Get("name").(string),
 			"description": d.Get("description").(string),
@@ -152,8 +145,7 @@ func resourceENECSRouterRead(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"id":     d.Id(),
+		"id": d.Id(),
 	}
 	var resp map[string]interface{}
 	if err := ecsClient.Post(ctx, "/ecs/openapi/v2/routers/detail", req, &resp); err != nil {
@@ -204,7 +196,6 @@ func resourceENECSRouterUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	if d.HasChanges("name", "description") {
 		req := map[string]interface{}{
-			"region": helper.NormalizeRegion(d.Get("region").(string)),
 			"router": map[string]interface{}{
 				"id":          d.Id(),
 				"name":        d.Get("name").(string),
@@ -223,7 +214,6 @@ func resourceENECSRouterUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	if d.HasChange("external_network_id") {
 		req := map[string]interface{}{
-			"region": helper.NormalizeRegion(d.Get("region").(string)),
 			"router": map[string]interface{}{
 				"id":                  d.Id(),
 				"external_network_id": d.Get("external_network_id").(string),
@@ -250,8 +240,7 @@ func resourceENECSRouterDelete(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"ids":    []string{d.Id()},
+		"ids": []string{d.Id()},
 	}
 	var resp map[string]interface{}
 

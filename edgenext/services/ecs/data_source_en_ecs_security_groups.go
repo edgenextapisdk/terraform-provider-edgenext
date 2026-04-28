@@ -15,7 +15,6 @@ func DataSourceENECSSecurityGroups() *schema.Resource {
 		ReadContext: dataSourceENECSSecurityGroupsRead,
 		Description: "Data source to query EdgeNext ECS security_groups.",
 		Schema: map[string]*schema.Schema{
-			"region": helper.RegionDataSchema("region description"),
 			"name": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -189,9 +188,8 @@ func dataSourceENECSSecurityGroupsRead(ctx context.Context, d *schema.ResourceDa
 	}
 
 	req := map[string]interface{}{
-		"region": helper.NormalizeRegion(d.Get("region").(string)),
-		"name":   d.Get("name").(string),
-		"limit":  d.Get("limit").(int),
+		"name":  d.Get("name").(string),
+		"limit": d.Get("limit").(int),
 	}
 	var resp map[string]interface{}
 
@@ -217,7 +215,7 @@ func dataSourceENECSSecurityGroupsRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("total", helper.IntFromMap(payload, "count")); err != nil {
 		return diag.FromErr(err)
 	}
-	helper.SetDataSourceStableID(d, "region", "name", "limit")
+	helper.SetDataSourceStableID(d, "name", "limit")
 	if err := d.Set("security_groups", items); err != nil {
 		return diag.FromErr(err)
 	}

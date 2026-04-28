@@ -15,12 +15,12 @@ Use this data source to query rules of a specific ECS security group.
 
 ```hcl
 data "edgenext_ecs_security_group_rules" "example" {
-  region = "tokyo-a"
-  id     = "de62db3d-c771-4d87-a233-344ef9574e76"
+  id = data.edgenext_ecs_security_groups.example.security_groups[0].id
 }
 
-output "first_rule_id" {
-  value = try(data.edgenext_ecs_security_group_rules.example.security_group_rules[0].id, null)
+data "edgenext_ecs_security_groups" "example" {
+  name  = "default"
+  limit = 1
 }
 ```
 
@@ -28,8 +28,7 @@ output "first_rule_id" {
 
 The following arguments are supported:
 
-* `id` - (Required, String) The security group ID.
-* `region` - (Required, String) region description
+* `security_group_id` - (Required, String) The security group ID to filter rules.
 
 ## Attributes Reference
 

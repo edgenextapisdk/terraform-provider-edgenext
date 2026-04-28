@@ -15,8 +15,8 @@ Use this resource to create and manage ECS global tags.
 
 ```hcl
 resource "edgenext_ecs_tag" "example" {
-  key   = "env"
-  value = "dev"
+  tag_key   = "env"
+  tag_value = "dev"
 }
 ```
 
@@ -24,8 +24,8 @@ resource "edgenext_ecs_tag" "example" {
 
 The following arguments are supported:
 
-* `key` - (Required, String) Tag key. Cannot be changed after creation.
-* `value` - (Required, String) Tag value. Cannot be changed after creation.
+* `tag_key` - (Required, String) Tag key. Cannot be changed after creation.
+* `tag_value` - (Required, String) Tag value. Cannot be changed after creation.
 
 ## Attributes Reference
 
@@ -37,7 +37,7 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-Import format is `tag_id/key/value`.
+Import format is `tag_id/tag_key/tag_value`.
 
 ```shell
 terraform import edgenext_ecs_tag.example 52/env/dev
@@ -45,8 +45,8 @@ terraform import edgenext_ecs_tag.example 52/env/dev
 
 Argument Reference
 
-* `key` - (Required) Tag key. Cannot be changed after creation.
-* `value` - (Required) Tag value. Cannot be changed after creation.
+* `tag_key` - (Required) Tag key. Cannot be changed after creation.
+* `tag_value` - (Required) Tag value. Cannot be changed after creation.
 
 Attributes Reference
 

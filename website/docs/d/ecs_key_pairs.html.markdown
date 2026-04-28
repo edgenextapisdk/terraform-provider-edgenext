@@ -15,12 +15,7 @@ Use this data source to query ECS key pairs.
 
 ```hcl
 data "edgenext_ecs_key_pairs" "example" {
-  region = "tokyo-a"
-  limit  = 10
-}
-
-output "first_key_name" {
-  value = try(data.edgenext_ecs_key_pairs.example.key_pairs[0].name, null)
+  limit = 10
 }
 ```
 
@@ -28,7 +23,6 @@ output "first_key_name" {
 
 The following arguments are supported:
 
-* `region` - (Required, String) region description
 * `limit` - (Optional, Int) Maximum number of key_pairs to return.
 
 ## Attributes Reference
@@ -40,5 +34,6 @@ In addition to all arguments above, the following attributes are exported:
   * `name` - The name of the key_pair.
   * `public_key` - The public key material.
   * `type` - The key type (e.g. ssh).
+* `total` - Total number of matched key_pairs.
 
 

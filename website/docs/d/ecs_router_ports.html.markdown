@@ -15,12 +15,12 @@ Use this data source to query ports attached to a specific ECS router.
 
 ```hcl
 data "edgenext_ecs_router_ports" "example" {
-  region = "tokyo-a"
-  id     = "f9883769-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  router_id = data.edgenext_ecs_routers.example.routers[0].id
 }
 
-output "router_port_total" {
-  value = data.edgenext_ecs_router_ports.example.total
+data "edgenext_ecs_routers" "example" {
+  router_name = "default-router"
+  limit       = 1
 }
 ```
 
@@ -28,8 +28,7 @@ output "router_port_total" {
 
 The following arguments are supported:
 
-* `id` - (Required, String) The router ID.
-* `region` - (Required, String) region description
+* `router_id` - (Required, String) The router ID.
 
 ## Attributes Reference
 
@@ -41,8 +40,8 @@ In addition to all arguments above, the following attributes are exported:
   * `ip_address` - Port IP address.
   * `mac_address` - Port MAC address.
   * `name` - Port name.
-  * `network_name` - Network name.
   * `status` - Port status.
+  * `vpc_name` - VPC name.
 * `total` - Total number of router ports.
 
 

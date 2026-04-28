@@ -4,21 +4,15 @@ Example Usage
 
 ```hcl
 data "edgenext_ecs_images" "example" {
-  region     = "tokyo-a"
   visibility = "public"
   name       = "Debian"
   page_num   = 1
   page_size  = 10
 }
-
-output "first_image_id" {
-  value = try(data.edgenext_ecs_images.example.images[0].id, null)
-}
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `visibility` - (Optional) Image visibility, default `public`.
 * `name` - (Optional) Image name filter.
 * `status` - (Optional) Image status filter.

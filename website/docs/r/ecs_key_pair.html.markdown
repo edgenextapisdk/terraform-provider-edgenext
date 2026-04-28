@@ -15,7 +15,6 @@ Use this resource to create and manage ECS key pairs.
 
 ```hcl
 resource "edgenext_ecs_key_pair" "example" {
-  region     = "tokyo-a"
   name       = "example-key"
   public_key = file("~/.ssh/id_rsa.pub")
 }
@@ -26,7 +25,6 @@ resource "edgenext_ecs_key_pair" "example" {
 The following arguments are supported:
 
 * `name` - (Required, String) Key pair name (also used as the Terraform resource id).
-* `region` - (Required, String, ForceNew) region description
 * `public_key` - (Optional, String) public_key description
 
 ## Attributes Reference
@@ -46,15 +44,14 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-Import format is `region/name`.
+Import format is `name`.
 
 ```shell
-terraform import edgenext_ecs_key_pair.example tokyo-a/example-key
+terraform import edgenext_ecs_key_pair.example example-key
 ```
 
 Argument Reference
 
-* `region` - (Required) Region.
 * `name` - (Required) Key pair name. Cannot be changed after creation.
 * `public_key` - (Optional) Public key content. Cannot be changed after creation.
 

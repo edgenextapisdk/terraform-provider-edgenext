@@ -136,7 +136,7 @@ edgenext_ecs_security_groups
 edgenext_ecs_disks
 edgenext_ecs_tags
 edgenext_ecs_security_group_rules
-edgenext_ecs_resource_tags
+edgenext_ecs_instance_tags
 
 Resource
 edgenext_ecs_key_pair
@@ -145,12 +145,16 @@ edgenext_ecs_vpc_subnet
 edgenext_ecs_router
 edgenext_ecs_router_port
 edgenext_ecs_network_interface
+edgenext_ecs_network_interface_instance_binding
+edgenext_ecs_network_interface_floating_ip_binding
 edgenext_ecs_security_group
 edgenext_ecs_security_group_rule
 edgenext_ecs_tag
-edgenext_ecs_resource_tag
+edgenext_ecs_instance_tag
+edgenext_ecs_instance_power
+edgenext_ecs_instance_reboot
 
-Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically (for example key pair name/public_key, ENI network/subnet, and VPC subnet settings).
+Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically.
 
 Security DNS (SDNS)
 Data Source
