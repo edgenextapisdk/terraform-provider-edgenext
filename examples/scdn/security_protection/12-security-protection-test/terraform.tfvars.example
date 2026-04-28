@@ -1,0 +1,140 @@
+access_key  = ""
+secret_key  = ""
+endpoint    = "https://api.edgenextscdn.com"
+
+# Single domain template configuration
+domain_template_id = 118181
+
+# Security config for single domain template - using new format
+# data field should be JSON string
+domain_template_precise_access_control_config = {
+  action = "add"
+
+  policies = [
+    {
+      type   = "plus"
+      action = "anticc"
+      action_data = {
+        level = "default"
+      }
+      rules = [
+        {
+          rule_type = "url"
+          logic     = "contains"
+          data      = "[\"/aaa\"]"
+        }
+      ]
+      from   = ""
+      status = 1
+    },
+    {
+      type   = "plus"
+      action = "deny"
+      action_data = {}
+      rules = [
+        {
+          rule_type = "referer_domain"
+          logic     = "not_equals"
+          data      = "[\"home.console.com\"]"
+        },
+        {
+          rule_type = "referer"
+          logic     = "len_greater_than"
+          data      = "{\"len\":0}"
+        },
+        {
+          rule_type = "postfix"
+          logic     = "equals"
+          data      = "[\"css\",\"js\",\"txt\",\"iso\",\"img\",\"exe\",\"zip\",\"rar\",\"7z\",\"gz\",\"tar\"]"
+        }
+      ]
+      from   = "aR"
+      status = 1
+    },
+    {
+      type   = "plus"
+      action = "deny"
+      action_data = {}
+      rules = [
+        {
+          rule_type = "region"
+          logic     = "not_belongs"
+          data      = "{\"country\":[\"CN\",\"MN\",\"JP\"],\"province\":[]}"
+        }
+      ]
+      from   = "zL"
+      status = 1
+    }
+  ]
+}
+
+# Multi-domain template configuration (disabled - only testing single domain template)
+security_template_name   = null
+security_template_remark = "Security protection test template"
+security_bind_all        = false
+security_domain_ids      = []
+security_group_ids       = []
+security_waf_rule_config = null
+security_ddos_config     = null
+
+# Using same new format for multi-domain template
+security_precise_access_control_config = {
+  action = "add"
+
+  policies = [
+    {
+      type   = "plus"
+      action = "anticc"
+      action_data = {
+        level = "default"
+      }
+      rules = [
+        {
+          rule_type = "url"
+          logic     = "contains"
+          data      = "[\"/aaa\"]"
+        }
+      ]
+      from   = ""
+      status = 1
+    },
+    {
+      type   = "plus"
+      action = "deny"
+      action_data = {}
+      rules = [
+        {
+          rule_type = "referer_domain"
+          logic     = "not_equals"
+          data      = "[\"home.console.prxcdn.com\"]"
+        },
+        {
+          rule_type = "referer"
+          logic     = "len_greater_than"
+          data      = "{\"len\":0}"
+        },
+        {
+          rule_type = "postfix"
+          logic     = "equals"
+          data      = "[\"css\",\"js\",\"txt\",\"iso\",\"img\",\"exe\",\"zip\",\"rar\",\"7z\",\"gz\",\"tar\"]"
+        }
+      ]
+      from   = "aR"
+      status = 1
+    },
+    {
+      type   = "plus"
+      action = "deny"
+      action_data = {}
+      rules = [
+        {
+          rule_type = "region"
+          logic     = "not_belongs"
+          data      = "{\"country\":[\"CN\",\"MN\",\"JP\"],\"province\":[]}"
+        }
+      ]
+      from   = "zL"
+      status = 1
+    }
+  ]
+}

@@ -111,4 +111,12 @@ website-lint-fix:
 
 ready: doc fmt-faster
 
-.PHONY: build sweep test testacc fmt fmtcheck lint tools test-compile doc doc-github hooks website-lint website-lint-fix ready
+# Start HTTP server for website preview (default port: 8080)
+# Usage: make website-server PORT=3000
+PORT?=8080
+website-server:
+	@echo "==> Starting HTTP server at http://localhost:$(PORT)..."
+	@echo "==> Serving files from website/ directory"
+	@cd website && python3 -m http.server $(PORT)
+
+.PHONY: build sweep test testacc fmt fmtcheck lint tools test-compile doc doc-github hooks website-lint website-lint-fix ready website-server

@@ -13,25 +13,90 @@ Provides a resource to batch configure SCDN security protection templates.
 
 ## Example Usage
 
-### Batch configure templates
+### Batch configure templates with precise access control
 
 ```hcl
 resource "edgenext_scdn_security_protection_template_batch_config" "example" {
   template_ids = [12345, 67890]
+  domains      = ["example.com"]
 
   ddos_config {
     application_ddos_protection {
-      status       = "on"
-      ai_cc_status = "on"
-      type         = "normal"
+      status                = "on"
+      ai_cc_status          = "on"
+      type                  = "strict"
+      need_attack_detection = 1
+      ai_status             = "on"
     }
   }
 
-  waf_config {
+  waf_rule_config {
     waf_rule_config {
       status    = "on"
+      ai_status = "on"
       waf_level = "strict"
       waf_mode  = "block"
+    }
+  }
+
+  precise_access_control_config {
+    action = "add"
+
+    # Anti-CC protection for specific URL
+    policies {
+      action = "anticc"
+      action_data = {
+        level = "default"
+      }
+      type   = "plus"
+      status = 1
+      sort   = 1
+
+      rules {
+        rule_type = "url"
+        logic     = "contains"
+        data      = jsonencode(["/aaa"])
+      }
+    }
+
+    # Deny access from specific referer
+    policies {
+      action = "deny"
+      type   = "plus"
+      from   = "aR"
+      status = 1
+
+      rules {
+        rule_type = "referer_domain"
+        logic     = "not_equals"
+        data      = jsonencode(["home.example.com"])
+      }
+
+      rules {
+        rule_type = "referer"
+        logic     = "len_greater_than"
+        data      = jsonencode({ len = 0 })
+      }
+
+      rules {
+        rule_type = "postfix"
+        logic     = "equals"
+        data      = jsonencode(["css", "js", "png", "jpg"])
+      }
+    }
+
+    # Region-based access control
+    policies {
+      action = "deny"
+      type   = "plus"
+      from   = "zL"
+      status = 1
+
+      rules {
+        rule_type = "region"
+        logic     = "not_belongs"
+        data      = jsonencode({ province = [], country = ["CN", "JP"] })
+      }
     }
   }
 }
@@ -88,14 +153,24 @@ The `policies` object of `precise_access_control_config` supports the following:
 * `action_data` - (Optional, Map) Action data
 * `action` - (Optional, String) Policy action
 * `from` - (Optional, String) From source
+* `id` - (Optional, Int) Policy ID
+* `remark` - (Optional, String) Policy remark
+* `rule_type` - (Optional, String) Rule type (was 'type')
 * `rules` - (Optional, List) Rules list
+* `sort` - (Optional, Int) Sort order
 * `status` - (Optional, Int) Status
-* `type` - (Optional, String) Policy type
+* `type` - (Optional, String) Policy type: plus
 
 The `precise_access_control_config` object supports the following:
 
 * `action` - (Required, String) Action: add, cover
 * `policies` - (Optional, List) Policy list
+
+The `rules` object of `policies` supports the following:
+
+* `data` - (Required, String) Rule data (JSON string for array/object, or plain string)
+* `logic` - (Required, String) Logic: contains, equals, not_equals, not_belongs, len_greater_than
+* `rule_type` - (Required, String) Rule type: url, referer_domain, referer, postfix, region
 
 The `visitor_authentication` object of `ddos_config` supports the following:
 
@@ -127,14 +202,13 @@ The `waf_rule_config` object supports the following:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - ID of the resource.
-* `fail_templates` - Failed templates
+* `fail_templates` - (**Deprecated**) This attribute is deprecated and will be removed in a future version. Please check the apply output or logs for failure details. Failed templates (Deprecated)
 
 
 ## Import
 
 SCDN security protection template batch configuration can be imported using the template IDs:
 
-```shell
+```hcl
 terraform import edgenext_scdn_security_protection_template_batch_config.example 12345,67890
-```
 
