@@ -27,25 +27,8 @@ resource "edgenext_ecs_network_interface" "example" {
 
 Import
 
-Import format is `port_id`.
+Import format is `network_interface_id`.
 
 ```shell
 terraform import edgenext_ecs_network_interface.example 29faf396-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
-
-Argument Reference
-
-* `name` - (Required) Port name.
-* `description` - (Optional) Port description.
-* `vpc_id` - (Required) VPC ID. Cannot be changed after creation.
-* `subnet_id` - (Required) Subnet ID. Cannot be changed after creation.
-* `port_security_enabled` - (Optional) Port security switch.
-* `security_groups` - (Optional) Security group IDs.
-
-Attributes Reference
-
-* `id` - Port ID.
-* `instance_id`, `floating_ip_address`, `tenant_id`, `project_id`, `status`, `instance_owner`
-* `fixed_ips` - Fixed IP list with `subnet_id`, `ip_address`, `floating_ip`.
-* `qos_policy_id`, `tags`, `created_at`, `updated_at`, `revision_number`
-* `mac_address`, `binding_vnic_type`, `instance_name`, `vpc_name`, `ipv4`, `ipv6`

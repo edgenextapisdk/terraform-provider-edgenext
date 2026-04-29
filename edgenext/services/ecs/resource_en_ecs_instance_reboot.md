@@ -12,15 +12,3 @@ resource "edgenext_ecs_instance_reboot" "example" {
   trigger     = timestamp()
 }
 ```
-
-Argument Reference
-
-* `instance_id` - (Required) Target instance ID. Cannot be changed after creation.
-* `reboot_type` - (Optional) Reboot action type. Default is `reboot_soft`.
-* `trigger` - (Optional) Any value used to trigger reboot again on update.
-
-Attributes Reference
-
-* `id` - Uses `instance_id`.
-* `status` - Current instance status from detail API.
-* `instance_name` - Instance name.
