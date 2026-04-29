@@ -79,19 +79,3 @@ Import format is `vpc_id/subnet_id`.
 terraform import edgenext_ecs_vpc_subnet.example 68451a78-xxxx-xxxx-xxxx-xxxxxxxxxxxx/b34fe463-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
-Argument Reference
-
-* `vpc_id` - (Required) VPC ID. Cannot be changed after creation.
-* `name` - (Required) Subnet name. Cannot be changed after creation.
-* `ip_version` - (Optional) IP version, default `4`. Cannot be changed after creation.
-* `cidr` - (Required) Subnet CIDR. Cannot be changed after creation.
-
-Attributes Reference
-
-* `id` - Subnet ID.
-* `tenant_id`, `subnetpool_id`, `enable_dhcp`, `ipv6_ra_mode`, `ipv6_address_mode`
-* `gateway_ip`, `allocation_pools`, `host_routes`, `dns_nameservers`
-* `description`, `service_types`, `tags`
-* `created_at`, `updated_at`, `revision_number`, `project_id`
-* `used_ips`, `total_ips`, `port_num`, `not_bind_reason`, `router_id`
-

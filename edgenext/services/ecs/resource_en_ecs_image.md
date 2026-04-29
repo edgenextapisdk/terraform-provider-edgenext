@@ -21,14 +21,3 @@ Import format is `image_id`.
 ```shell
 terraform import edgenext_ecs_image.example 7b6387c5-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
-
-Argument Reference
-
-* `name` - (Required) Image name.
-* `instance_id` - (Optional) Source instance ID.
-* `description` - (Optional) Image description.
-
-Attributes Reference
-
-* `id` - Image ID.
-* `os_distro` - OS distribution reported by API.

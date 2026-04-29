@@ -39,20 +39,3 @@ Import format is `instance_id`.
 ```shell
 terraform import edgenext_ecs_instance.example 80e47fca-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
-
-Argument Reference
-
-* `name` - (Required) Instance name.
-* `flavor_ref` - (Required) Flavor ID or name.
-* `image_ref` - (Required) Image ID or name.
-* `admin_pass` - (Required) Initial admin password.
-* `key_name` - (Optional) Key pair name.
-* `project_id` - (Optional) Project ID.
-* `bandwidth` - (Optional) Public bandwidth in Mbps.
-* `networks` - (Optional) Network IDs.
-* `security_groups` - (Optional) Security group IDs.
-
-Attributes Reference
-
-* `id` - Instance ID.
-* `status` - Current instance status.
