@@ -30,16 +30,3 @@ Import format is `instance_id`.
 ```shell
 terraform import edgenext_ecs_instance_tag.example 0d4dd8b5-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
-
-Argument Reference
-
-* `instance_id` - (Required) Target instance ID. Cannot be changed after creation.
-* `instance_name` - (Required) Target instance name. Cannot be changed after creation.
-* `tag_ids` - (Required) Tag ID list to bind.
-
-Attributes Reference
-
-* `id` - Uses `instance_id`.
-* `instance_type` - Instance type returned by query API.
-* `tag_count` - Number of tags on this instance.
-* `tags` - Tag details with `id`, `key`, and `value`.

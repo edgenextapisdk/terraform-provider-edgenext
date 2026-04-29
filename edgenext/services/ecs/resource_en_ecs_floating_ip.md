@@ -20,12 +20,3 @@ Import format is `floating_ip_id`.
 ```shell
 terraform import edgenext_ecs_floating_ip.example c1eae862-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
-
-Argument Reference
-
-* `bandwidth` - (Required) Floating IP bandwidth in Mbps.
-
-Attributes Reference
-
-* `id` - Floating IP ID.
-* `ip_address` - Floating IP address.

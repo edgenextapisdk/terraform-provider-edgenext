@@ -23,13 +23,3 @@ Import format is `disk_id`.
 ```shell
 terraform import edgenext_ecs_disk.example 2c5c9f8d-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
-
-Argument Reference
-
-* `name` - (Required) Disk name.
-* `volume_type` - (Required) Volume type.
-* `size` - (Required) Disk size in GiB.
-
-Attributes Reference
-
-* `id` - Disk ID.
