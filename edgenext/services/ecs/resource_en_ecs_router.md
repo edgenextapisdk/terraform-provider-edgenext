@@ -21,15 +21,3 @@ Import format is `router_id`.
 ```shell
 terraform import edgenext_ecs_router.example f9883769-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
-
-Argument Reference
-
-* `name` - (Required) Router name.
-* `description` - (Optional) Router description.
-* `external_network_id` - (Optional) External gateway network ID.
-
-Attributes Reference
-
-* `id` - Router ID.
-* `tenant_id`, `admin_state_up`, `status`, `project_id`
-* `created_at`, `updated_at`, `revision_number`

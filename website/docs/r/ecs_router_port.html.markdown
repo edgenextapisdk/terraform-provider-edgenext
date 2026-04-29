@@ -68,15 +68,3 @@ Import format is `router_id/port_id`.
 terraform import edgenext_ecs_router_port.example f9883769-xxxx-xxxx-xxxx-xxxxxxxxxxxx/74f3a422-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
-Argument Reference
-
-* `router_id` - (Required) Router ID. Cannot be changed after creation.
-* `vpc_id` - (Required) VPC ID. Cannot be changed after creation.
-* `subnet_id` - (Required) Subnet ID. Cannot be changed after creation.
-
-Attributes Reference
-
-* `id` - Router port ID.
-* `port_id` - Same as router port ID.
-* `name`, `ip_address`, `mac_address`, `vpc_name`, `status`, `created_at`
-
