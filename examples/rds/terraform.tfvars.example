@@ -1,0 +1,9 @@
+access_key = "your-access-key"
+secret_key = "your-secret-key"
+endpoint   = "https://cdn.api.edgenext.com"
+region     = "us-east-1"
+
+# Replace with a real instance ID from your account (or from data.edgenext_rds_instances).
+rds_instance_id = "da3a5c51-bf3b-4bc3-9c6d-a9095092f942"
+
+rds_database_name = "tyd_db"

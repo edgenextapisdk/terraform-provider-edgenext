@@ -170,6 +170,12 @@ The EdgeNext provider supports the following resource types:
 
 ### Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically.
 
+### Relational Database Service (RDS)
+
+#### Data Sources
+
+* [`edgenext_rds_instances`](data-sources/rds_instances) - Query RDS instances
+
 ### Security DNS (SDNS)
 
 #### Resources

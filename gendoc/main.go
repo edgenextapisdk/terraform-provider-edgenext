@@ -341,6 +341,8 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		productDir = "ssl"
 	case "object storage service(oss)", "object storage service":
 		productDir = "oss"
+	case "relational database service(rds)", "relational database service", "rds":
+		productDir = "rds"
 	case "security cdn(scdn)", "security cdn", "scdn":
 		productDir = "scdn"
 	case "security dns(sdns)", "security dns", "sdns":
@@ -916,6 +918,8 @@ func getDataSourceDesc(dataSourceName string) string {
 		"edgenext_ecs_tags":                 "ECS tags",
 		"edgenext_ecs_security_group_rules": "ECS security group rules",
 		"edgenext_ecs_instance_tags":        "ECS instance tag relations",
+		// RDS data sources
+		"edgenext_rds_instances": "RDS instances",
 		// SCDN data sources
 		"edgenext_scdn_domain":                                       "SCDN domain details",
 		"edgenext_scdn_domains":                                      "SCDN domains",

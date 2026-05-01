@@ -156,6 +156,10 @@ edgenext_ecs_instance_reboot
 
 Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically.
 
+Relational Database Service (RDS)
+Data Source
+edgenext_rds_instances
+
 Security DNS (SDNS)
 Data Source
 edgenext_sdns_domains
