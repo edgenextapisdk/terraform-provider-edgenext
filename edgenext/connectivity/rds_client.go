@@ -6,5 +6,5 @@ type RDSClient = ECSClient
 
 // NewRDSClient creates a new RDS API client. It is equivalent to NewECSClient with the same arguments.
 func NewRDSClient(accessKey, secretKey, endpoint, region string) *RDSClient {
-	return NewECSClient(accessKey, secretKey, endpoint, region)
+	return newServiceClient("RDS", accessKey, secretKey, endpoint, region)
 }
