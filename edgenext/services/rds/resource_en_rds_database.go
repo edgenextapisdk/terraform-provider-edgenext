@@ -20,6 +20,7 @@ func ResourceENRDSDatabase() *schema.Resource {
 		CreateContext: resourceENRDSDatabaseCreate,
 		ReadContext:   resourceENRDSDatabaseRead,
 		DeleteContext: resourceENRDSDatabaseDelete,
+		CustomizeDiff: resourceENRDSDatabaseCustomizeDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: resourceENRDSDatabaseImport,
 		},
@@ -40,18 +41,23 @@ func ResourceENRDSDatabase() *schema.Resource {
 				ValidateFunc: validation.StringIsNotWhiteSpace,
 			},
 			"character_set": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Default:     "utf8",
-				Description: "Character set for the new database (sent on create only).",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Default:          "utf8",
+				ValidateDiagFunc: validateRDSMySQLCharacterSet,
+				Description: "MySQL character set for the new database (create only). " +
+					"Examples: utf8, utf8mb4, latin1. Default: utf8. " +
+					"Matching is case-insensitive; the create request sends the canonical lowercase name.",
 			},
 			"collate": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Default:     "utf8_general_ci",
-				Description: "Collation for the new database (sent on create only).",
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "utf8_general_ci",
+				Description: "MySQL collation for the selected character_set (create only). " +
+					"Examples: utf8_general_ci (for utf8), utf8mb4_general_ci (for utf8mb4). " +
+					"Default: utf8_general_ci. Matching is case-insensitive.",
 			},
 		},
 	}
@@ -81,6 +87,39 @@ func resourceENRDSDatabaseImport(ctx context.Context, d *schema.ResourceData, me
 	return []*schema.ResourceData{d}, nil
 }
 
+func resourceENRDSDatabaseCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	charset := "utf8"
+	if raw, ok := d.Get("character_set").(string); ok {
+		charset = strings.ToLower(strings.TrimSpace(raw))
+	}
+	if charset == "" {
+		charset = "utf8"
+	}
+	collate := "utf8_general_ci"
+	if raw, ok := d.Get("collate").(string); ok {
+		collate = strings.TrimSpace(raw)
+	}
+	if collate == "" {
+		collate = "utf8_general_ci"
+	}
+	if !rdsMySQLCollateValid(charset, collate) {
+		allowed := rdsMySQLCharsetCollations[charset]
+		hint := ""
+		if len(allowed) > 0 {
+			n := len(allowed)
+			if n > 8 {
+				n = 8
+			}
+			hint = fmt.Sprintf(" Example collations for %q: %s.", charset, strings.Join(allowed[:n], ", "))
+			if len(allowed) > 8 {
+				hint += " (list truncated)"
+			}
+		}
+		return fmt.Errorf("collate %q is not valid for character_set %q.%s", collate, charset, hint)
+	}
+	return nil
+}
+
 func diagToError(diags diag.Diagnostics) error {
 	if len(diags) == 0 {
 		return fmt.Errorf("unknown error")
@@ -101,10 +140,18 @@ func resourceENRDSDatabaseCreate(ctx context.Context, d *schema.ResourceData, m 
 
 	instanceID := d.Get("instance_id").(string)
 	name := d.Get("name").(string)
+	characterSet := strings.ToLower(strings.TrimSpace(d.Get("character_set").(string)))
+	if characterSet == "" {
+		characterSet = "utf8"
+	}
+	collate := strings.TrimSpace(d.Get("collate").(string))
+	if collate == "" {
+		collate = "utf8_general_ci"
+	}
 	entry := map[string]interface{}{
 		"name":          name,
-		"character_set": d.Get("character_set").(string),
-		"collate":       d.Get("collate").(string),
+		"character_set": characterSet,
+		"collate":       collate,
 	}
 	req := map[string]interface{}{
 		"instance_id": instanceID,
@@ -182,7 +229,7 @@ func rdsDatabaseExistsInList(ctx context.Context, rdsClient *connectivity.RDSCli
 		if !ok {
 			continue
 		}
-		if helper.StringFromMap(row, "name") == wantName {
+		if strings.EqualFold(helper.StringFromMap(row, "name"), wantName) {
 			return true, nil
 		}
 	}

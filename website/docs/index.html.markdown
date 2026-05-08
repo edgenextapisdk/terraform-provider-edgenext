@@ -172,9 +172,24 @@ The EdgeNext provider supports the following resource types:
 
 ### Relational Database Service (RDS)
 
+#### Resources
+
+* [`edgenext_rds_backup`](resources/rds_backup) - Manage RDS backups
+* [`edgenext_rds_backup_policy`](resources/rds_backup_policy) - Manage RDS backup policies
+* [`edgenext_rds_backup_policy_associate_instance`](resources/rds_backup_policy_associate_instance) - Manage RDS backup policy instance associations
+* [`edgenext_rds_database`](resources/rds_database) - Manage RDS databases
+* [`edgenext_rds_account`](resources/rds_account) - Manage RDS database users
+* [`edgenext_rds_account_privilege`](resources/rds_account_privilege) - Manage RDS database user privileges
+* [`edgenext_rds_account_root_password`](resources/rds_account_root_password) - Manage RDS root password management
+
 #### Data Sources
 
 * [`edgenext_rds_instances`](data-sources/rds_instances) - Query RDS instances
+* [`edgenext_rds_databases`](data-sources/rds_databases) - Query RDS databases
+* [`edgenext_rds_accounts`](data-sources/rds_accounts) - Query RDS database users
+* [`edgenext_rds_backups`](data-sources/rds_backups) - Query RDS backups
+* [`edgenext_rds_backup_policies`](data-sources/rds_backup_policies) - Query RDS backup policies
+* [`edgenext_rds_backup_policy_associate_instances`](data-sources/rds_backup_policy_associate_instances) - Query RDS backup policy associated instances
 
 ### Security DNS (SDNS)
 

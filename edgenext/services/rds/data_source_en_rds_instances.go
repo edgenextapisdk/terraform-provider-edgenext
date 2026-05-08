@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+const rdsInstancesListDatastoreTypeMySQL = "mysql"
+
 // DataSourceENRDSInstances returns the data source schema for RDS instances.
 func DataSourceENRDSInstances() *schema.Resource {
 	return &schema.Resource{
@@ -27,10 +29,17 @@ func DataSourceENRDSInstances() *schema.Resource {
 				Default:     1000,
 				Description: "Page size for the list request.",
 			},
-			"datastore_type": {
+			"instance_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Filter by datastore engine type (for example mysql). Omit when not filtering.",
+				Default:     "",
+				Description: "Filter by instance ID. Use empty string to omit the filter.",
+			},
+			"name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Filter by instance name. Use empty string to omit the filter.",
 			},
 			"instances": {
 				Type:        schema.TypeList,
@@ -203,11 +212,11 @@ func dataSourceENRDSInstancesRead(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	req := map[string]interface{}{
-		"page_size":   d.Get("page_size").(int),
-		"page_number": d.Get("page_num").(int),
-	}
-	if v, ok := d.GetOk("datastore_type"); ok && v.(string) != "" {
-		req["datastore_type"] = v.(string)
+		"page_size":      d.Get("page_size").(int),
+		"page_number":    d.Get("page_num").(int),
+		"datastore_type": rdsInstancesListDatastoreTypeMySQL,
+		"id":             d.Get("instance_id").(string),
+		"name":           d.Get("name").(string),
 	}
 
 	var resp map[string]interface{}
@@ -241,7 +250,7 @@ func dataSourceENRDSInstancesRead(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	helper.SetDataSourceStableID(d, "page_num", "page_size", "datastore_type")
+	helper.SetDataSourceStableID(d, "page_num", "page_size", "instance_id", "name")
 	return nil
 }
 

@@ -15,9 +15,10 @@ Use this data source to list EdgeNext RDS instances.
 
 ```hcl
 data "edgenext_rds_instances" "mysql" {
-  page_num       = 1
-  page_size      = 1000
-  datastore_type = "mysql"
+  page_num    = 1
+  page_size   = 1000
+  instance_id = ""
+  name        = ""
 }
 ```
 
@@ -25,7 +26,8 @@ data "edgenext_rds_instances" "mysql" {
 
 The following arguments are supported:
 
-* `datastore_type` - (Optional, String) Filter by datastore engine type (for example mysql). Omit when not filtering.
+* `instance_id` - (Optional, String) Filter by instance ID. Use empty string to omit the filter.
+* `name` - (Optional, String) Filter by instance name. Use empty string to omit the filter.
 * `page_num` - (Optional, Int) Page number for the list request. The API request body uses the field name page_number.
 * `page_size` - (Optional, Int) Page size for the list request.
 

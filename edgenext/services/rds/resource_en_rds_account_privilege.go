@@ -2,7 +2,6 @@ package rds
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"strings"
 
@@ -41,6 +40,13 @@ func ResourceENRDSAccountPrivilege() *schema.Resource {
 				Description:  "Database user name to manage privileges for.",
 				ValidateFunc: validation.StringIsNotWhiteSpace,
 			},
+			"host": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validateRDSAccountHost,
+				Description:      "Client host for the database user (same as edgenext_rds_account.host). Together with instance_id and user_name it identifies the user. Use % for any host.",
+			},
 			"databases": {
 				Type:        schema.TypeSet,
 				Required:    true,
@@ -54,21 +60,12 @@ func ResourceENRDSAccountPrivilege() *schema.Resource {
 	}
 }
 
-func rdsAccountPrivilegeComposeID(instanceID, userName string) string {
-	return instanceID + rdsAccountPrivilegeIDSeparator + userName
-}
-
-func rdsAccountPrivilegeParseImportID(raw string) (instanceID, userName string, err error) {
-	s := strings.TrimSpace(raw)
-	parts := strings.SplitN(s, rdsAccountPrivilegeIDSeparator, 2)
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return "", "", fmt.Errorf("expected import id as instance_id%suser_name, got %q", rdsAccountPrivilegeIDSeparator, raw)
-	}
-	return parts[0], parts[1], nil
+func rdsAccountPrivilegeComposeID(instanceID, userName, host string) string {
+	return strings.Join([]string{instanceID, userName, rdsNormalizeAccountHost(host)}, rdsAccountPrivilegeIDSeparator)
 }
 
 func resourceENRDSAccountPrivilegeImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	instanceID, userName, err := rdsAccountPrivilegeParseImportID(d.Id())
+	instanceID, userName, host, err := rdsParseAccountUserHostImportID(d.Id())
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +75,10 @@ func resourceENRDSAccountPrivilegeImport(ctx context.Context, d *schema.Resource
 	if err := d.Set("user_name", userName); err != nil {
 		return nil, err
 	}
-	d.SetId(rdsAccountPrivilegeComposeID(instanceID, userName))
+	if err := d.Set("host", host); err != nil {
+		return nil, err
+	}
+	d.SetId(rdsAccountPrivilegeComposeID(instanceID, userName, host))
 	diags := resourceENRDSAccountPrivilegeRead(ctx, d, meta)
 	if diags.HasError() {
 		return nil, diagToError(diags)
@@ -103,15 +103,17 @@ func resourceENRDSAccountPrivilegeRead(ctx context.Context, d *schema.ResourceDa
 
 	instanceID := d.Get("instance_id").(string)
 	userName := d.Get("user_name").(string)
-	if id := d.Id(); id != "" && (instanceID == "" || userName == "") {
-		i, u, perr := rdsAccountPrivilegeParseImportID(id)
+	host := rdsNormalizeAccountHost(d.Get("host").(string))
+	if id := d.Id(); id != "" && (instanceID == "" || userName == "" || host == "") {
+		i, u, h, perr := rdsParseAccountUserHostImportID(id)
 		if perr == nil {
-			instanceID, userName = i, u
+			instanceID, userName, host = i, u, rdsNormalizeAccountHost(h)
 			_ = d.Set("instance_id", instanceID)
 			_ = d.Set("user_name", userName)
+			_ = d.Set("host", host)
 		}
 	}
-	if instanceID == "" || userName == "" {
+	if instanceID == "" || userName == "" || host == "" {
 		d.SetId("")
 		return nil
 	}
@@ -121,7 +123,7 @@ func resourceENRDSAccountPrivilegeRead(ctx context.Context, d *schema.ResourceDa
 		return diags
 	}
 
-	row, ok := rdsFindDatabaseUserByName(rows, userName)
+	row, ok := rdsFindDatabaseUserByNameHost(rows, userName, host)
 	if !ok {
 		d.SetId("")
 		return nil
@@ -129,7 +131,7 @@ func resourceENRDSAccountPrivilegeRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("databases", rdsUserDatabasesFromMap(row)); err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(rdsAccountPrivilegeComposeID(instanceID, userName))
+	d.SetId(rdsAccountPrivilegeComposeID(instanceID, userName, host))
 	return nil
 }
 
@@ -142,7 +144,8 @@ func resourceENRDSAccountPrivilegeDelete(ctx context.Context, d *schema.Resource
 
 	instanceID := d.Get("instance_id").(string)
 	userName := d.Get("user_name").(string)
-	if diags := rdsAccountPrivilegeUpdateAccess(ctx, rdsClient, instanceID, userName, []string{}); diags.HasError() {
+	host := rdsNormalizeAccountHost(d.Get("host").(string))
+	if diags := rdsAccountPrivilegeUpdateAccess(ctx, rdsClient, instanceID, userName, host, []string{}); diags.HasError() {
 		return diags
 	}
 
@@ -159,16 +162,17 @@ func rdsAccountPrivilegeApply(ctx context.Context, d *schema.ResourceData, m int
 
 	instanceID := d.Get("instance_id").(string)
 	userName := d.Get("user_name").(string)
+	host := rdsNormalizeAccountHost(d.Get("host").(string))
 	databases := rdsStringSetToSortedSlice(d.Get("databases").(*schema.Set))
-	if diags := rdsAccountPrivilegeUpdateAccess(ctx, rdsClient, instanceID, userName, databases); diags.HasError() {
+	if diags := rdsAccountPrivilegeUpdateAccess(ctx, rdsClient, instanceID, userName, host, databases); diags.HasError() {
 		return diags
 	}
 
-	d.SetId(rdsAccountPrivilegeComposeID(instanceID, userName))
+	d.SetId(rdsAccountPrivilegeComposeID(instanceID, userName, host))
 	return resourceENRDSAccountPrivilegeRead(ctx, d, m)
 }
 
-func rdsAccountPrivilegeUpdateAccess(ctx context.Context, rdsClient *connectivity.RDSClient, instanceID, userName string, databases []string) diag.Diagnostics {
+func rdsAccountPrivilegeUpdateAccess(ctx context.Context, rdsClient *connectivity.RDSClient, instanceID, userName, host string, databases []string) diag.Diagnostics {
 	reqDatabases := make([]interface{}, 0, len(databases))
 	for _, db := range databases {
 		reqDatabases = append(reqDatabases, db)
@@ -176,6 +180,7 @@ func rdsAccountPrivilegeUpdateAccess(ctx context.Context, rdsClient *connectivit
 	req := map[string]interface{}{
 		"instance_id": instanceID,
 		"user_name":   userName,
+		"host":        rdsNormalizeAccountHost(host),
 		"databases":   reqDatabases,
 	}
 	var resp map[string]interface{}
@@ -204,13 +209,4 @@ func rdsStringSetToSortedSlice(set *schema.Set) []string {
 	}
 	sort.Strings(out)
 	return out
-}
-
-func rdsFindDatabaseUserByName(rows []map[string]interface{}, userName string) (map[string]interface{}, bool) {
-	for _, row := range rows {
-		if helper.StringFromMap(row, "name") == userName {
-			return row, true
-		}
-	}
-	return nil, false
 }

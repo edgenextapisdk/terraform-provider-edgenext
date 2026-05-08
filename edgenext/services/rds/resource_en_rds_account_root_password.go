@@ -29,11 +29,11 @@ func ResourceENRDSAccountRootPassword() *schema.Resource {
 				ValidateFunc: validation.StringIsNotWhiteSpace,
 			},
 			"password": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Sensitive:    true,
-				Description:  "Root password to set.",
-				ValidateFunc: validation.StringIsNotWhiteSpace,
+				Type:             schema.TypeString,
+				Required:         true,
+				Sensitive:        true,
+				ValidateDiagFunc: validateRDSAccountPassword,
+				Description:      "Root password. Please enter 8-20 characters, must include all four: uppercase letters, lowercase letters, numbers, and special characters from ()~!@#$%^&*_-+=|{}[]:;'<>,.?/. ",
 			},
 		},
 	}

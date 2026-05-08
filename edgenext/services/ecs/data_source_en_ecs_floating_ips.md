@@ -4,11 +4,7 @@ Example Usage
 
 ```hcl
 data "edgenext_ecs_floating_ips" "example" {
-  floating_ip_id = edgenext_ecs_floating_ip.example.id
+  floating_ip_id = ""
   limit          = 10
-}
-
-resource "edgenext_ecs_floating_ip" "example" {
-  bandwidth = 10
 }
 ```

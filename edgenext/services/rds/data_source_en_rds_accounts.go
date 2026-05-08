@@ -28,7 +28,7 @@ func DataSourceENRDSAccounts() *schema.Resource {
 				Description: "Database users returned by the API.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": {
+						"user_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "User name.",
@@ -69,7 +69,7 @@ func dataSourceENRDSAccountsRead(ctx context.Context, d *schema.ResourceData, m 
 	users := make([]interface{}, 0, len(rawList))
 	for _, row := range rawList {
 		users = append(users, map[string]interface{}{
-			"name":      helper.StringFromMap(row, "name"),
+			"user_name": helper.StringFromMap(row, "name"),
 			"host":      helper.StringFromMap(row, "host"),
 			"databases": rdsUserDatabasesFromMap(row),
 		})

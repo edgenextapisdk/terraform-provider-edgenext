@@ -260,6 +260,77 @@
         }
       ]
     },
+    "RDS": {
+      "data_sources": [
+        {
+          "name": "rds_accounts",
+          "path": "docs/d/rds_accounts.html.markdown",
+          "display_name": "rds accounts"
+        },
+        {
+          "name": "rds_backup_policies",
+          "path": "docs/d/rds_backup_policies.html.markdown",
+          "display_name": "rds backup policies"
+        },
+        {
+          "name": "rds_backup_policy_associate_instances",
+          "path": "docs/d/rds_backup_policy_associate_instances.html.markdown",
+          "display_name": "rds backup policy associate instances"
+        },
+        {
+          "name": "rds_backups",
+          "path": "docs/d/rds_backups.html.markdown",
+          "display_name": "rds backups"
+        },
+        {
+          "name": "rds_databases",
+          "path": "docs/d/rds_databases.html.markdown",
+          "display_name": "rds databases"
+        },
+        {
+          "name": "rds_instances",
+          "path": "docs/d/rds_instances.html.markdown",
+          "display_name": "rds instances"
+        }
+      ],
+      "resources": [
+        {
+          "name": "rds_account",
+          "path": "docs/r/rds_account.html.markdown",
+          "display_name": "rds account"
+        },
+        {
+          "name": "rds_account_privilege",
+          "path": "docs/r/rds_account_privilege.html.markdown",
+          "display_name": "rds account privilege"
+        },
+        {
+          "name": "rds_account_root_password",
+          "path": "docs/r/rds_account_root_password.html.markdown",
+          "display_name": "rds account root password"
+        },
+        {
+          "name": "rds_backup",
+          "path": "docs/r/rds_backup.html.markdown",
+          "display_name": "rds backup"
+        },
+        {
+          "name": "rds_backup_policy",
+          "path": "docs/r/rds_backup_policy.html.markdown",
+          "display_name": "rds backup policy"
+        },
+        {
+          "name": "rds_backup_policy_associate_instance",
+          "path": "docs/r/rds_backup_policy_associate_instance.html.markdown",
+          "display_name": "rds backup policy associate instance"
+        },
+        {
+          "name": "rds_database",
+          "path": "docs/r/rds_database.html.markdown",
+          "display_name": "rds database"
+        }
+      ]
+    },
     "SCDN": {
       "data_sources": [
         {
@@ -805,6 +876,36 @@
       "display_name": "oss objects"
     },
     {
+      "name": "rds_accounts",
+      "path": "docs/d/rds_accounts.html.markdown",
+      "display_name": "rds accounts"
+    },
+    {
+      "name": "rds_backup_policies",
+      "path": "docs/d/rds_backup_policies.html.markdown",
+      "display_name": "rds backup policies"
+    },
+    {
+      "name": "rds_backup_policy_associate_instances",
+      "path": "docs/d/rds_backup_policy_associate_instances.html.markdown",
+      "display_name": "rds backup policy associate instances"
+    },
+    {
+      "name": "rds_backups",
+      "path": "docs/d/rds_backups.html.markdown",
+      "display_name": "rds backups"
+    },
+    {
+      "name": "rds_databases",
+      "path": "docs/d/rds_databases.html.markdown",
+      "display_name": "rds databases"
+    },
+    {
+      "name": "rds_instances",
+      "path": "docs/d/rds_instances.html.markdown",
+      "display_name": "rds instances"
+    },
+    {
       "name": "scdn_access_progress",
       "path": "docs/d/scdn_access_progress.html.markdown",
       "display_name": "scdn access progress"
@@ -1135,6 +1236,41 @@
       "name": "oss_object_copy",
       "path": "docs/r/oss_object_copy.html.markdown",
       "display_name": "oss object copy"
+    },
+    {
+      "name": "rds_account",
+      "path": "docs/r/rds_account.html.markdown",
+      "display_name": "rds account"
+    },
+    {
+      "name": "rds_account_privilege",
+      "path": "docs/r/rds_account_privilege.html.markdown",
+      "display_name": "rds account privilege"
+    },
+    {
+      "name": "rds_account_root_password",
+      "path": "docs/r/rds_account_root_password.html.markdown",
+      "display_name": "rds account root password"
+    },
+    {
+      "name": "rds_backup",
+      "path": "docs/r/rds_backup.html.markdown",
+      "display_name": "rds backup"
+    },
+    {
+      "name": "rds_backup_policy",
+      "path": "docs/r/rds_backup_policy.html.markdown",
+      "display_name": "rds backup policy"
+    },
+    {
+      "name": "rds_backup_policy_associate_instance",
+      "path": "docs/r/rds_backup_policy_associate_instance.html.markdown",
+      "display_name": "rds backup policy associate instance"
+    },
+    {
+      "name": "rds_database",
+      "path": "docs/r/rds_database.html.markdown",
+      "display_name": "rds database"
     },
     {
       "name": "scdn_cache_clean_task",
