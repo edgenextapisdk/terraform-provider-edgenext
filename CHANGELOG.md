@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.5] - 2026-05-08
+
+### Added
+- **RDS resources**:
+  - `edgenext_rds_backup`
+  - `edgenext_rds_backup_policy`
+  - `edgenext_rds_backup_policy_associate_instance`
+  - `edgenext_rds_database`
+  - `edgenext_rds_account`
+  - `edgenext_rds_account_privilege`
+  - `edgenext_rds_account_root_password`
+- **RDS data sources**:
+  - `data.edgenext_rds_instances`
+  - `data.edgenext_rds_databases`
+  - `data.edgenext_rds_accounts`
+  - `data.edgenext_rds_backups`
+  - `data.edgenext_rds_backup_policies`
+  - `data.edgenext_rds_backup_policy_associate_instances`
+- **MySQL charset/collation validation data** for `edgenext_rds_database` via embedded catalog.
+
+### Changed
+- **RDS account naming alignment**:
+  - `edgenext_rds_account` now uses `user_name` (instead of `name`) in schema.
+  - `edgenext_rds_account` and `edgenext_rds_account_privilege` import IDs are unified as `instance_id/user_name/host`.
+  - `data.edgenext_rds_accounts` user entries now expose `user_name`.
+- **RDS backup policy association data source schema alignment**:
+  - `sources` renamed to `instances`.
+  - `source_type/source_id/source_name` renamed to `instance_type/instance_id/instance_name`.
+- **RDS instance list data source filters**:
+  - request datastore type is fixed to MySQL internally.
+  - optional filters now use `instance_id` and `name`.
+- **RDS database create flow** now includes retry-based read-after-create handling to avoid transient "resource not visible yet" inconsistencies.
+- **Connectivity client error labels** now reflect the actual service (`ECS` vs `RDS`) when using shared request logic.
+
+### Documentation
+- Added and refreshed RDS service docs, website docs, provider docs, top-level README, and examples to match latest RDS schemas and import formats.
+
 ## [1.0.0] - 2025-09-11
 
 ### Added
@@ -75,5 +112,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `data.edgenext_ssl_certificate`: Query certificate information
 - `data.edgenext_ssl_certificates`: Query multiple certificates
 
-[Unreleased]: https://github.com/edgenextapisdk/terraform-provider-edgenext/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/edgenextapisdk/terraform-provider-edgenext/compare/v1.3.5...HEAD
+[1.3.5]: https://github.com/edgenextapisdk/terraform-provider-edgenext/releases/tag/v1.3.5
 [1.0.0]: https://github.com/edgenextapisdk/terraform-provider-edgenext/releases/tag/v1.0.0
