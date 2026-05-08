@@ -21,10 +21,15 @@ type ECSClient struct {
 	accessKey string
 	secretKey string
 	region    string
+	service   string
 }
 
 // NewECSClient creates a new ECS API client instance.
 func NewECSClient(accessKey, secretKey, endpoint, region string) *ECSClient {
+	return newServiceClient("ECS", accessKey, secretKey, endpoint, region)
+}
+
+func newServiceClient(service, accessKey, secretKey, endpoint, region string) *ECSClient {
 	normalizedRegion := strings.ToLower(strings.TrimSpace(region))
 	client := resty.New().
 		SetBaseURL(endpoint).
@@ -41,6 +46,7 @@ func NewECSClient(accessKey, secretKey, endpoint, region string) *ECSClient {
 		accessKey: accessKey,
 		secretKey: secretKey,
 		region:    normalizedRegion,
+		service:   service,
 	}
 }
 
@@ -57,11 +63,11 @@ func (c *ECSClient) Get(ctx context.Context, path string, query map[string]inter
 		SetResult(result).
 		Get(path)
 	if err != nil {
-		return fmt.Errorf("ECS GET request failed: %w", err)
+		return fmt.Errorf("%s GET request failed: %w", c.serviceName(), err)
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		return fmt.Errorf("ECS GET request returned error status code: %d, response: %s", resp.StatusCode(), resp.String())
+		return fmt.Errorf("%s GET request returned error status code: %d, response: %s", c.serviceName(), resp.StatusCode(), resp.String())
 	}
 
 	return nil
@@ -71,7 +77,7 @@ func (c *ECSClient) Get(ctx context.Context, path string, query map[string]inter
 func (c *ECSClient) Post(ctx context.Context, path string, body interface{}, result interface{}) error {
 	payload, err := json.Marshal(body)
 	if err != nil {
-		return fmt.Errorf("failed to marshal ECS POST body: %w", err)
+		return fmt.Errorf("failed to marshal %s POST body: %w", c.serviceName(), err)
 	}
 
 	timestamp, signature := c.sign(payload)
@@ -82,11 +88,11 @@ func (c *ECSClient) Post(ctx context.Context, path string, body interface{}, res
 		SetResult(result).
 		Post(path)
 	if err != nil {
-		return fmt.Errorf("ECS POST request failed: %w", err)
+		return fmt.Errorf("%s POST request failed: %w", c.serviceName(), err)
 	}
 
 	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusCreated {
-		return fmt.Errorf("ECS POST request returned error status code: %d, response: %s", resp.StatusCode(), resp.String())
+		return fmt.Errorf("%s POST request returned error status code: %d, response: %s", c.serviceName(), resp.StatusCode(), resp.String())
 	}
 
 	return nil
@@ -102,6 +108,10 @@ func (c *ECSClient) authHeaders(timestamp, signature string) map[string]string {
 
 func (c *ECSClient) Region() string {
 	return c.region
+}
+
+func (c *ECSClient) serviceName() string {
+	return c.service
 }
 
 func (c *ECSClient) sign(payload []byte) (string, string) {

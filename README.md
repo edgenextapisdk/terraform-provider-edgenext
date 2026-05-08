@@ -5,7 +5,7 @@
 [![Go Version](https://img.shields.io/badge/Go-1.23+-blue.svg)](https://golang.org)
 [![Terraform](https://img.shields.io/badge/Terraform-1.0+-purple.svg)](https://terraform.io)
 
-Terraform provider for managing EdgeNext services, including CDN, SSL, OSS, ECS, SDNS, and SCDN.
+Terraform provider for managing EdgeNext services, including CDN, SSL, OSS, ECS, RDS, SDNS, and SCDN.
 
 ## Supported Services
 
@@ -13,6 +13,7 @@ Terraform provider for managing EdgeNext services, including CDN, SSL, OSS, ECS,
 - SSL: Certificate lifecycle management
 - OSS: Bucket and object management
 - ECS: Network, security, tag, and instance operation resources/data sources
+- RDS: Relational database resources and data sources
 - SDNS: Domain group and record management
 - SCDN: Domain/origin/template/cache/security/log modules
 
@@ -22,6 +23,7 @@ Service-level documentation:
 - [SSL](edgenext/services/ssl/README.md)
 - [OSS](edgenext/services/oss/README.md)
 - [ECS](edgenext/services/ecs/README.md)
+- [RDS](edgenext/services/rds/README.md)
 - [SCDN](edgenext/services/scdn/README.md)
 
 ## Installation
@@ -156,6 +158,25 @@ Current ECS data sources registered in `edgenext/provider.go`:
 - `edgenext_ecs_tags`
 - `edgenext_ecs_security_group_rules`
 - `edgenext_ecs_instance_tags`
+
+RDS resources registered in `edgenext/provider.go`:
+
+- `edgenext_rds_backup`
+- `edgenext_rds_backup_policy`
+- `edgenext_rds_backup_policy_associate_instance`
+- `edgenext_rds_database`
+- `edgenext_rds_account`
+- `edgenext_rds_account_privilege`
+- `edgenext_rds_account_root_password`
+
+RDS data sources registered in `edgenext/provider.go`:
+
+- `edgenext_rds_instances`
+- `edgenext_rds_databases`
+- `edgenext_rds_accounts`
+- `edgenext_rds_backups`
+- `edgenext_rds_backup_policies`
+- `edgenext_rds_backup_policy_associate_instances`
 
 ECS resources currently present in code but not registered in provider:
 

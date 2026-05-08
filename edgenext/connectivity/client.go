@@ -21,18 +21,21 @@ type EdgeNextClient struct {
 	ossClient  *OSSClient  // For OSS
 	scdnClient *ScdnClient // For SCDN
 	ecsClient  *ECSClient  // For ECS
+	rdsClient  *RDSClient  // For RDS (same HTTP client stack as ECS)
 
 	// Use sync.Once to ensure clients are initialized only once
 	apiClientOnce  sync.Once
 	ossClientOnce  sync.Once
 	scdnClientOnce sync.Once
 	ecsClientOnce  sync.Once
+	rdsClientOnce  sync.Once
 
 	// Store initialization errors
 	apiClientErr  error
 	ossClientErr  error
 	scdnClientErr error
 	ecsClientErr  error
+	rdsClientErr  error
 }
 
 // Client returns the EdgeNext client
@@ -90,4 +93,13 @@ func (c *EdgeNextClient) ECSClient() (*ECSClient, error) {
 	})
 
 	return c.ecsClient, c.ecsClientErr
+}
+
+// RDSClient returns or initializes the RDS API client (same signing and transport as ECSClient).
+func (c *EdgeNextClient) RDSClient() (*RDSClient, error) {
+	c.rdsClientOnce.Do(func() {
+		c.rdsClient = NewRDSClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint, c.config.Region)
+	})
+
+	return c.rdsClient, c.rdsClientErr
 }

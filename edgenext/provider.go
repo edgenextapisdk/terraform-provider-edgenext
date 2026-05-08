@@ -9,6 +9,7 @@ import (
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/cdn"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/ecs"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/oss"
+	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/rds"
 	scdncache "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cache"
 	scdncacheoperate "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cache_operate"
 	scdncert "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cert"
@@ -113,6 +114,15 @@ func Provider() *schema.Provider {
 		"edgenext_ecs_instance_tag":    ecs.ResourceENECSInstanceTag(),
 		"edgenext_ecs_instance_power":  ecs.ResourceENECSInstancePower(),
 		"edgenext_ecs_instance_reboot": ecs.ResourceENECSInstanceReboot(),
+
+		// RDS resources
+		"edgenext_rds_backup":                           rds.ResourceENRDSBackup(),
+		"edgenext_rds_backup_policy":                    rds.ResourceENRDSBackupPolicy(),
+		"edgenext_rds_backup_policy_associate_instance": rds.ResourceENRDSBackupPolicyAssociateInstance(),
+		"edgenext_rds_database":                         rds.ResourceENRDSDatabase(),
+		"edgenext_rds_account":                          rds.ResourceENRDSAccount(),
+		"edgenext_rds_account_privilege":                rds.ResourceENRDSAccountPrivilege(),
+		"edgenext_rds_account_root_password":            rds.ResourceENRDSAccountRootPassword(),
 
 		// SCDN domain management resources (from domain module)
 		// Note: These resources are organized under scdn/domain/ for better module management
@@ -222,6 +232,14 @@ func Provider() *schema.Provider {
 		"edgenext_ecs_tags":                 ecs.DataSourceENECSTags(),
 		"edgenext_ecs_security_group_rules": ecs.DataSourceENECSSecurityGroupRules(),
 		"edgenext_ecs_instance_tags":        ecs.DataSourceENECSInstanceTags(),
+
+		// RDS data sources
+		"edgenext_rds_instances":                         rds.DataSourceENRDSInstances(),
+		"edgenext_rds_databases":                         rds.DataSourceENRDSDatabases(),
+		"edgenext_rds_accounts":                          rds.DataSourceENRDSAccounts(),
+		"edgenext_rds_backups":                           rds.DataSourceENRDSBackups(),
+		"edgenext_rds_backup_policies":                   rds.DataSourceENRDSBackupPolicies(),
+		"edgenext_rds_backup_policy_associate_instances": rds.DataSourceENRDSBackupPolicyAssociateInstances(),
 
 		// SCDN domain data sources (from domain module)
 		// Note: These data sources are organized under scdn/domain/ for better module management

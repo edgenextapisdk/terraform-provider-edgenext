@@ -341,6 +341,8 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		productDir = "ssl"
 	case "object storage service(oss)", "object storage service":
 		productDir = "oss"
+	case "relational database service(rds)", "relational database service", "rds":
+		productDir = "rds"
 	case "security cdn(scdn)", "security cdn", "scdn":
 		productDir = "scdn"
 	case "security dns(sdns)", "security dns", "sdns":
@@ -842,6 +844,14 @@ func getResourceDesc(resourceName string) string {
 		"edgenext_ecs_instance_tag":        "ECS instance tag bindings",
 		"edgenext_ecs_instance_power":      "ECS instance power operations",
 		"edgenext_ecs_instance_reboot":     "ECS instance reboot operations",
+		// RDS resources
+		"edgenext_rds_backup":                           "RDS backups",
+		"edgenext_rds_backup_policy":                    "RDS backup policies",
+		"edgenext_rds_backup_policy_associate_instance": "RDS backup policy instance associations",
+		"edgenext_rds_database":                         "RDS databases",
+		"edgenext_rds_account":                          "RDS database users",
+		"edgenext_rds_account_privilege":                "RDS database user privileges",
+		"edgenext_rds_account_root_password":            "RDS root password management",
 		// SCDN resources
 		"edgenext_scdn_domain":                                    "SCDN domain configuration",
 		"edgenext_scdn_origin":                                    "SCDN origin servers",
@@ -916,6 +926,13 @@ func getDataSourceDesc(dataSourceName string) string {
 		"edgenext_ecs_tags":                 "ECS tags",
 		"edgenext_ecs_security_group_rules": "ECS security group rules",
 		"edgenext_ecs_instance_tags":        "ECS instance tag relations",
+		// RDS data sources
+		"edgenext_rds_instances":                         "RDS instances",
+		"edgenext_rds_databases":                         "RDS databases",
+		"edgenext_rds_accounts":                          "RDS database users",
+		"edgenext_rds_backups":                           "RDS backups",
+		"edgenext_rds_backup_policies":                   "RDS backup policies",
+		"edgenext_rds_backup_policy_associate_instances": "RDS backup policy associated instances",
 		// SCDN data sources
 		"edgenext_scdn_domain":                                       "SCDN domain details",
 		"edgenext_scdn_domains":                                      "SCDN domains",
