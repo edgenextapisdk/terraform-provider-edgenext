@@ -130,7 +130,6 @@ edgenext_ecs_external_gateways
 edgenext_ecs_vpc_subnets
 edgenext_ecs_routers
 edgenext_ecs_router_ports
-edgenext_ecs_floating_ips
 edgenext_ecs_network_interfaces
 edgenext_ecs_security_groups
 edgenext_ecs_disks
@@ -155,6 +154,31 @@ edgenext_ecs_instance_power
 edgenext_ecs_instance_reboot
 
 Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically.
+
+Elastic Load Balancer (ELB)
+Data Source
+edgenext_elb_load_balancers
+edgenext_elb_certificates
+edgenext_elb_listeners
+edgenext_elb_target_groups
+edgenext_elb_target_group_attachments
+edgenext_elb_l7_policies
+edgenext_elb_l7_rules
+
+Resource
+edgenext_elb_certificate
+edgenext_elb_listener
+edgenext_elb_target_group
+edgenext_elb_target_group_attachment
+edgenext_elb_l7_policy
+edgenext_elb_l7_rule
+
+Elastic IP (EIP)
+Data Source
+edgenext_eip_floating_ips
+
+Resource
+edgenext_eip_association
 
 Relational Database Service (RDS)
 Data Source

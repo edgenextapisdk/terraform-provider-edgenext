@@ -160,7 +160,6 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_ecs_vpc_subnets`](data-sources/ecs_vpc_subnets) - Query ECS VPC subnets
 * [`edgenext_ecs_routers`](data-sources/ecs_routers) - Query ECS routers
 * [`edgenext_ecs_router_ports`](data-sources/ecs_router_ports) - Query ECS router ports
-* [`edgenext_ecs_floating_ips`](data-sources/ecs_floating_ips) - Query ECS floating IPs
 * [`edgenext_ecs_network_interfaces`](data-sources/ecs_network_interfaces) - Query ECS network interfaces
 * [`edgenext_ecs_security_groups`](data-sources/ecs_security_groups) - Query ECS security groups
 * [`edgenext_ecs_disks`](data-sources/ecs_disks) - Query ECS disks
@@ -169,6 +168,37 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_ecs_instance_tags`](data-sources/ecs_instance_tags) - Query ECS instance tag relations
 
 ### Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically.
+
+### Elastic Load Balancer (ELB)
+
+#### Resources
+
+* [`edgenext_elb_certificate`](resources/elb_certificate) - Manage ELB certificates
+* [`edgenext_elb_listener`](resources/elb_listener) - Manage ELB listeners
+* [`edgenext_elb_target_group`](resources/elb_target_group) - Manage ELB target groups
+* [`edgenext_elb_target_group_attachment`](resources/elb_target_group_attachment) - Manage ELB target group attachments
+* [`edgenext_elb_l7_policy`](resources/elb_l7_policy) - Manage ELB L7 policies
+* [`edgenext_elb_l7_rule`](resources/elb_l7_rule) - Manage ELB L7 rules
+
+#### Data Sources
+
+* [`edgenext_elb_load_balancers`](data-sources/elb_load_balancers) - Query ELB load balancers
+* [`edgenext_elb_certificates`](data-sources/elb_certificates) - Query ELB certificates
+* [`edgenext_elb_listeners`](data-sources/elb_listeners) - Query ELB listeners
+* [`edgenext_elb_target_groups`](data-sources/elb_target_groups) - Query ELB target groups
+* [`edgenext_elb_target_group_attachments`](data-sources/elb_target_group_attachments) - Query ELB target group attachments
+* [`edgenext_elb_l7_policies`](data-sources/elb_l7_policies) - Query ELB L7 policies
+* [`edgenext_elb_l7_rules`](data-sources/elb_l7_rules) - Query ELB L7 rules
+
+### Elastic IP (EIP)
+
+#### Resources
+
+* [`edgenext_eip_association`](resources/eip_association) - Manage EIP associations
+
+#### Data Sources
+
+* [`edgenext_eip_floating_ips`](data-sources/eip_floating_ips) - Query EIP floating IPs
 
 ### Relational Database Service (RDS)
 

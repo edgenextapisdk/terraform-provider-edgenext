@@ -1,7 +1,8 @@
-package ecs
+package eip
 
 import (
 	"context"
+	"strings"
 
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/helper"
@@ -9,21 +10,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// DataSourceENECSFloatingIps returns the data source schema for ECS floating_ips.
-func DataSourceENECSFloatingIps() *schema.Resource {
+// DataSourceENEIPFloatingIps lists EdgeNext floating IPs (EIPs).
+func DataSourceENEIPFloatingIps() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceENECSFloatingIpsRead,
-		Description: "Data source to query EdgeNext ECS floating_ips.",
+		ReadContext: dataSourceENEIPFloatingIpsRead,
+		Description: "Data source to query EdgeNext floating IPs (EIPs).",
 		Schema: map[string]*schema.Schema{
 			"floating_ip_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The floating IP ID to filter.",
+				Description: "Floating IP ID to filter.",
 			},
 			"floating_ip_address": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The floating IP address to filter.",
+				Description: "Floating IP address to filter.",
 			},
 			"limit": {
 				Type:        schema.TypeInt,
@@ -34,58 +35,58 @@ func DataSourceENECSFloatingIps() *schema.Resource {
 			"floating_ips": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "A list of ECS floating_ips.",
+				Description: "List of floating IPs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The ID of the floating_ip.",
+							Description: "Floating IP ID.",
 						},
 						"tenant_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The tenant ID.",
+							Description: "Tenant ID.",
 						},
 						"floating_ip_address": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The floating IP address.",
+							Description: "Public floating IP address.",
 						},
 						"floating_network_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The floating network ID.",
+							Description: "Floating network ID.",
 						},
 						"router_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The router ID.",
+							Description: "Router ID.",
 						},
 						"network_interface_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The network interface ID.",
+							Description: "Network interface (port) ID when associated.",
 						},
 						"fixed_ip_address": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The fixed IP address.",
+							Description: "Fixed (private) IP when associated.",
 						},
 						"status": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The status.",
+							Description: "Status.",
 						},
 						"description": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The description.",
+							Description: "Description.",
 						},
 						"qos_policy_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The QoS policy ID.",
+							Description: "QoS policy ID.",
 						},
 						"port_forwardings": {
 							Type:        schema.TypeList,
@@ -96,7 +97,7 @@ func DataSourceENECSFloatingIps() *schema.Resource {
 						"tags": {
 							Type:        schema.TypeList,
 							Computed:    true,
-							Description: "A list of tag strings.",
+							Description: "Tag strings.",
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 						"created_at": {
@@ -147,7 +148,7 @@ func DataSourceENECSFloatingIps() *schema.Resource {
 						"instance_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Instance name.",
+							Description: "Associated instance name when present.",
 						},
 						"billing_model": {
 							Type:        schema.TypeInt,
@@ -166,7 +167,7 @@ func DataSourceENECSFloatingIps() *schema.Resource {
 	}
 }
 
-func dataSourceENECSFloatingIpsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceENEIPFloatingIpsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := m.(*connectivity.EdgeNextClient)
 	ecsClient, err := client.ECSClient()
 	if err != nil {
@@ -174,22 +175,25 @@ func dataSourceENECSFloatingIpsRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	req := map[string]interface{}{
-		"id":                  d.Get("floating_ip_id").(string),
-		"limit":               d.Get("limit").(int),
-		"floating_ip_address": d.Get("floating_ip_address").(string),
+		"limit": d.Get("limit").(int),
 	}
-	var resp map[string]interface{}
+	if v := strings.TrimSpace(d.Get("floating_ip_id").(string)); v != "" {
+		req["id"] = v
+	}
+	if v := strings.TrimSpace(d.Get("floating_ip_address").(string)); v != "" {
+		req["floating_ip_address"] = v
+	}
 
-	// List action
-	err = ecsClient.Post(ctx, "/ecs/openapi/v2/floatingips/list", req, &resp)
-	if err != nil {
-		return diag.Errorf("failed to read ECS floating_ips: %s", err)
+	var resp map[string]interface{}
+	if err := ecsClient.Post(ctx, eipFloatingIPListPath, req, &resp); err != nil {
+		return diag.Errorf("failed to list floating IPs: %s", err)
 	}
 
 	payload, err := helper.ParseAPIResponseMap(resp)
 	if err != nil {
-		return diag.Errorf("failed to parse ECS floating_ips response: %s", err)
+		return diag.Errorf("failed to parse floating IPs list response: %s", err)
 	}
+
 	dataList := helper.ListFromMap(payload, "floating_ip")
 	items := make([]interface{}, 0, len(dataList))
 	for _, raw := range dataList {
@@ -223,6 +227,7 @@ func dataSourceENECSFloatingIpsRead(ctx context.Context, d *schema.ResourceData,
 			"billing_model":          helper.IntFromMap(row, "billing_model"),
 		})
 	}
+
 	if err := d.Set("total", helper.IntFromMap(payload, "count")); err != nil {
 		return diag.FromErr(err)
 	}
@@ -230,6 +235,5 @@ func dataSourceENECSFloatingIpsRead(ctx context.Context, d *schema.ResourceData,
 	if err := d.Set("floating_ips", items); err != nil {
 		return diag.FromErr(err)
 	}
-
 	return nil
 }
