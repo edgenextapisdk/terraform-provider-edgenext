@@ -41,15 +41,15 @@ func DataSourceENELBCertificates() *schema.Resource {
 				Description: "Certificates returned by the API.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"container_id": {
+						"certificate_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Barbican container ID.",
+							Description: "Certificate ID (Barbican container ID).",
 						},
-						"container_ref": {
+						"certificate_ref": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Barbican container reference URL.",
+							Description: "Certificate reference URL (Barbican container reference).",
 						},
 						"name": {
 							Type:        schema.TypeString,
@@ -143,13 +143,13 @@ func dataSourceENELBCertificatesRead(ctx context.Context, d *schema.ResourceData
 
 func elbCertificateListItemFromMap(m map[string]interface{}) map[string]interface{} {
 	return map[string]interface{}{
-		"container_id":  helper.StringFromMap(m, "container_id"),
-		"container_ref": helper.StringFromMap(m, "container_ref"),
-		"name":          helper.StringFromMap(m, "name"),
-		"type":          helper.StringFromMap(m, "type"),
-		"status":        helper.StringFromMap(m, "status"),
-		"created":       helper.IntFromMap(m, "created"),
-		"updated":       helper.IntFromMap(m, "updated"),
-		"expiration":    helper.IntFromMap(m, "expiration"),
+		"certificate_id":  helper.StringFromMap(m, "container_id"),
+		"certificate_ref": helper.StringFromMap(m, "container_ref"),
+		"name":            helper.StringFromMap(m, "name"),
+		"type":            helper.StringFromMap(m, "type"),
+		"status":          helper.StringFromMap(m, "status"),
+		"created":         helper.IntFromMap(m, "created"),
+		"updated":         helper.IntFromMap(m, "updated"),
+		"expiration":      helper.IntFromMap(m, "expiration"),
 	}
 }

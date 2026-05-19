@@ -91,7 +91,7 @@ func DataSourceENELBListeners() *schema.Resource {
 						"insert_headers": {
 							Type:        schema.TypeMap,
 							Computed:    true,
-							Description: "Insert headers configuration (string key to string value).",
+							Description: "Insert headers configuration (string key to string value, for example X-Forwarded-For, X-Forwarded-Port, X-Forwarded-Proto).",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},

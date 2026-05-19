@@ -4,18 +4,22 @@ layout: "edgenext"
 page_title: "EdgeNext: edgenext_elb_target_groups"
 sidebar_current: "docs-edgenext-datasource-elb_target_groups"
 description: |-
-  Use this data source to query EdgeNext ELB target groups.
+  Use this data source to list EdgeNext ELB target groups for a load balancer, including health monitor details when available.
 ---
 
 # edgenext_elb_target_groups
 
-Use this data source to query EdgeNext ELB target groups.
+Use this data source to list EdgeNext ELB target groups for a load balancer, including health monitor details when available.
 
 ## Example Usage
 
 ```hcl
-data "edgenext_elb_target_groups" "example" {
-  limit = 10
+data "edgenext_elb_target_groups" "lb" {
+  loadbalancer_id = var.loadbalancer_id
+}
+
+output "target_group_ids" {
+  value = [for tg in data.edgenext_elb_target_groups.lb.target_groups : tg.id]
 }
 ```
 
@@ -43,7 +47,7 @@ In addition to all arguments above, the following attributes are exported:
     * `operating_status` - Operating status.
     * `provisioning_status` - Provisioning status.
     * `timeout` - Health check timeout in seconds.
-    * `type` - Health monitor type.
+    * `type` - Health monitor type (for example HTTP, HTTPS, TCP, PING, TLS-HELLO).
     * `updated_at` - Last update time as Unix timestamp (seconds).
     * `url_path` - URL path for HTTP(S) checks.
   * `healthmonitor_id` - Health monitor id (same as health_monitor.0.id when present).

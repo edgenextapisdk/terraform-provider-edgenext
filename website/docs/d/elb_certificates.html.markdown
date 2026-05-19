@@ -4,18 +4,24 @@ layout: "edgenext"
 page_title: "EdgeNext: edgenext_elb_certificates"
 sidebar_current: "docs-edgenext-datasource-elb_certificates"
 description: |-
-  Use this data source to query EdgeNext ELB certificates.
+  Use this data source to list EdgeNext ELB TLS certificates.
 ---
 
 # edgenext_elb_certificates
 
-Use this data source to query EdgeNext ELB certificates.
+Use this data source to list EdgeNext ELB TLS certificates.
 
 ## Example Usage
 
 ```hcl
-data "edgenext_elb_certificates" "example" {
-  limit = 10
+data "edgenext_elb_certificates" "all" {
+  page_num  = 1
+  page_size = 50
+  name      = ""
+}
+
+output "certificate_refs" {
+  value = [for c in data.edgenext_elb_certificates.all.certificates : c.certificate_ref]
 }
 ```
 
@@ -32,8 +38,8 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `certificates` - Certificates returned by the API.
-  * `container_id` - Barbican container ID.
-  * `container_ref` - Barbican container reference URL.
+  * `certificate_id` - Certificate ID (Barbican container ID).
+  * `certificate_ref` - Certificate reference URL (Barbican container reference).
   * `created` - Creation time as Unix timestamp (seconds).
   * `expiration` - Expiration time as Unix timestamp (seconds).
   * `name` - Certificate name.

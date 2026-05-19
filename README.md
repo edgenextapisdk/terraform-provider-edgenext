@@ -5,17 +5,19 @@
 [![Go Version](https://img.shields.io/badge/Go-1.23+-blue.svg)](https://golang.org)
 [![Terraform](https://img.shields.io/badge/Terraform-1.0+-purple.svg)](https://terraform.io)
 
-Terraform provider for managing EdgeNext services, including CDN, SSL, OSS, ECS, RDS, SDNS, and SCDN.
+Terraform provider for managing EdgeNext services, including CDN, SSL, OSS, ECS, ELB, EIP, RDS, SDNS, and SCDN.
 
 ## Supported Services
 
-- CDN: Domain configuration and cache operations
-- SSL: Certificate lifecycle management
-- OSS: Bucket and object management
-- ECS: Network, security, tag, and instance operation resources/data sources
-- RDS: Relational database resources and data sources
-- SDNS: Domain group and record management
-- SCDN: Domain/origin/template/cache/security/log modules
+- **CDN**: Domain configuration and cache operations
+- **SSL**: Certificate lifecycle management
+- **OSS**: Bucket and object management
+- **ECS**: VPC, router, ENI, security groups, tags, and instance power/reboot resources and data sources
+- **ELB**: Load balancers, listeners, target groups, backends, TLS certificates, and L7 policies/rules
+- **EIP**: Floating IP list and association with ECS, ELB, or network interfaces
+- **RDS**: Relational database resources and data sources
+- **SDNS**: Domain group and record management
+- **SCDN**: Domain/origin/template/cache/security/log modules
 
 Service-level documentation:
 
@@ -23,6 +25,8 @@ Service-level documentation:
 - [SSL](edgenext/services/ssl/README.md)
 - [OSS](edgenext/services/oss/README.md)
 - [ECS](edgenext/services/ecs/README.md)
+- [ELB](edgenext/services/elb/README.md)
+- [EIP](edgenext/services/eip/README.md)
 - [RDS](edgenext/services/rds/README.md)
 - [SCDN](edgenext/services/scdn/README.md)
 
@@ -122,9 +126,65 @@ resource "edgenext_ecs_vpc_subnet" "extra" {
 }
 ```
 
-## ECS Registration Snapshot
+### ELB
 
-Current ECS resources registered in `edgenext/provider.go`:
+```hcl
+resource "edgenext_elb_listener" "https" {
+  loadbalancer_id             = var.loadbalancer_id
+  name                        = "https"
+  protocol                    = "TERMINATED_HTTPS"
+  protocol_port               = 443
+  default_tls_certificate_ref = edgenext_elb_certificate.site.certificate_ref
+}
+
+resource "edgenext_elb_target_group" "app" {
+  listener_id  = edgenext_elb_listener.https.id
+  name         = "app"
+  protocol     = "HTTP"
+  lb_algorithm = "ROUND_ROBIN"
+  health_monitor {
+    name           = "check"
+    type           = "HTTP"
+    max_retries    = 3
+    delay          = 10
+    timeout        = 5
+    http_method    = "GET"
+    url_path       = "/health"
+    expected_codes = "200"
+  }
+}
+
+resource "edgenext_elb_target_group_attachment" "app1" {
+  target_group_id = edgenext_elb_target_group.app.id
+  address         = "192.168.0.10"
+  protocol_port   = 8080
+}
+```
+
+See [examples/elb](examples/elb/).
+
+### EIP
+
+```hcl
+data "edgenext_eip_floating_ips" "all" {
+  limit = 50
+}
+
+resource "edgenext_eip_association" "web" {
+  allocation_id = var.eip_id
+  instance_id   = var.ecs_instance_id
+  # instance_type = "EcsInstance"  # default; or ElbInstance, NetworkInterface
+  fixed_ip_address = "172.31.0.32"
+}
+```
+
+See [examples/eip](examples/eip/).
+
+## Provider Registration Snapshot
+
+Registration matches `edgenext/provider.go` (see also [provider.md](edgenext/provider.md) for the registry website list).
+
+### ECS resources
 
 - `edgenext_ecs_key_pair`
 - `edgenext_ecs_vpc`
@@ -133,7 +193,6 @@ Current ECS resources registered in `edgenext/provider.go`:
 - `edgenext_ecs_router_port`
 - `edgenext_ecs_network_interface`
 - `edgenext_ecs_network_interface_instance_binding`
-- `edgenext_ecs_network_interface_floating_ip_binding`
 - `edgenext_ecs_security_group`
 - `edgenext_ecs_security_group_rule`
 - `edgenext_ecs_tag`
@@ -141,7 +200,7 @@ Current ECS resources registered in `edgenext/provider.go`:
 - `edgenext_ecs_instance_power`
 - `edgenext_ecs_instance_reboot`
 
-Current ECS data sources registered in `edgenext/provider.go`:
+### ECS data sources
 
 - `edgenext_ecs_instances`
 - `edgenext_ecs_images`
@@ -151,7 +210,6 @@ Current ECS data sources registered in `edgenext/provider.go`:
 - `edgenext_ecs_vpc_subnets`
 - `edgenext_ecs_routers`
 - `edgenext_ecs_router_ports`
-- `edgenext_ecs_floating_ips`
 - `edgenext_ecs_network_interfaces`
 - `edgenext_ecs_security_groups`
 - `edgenext_ecs_disks`
@@ -159,7 +217,31 @@ Current ECS data sources registered in `edgenext/provider.go`:
 - `edgenext_ecs_security_group_rules`
 - `edgenext_ecs_instance_tags`
 
-RDS resources registered in `edgenext/provider.go`:
+### ELB resources
+
+- `edgenext_elb_certificate`
+- `edgenext_elb_listener`
+- `edgenext_elb_target_group`
+- `edgenext_elb_target_group_attachment`
+- `edgenext_elb_l7_policy`
+- `edgenext_elb_l7_rule`
+
+### ELB data sources
+
+- `edgenext_elb_load_balancers`
+- `edgenext_elb_certificates`
+- `edgenext_elb_listeners`
+- `edgenext_elb_target_groups`
+- `edgenext_elb_target_group_attachments`
+- `edgenext_elb_l7_policies`
+- `edgenext_elb_l7_rules`
+
+### EIP
+
+- Data source: `edgenext_eip_floating_ips` (replaces former `edgenext_ecs_floating_ips`)
+- Resource: `edgenext_eip_association`
+
+### RDS resources
 
 - `edgenext_rds_backup`
 - `edgenext_rds_backup_policy`
@@ -169,7 +251,7 @@ RDS resources registered in `edgenext/provider.go`:
 - `edgenext_rds_account_privilege`
 - `edgenext_rds_account_root_password`
 
-RDS data sources registered in `edgenext/provider.go`:
+### RDS data sources
 
 - `edgenext_rds_instances`
 - `edgenext_rds_databases`
@@ -178,12 +260,14 @@ RDS data sources registered in `edgenext/provider.go`:
 - `edgenext_rds_backup_policies`
 - `edgenext_rds_backup_policy_associate_instances`
 
-ECS resources currently present in code but not registered in provider:
+### ECS (implemented, not registered)
 
 - `edgenext_ecs_instance`
 - `edgenext_ecs_image`
 - `edgenext_ecs_floating_ip`
 - `edgenext_ecs_disk`
+
+CDN, SSL, OSS, SDNS, and SCDN modules include additional resources registered from subpackages; see `edgenext/provider.go` and [provider.md](edgenext/provider.md).
 
 ## Documentation
 

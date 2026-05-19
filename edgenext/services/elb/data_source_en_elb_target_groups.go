@@ -27,7 +27,7 @@ func DataSourceENELBTargetGroups() *schema.Resource {
 			"type": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Health monitor type.",
+				Description: "Health monitor type (for example HTTP, HTTPS, TCP, PING, TLS-HELLO).",
 			},
 			"max_retries": {
 				Type:        schema.TypeInt,

@@ -341,6 +341,8 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		productDir = "ssl"
 	case "object storage service(oss)", "object storage service":
 		productDir = "oss"
+	case "elastic compute service(ecs)", "elastic compute service", "ecs":
+		productDir = "ecs"
 	case "relational database service(rds)", "relational database service", "rds":
 		productDir = "rds"
 	case "elastic load balancer(elb)", "elastic load balancer", "elb":
@@ -840,9 +842,8 @@ func getResourceDesc(resourceName string) string {
 		"edgenext_ecs_router":              "ECS routers",
 		"edgenext_ecs_router_port":         "ECS router port attachments",
 		"edgenext_ecs_network_interface":   "ECS network interfaces",
-		"edgenext_ecs_network_interface_instance_binding":    "ECS network interface instance bindings",
-		"edgenext_ecs_network_interface_floating_ip_binding": "ECS network interface floating IP bindings",
-		"edgenext_ecs_security_group":      "ECS security groups",
+		"edgenext_ecs_network_interface_instance_binding": "ECS network interface instance bindings",
+		"edgenext_ecs_security_group":                     "ECS security groups",
 		"edgenext_ecs_security_group_rule": "ECS security group rules",
 		"edgenext_ecs_tag":                 "ECS tags",
 		"edgenext_ecs_instance_tag":        "ECS instance tag bindings",

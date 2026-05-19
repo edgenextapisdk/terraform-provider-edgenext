@@ -4,18 +4,23 @@ layout: "edgenext"
 page_title: "EdgeNext: edgenext_elb_listeners"
 sidebar_current: "docs-edgenext-datasource-elb_listeners"
 description: |-
-  Use this data source to query EdgeNext ELB listeners.
+  Use this data source to list EdgeNext ELB listeners for a load balancer.
 ---
 
 # edgenext_elb_listeners
 
-Use this data source to query EdgeNext ELB listeners.
+Use this data source to list EdgeNext ELB listeners for a load balancer.
 
 ## Example Usage
 
 ```hcl
-data "edgenext_elb_listeners" "example" {
-  limit = 10
+data "edgenext_elb_listeners" "lb" {
+  loadbalancer_id = var.loadbalancer_id
+  limit           = 100
+}
+
+output "listener_ids" {
+  value = [for l in data.edgenext_elb_listeners.lb.listeners : l.id]
 }
 ```
 
@@ -37,7 +42,7 @@ In addition to all arguments above, the following attributes are exported:
   * `default_target_group_id` - Default target group ID when set.
   * `description` - Description.
   * `id` - Listener ID.
-  * `insert_headers` - Insert headers configuration (string key to string value).
+  * `insert_headers` - Insert headers configuration (string key to string value, for example X-Forwarded-For, X-Forwarded-Port, X-Forwarded-Proto).
   * `name` - Listener name.
   * `operating_status` - Operating status.
   * `protocol_port` - Protocol port.

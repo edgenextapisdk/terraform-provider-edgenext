@@ -79,7 +79,7 @@ func ResourceENELBListener() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
-				Description: "Insert headers for the listener (string keys and values, for example X-Forwarded-For = true). " +
+				Description: "Insert headers for the listener (string keys and values, for example X-Forwarded-For, X-Forwarded-Port, and X-Forwarded-Proto set to true). " +
 					"Create only.",
 				Elem: &schema.Schema{Type: schema.TypeString},
 			},

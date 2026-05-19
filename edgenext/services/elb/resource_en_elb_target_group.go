@@ -89,7 +89,7 @@ func ResourceENELBTargetGroup() *schema.Resource {
 						"type": {
 							Type:         schema.TypeString,
 							Required:     true,
-							Description:  "Health monitor type (for example HTTP, HTTPS, TCP).",
+							Description:  "Health monitor type (for example HTTP, HTTPS, TCP, PING, TLS-HELLO).",
 							ValidateFunc: validation.StringIsNotWhiteSpace,
 						},
 						"max_retries": {
