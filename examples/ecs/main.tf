@@ -3,7 +3,7 @@
 #
 # The following resources are implemented under services/ecs but commented out in
 # edgenext/provider.go until registered: edgenext_ecs_instance, edgenext_ecs_image,
-# edgenext_ecs_floating_ip, edgenext_ecs_disk.
+# edgenext_ecs_disk.
 
 terraform {
   required_providers {
@@ -93,13 +93,6 @@ variable "region" {
 #   instance_id          = "cb24704a-dda5-4287-978f-cec28ee1e816"
 # }
 
-# Bind floating IP to an ENI (separate resource; edgenext_ecs_floating_ip create is optional in provider).
-# resource "edgenext_ecs_network_interface_floating_ip_binding" "example" {
-#   network_interface_id  = "47b88552-2a31-4446-9306-6abd692051bd"
-#   floating_ip_address   = "156.246.18.218"
-# }
-
-
 # resource "edgenext_ecs_security_group" "example" {
 #   name        = "example-sg-managed"
 #   description = "A standard example security group"
@@ -172,10 +165,6 @@ locals {
 #   volume_type = "SSD"
 # }
 
-# resource "edgenext_ecs_floating_ip" "example" {
-#   bandwidth = 10
-# }
-
 # resource "edgenext_ecs_instance" "example" {
 #   name            = "example-instance"
 #   flavor_ref      = "s1.small"
@@ -196,12 +185,6 @@ locals {
 #
 # Data sources
 #
-
-# data "edgenext_ecs_floating_ips" "all" {
-#   limit             = 10
-#   floating_ip_id    = "c48bf957-9dad-4aea-b572-911bed2ab5d3"
-#   floating_ip_address = "156.246.18.218"
-# }
 
 # data "edgenext_ecs_vpcs" "all" {
 #   limit   = 10
@@ -302,9 +285,6 @@ locals {
 #
 # resource "edgenext_ecs_network_interface_instance_binding" "imported_eni_instance_binding" {}
 # terraform import edgenext_ecs_network_interface_instance_binding.imported_eni_instance_binding '<network_interface_id>/<instance_id>'
-#
-# resource "edgenext_ecs_network_interface_floating_ip_binding" "imported_eni_floating_ip_binding" {}
-# terraform import edgenext_ecs_network_interface_floating_ip_binding.imported_eni_floating_ip_binding '<network_interface_id>/<floating_ip_address>'
 #
 # resource "edgenext_ecs_security_group" "imported_security_group" {}
 # terraform import edgenext_ecs_security_group.imported_security_group '<security_group_id>'

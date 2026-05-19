@@ -8,7 +8,9 @@ description: |-
 
 # EdgeNext Provider
 
-The EdgeNext Provider can be used to configure infrastructure in [EdgeNext](https://www.edgenext.com) using the EdgeNext Resource Manager API's. Documentation regarding the Data Sources and Resources supported by the EdgeNext Provider can be found in the navigation to the left.
+The EdgeNext Provider can be used to configure infrastructure in [EdgeNext](https://www.edgenext.com) using EdgeNext OpenAPI services (CDN, SSL, OSS, ECS, ELB, EIP, RDS, SDNS, SCDN, and related APIs). Documentation regarding the Data Sources and Resources supported by the EdgeNext Provider can be found in the navigation to the left.
+
+Service-specific notes and examples live under `edgenext/services/<service>/README.md` in the repository (for example [ECS](https://github.com/edgenextapisdk/terraform-provider-edgenext/tree/main/edgenext/services/ecs), [ELB](https://github.com/edgenextapisdk/terraform-provider-edgenext/tree/main/edgenext/services/elb), [EIP](https://github.com/edgenextapisdk/terraform-provider-edgenext/tree/main/edgenext/services/eip)).
 
 -> **Note:** This provider requires EdgeNext API credentials (access key and secret key).
 
@@ -81,7 +83,7 @@ The following arguments are supported in the `provider` block:
 
 * `secret_key` - (Required) EdgeNext secret key for authentication. It can also be sourced from the `EDGENEXT_SECRET_KEY` environment variable.
 
-* `endpoint` - (Required) EdgeNext API endpoint address. It can also be sourced from the `EDGENEXT_ENDPOINT` environment variable.
+* `endpoint` - (Required) EdgeNext API endpoint address (for example CDN/SCDN, ECS, ELB, RDS base URL for your environment). It can also be sourced from the `EDGENEXT_ENDPOINT` environment variable.
 
 * `region` - (Optional) EdgeNext region. It can also be sourced from the `EDGENEXT_REGION` environment variable.
 
@@ -130,7 +132,6 @@ edgenext_ecs_external_gateways
 edgenext_ecs_vpc_subnets
 edgenext_ecs_routers
 edgenext_ecs_router_ports
-edgenext_ecs_floating_ips
 edgenext_ecs_network_interfaces
 edgenext_ecs_security_groups
 edgenext_ecs_disks
@@ -146,7 +147,6 @@ edgenext_ecs_router
 edgenext_ecs_router_port
 edgenext_ecs_network_interface
 edgenext_ecs_network_interface_instance_binding
-edgenext_ecs_network_interface_floating_ip_binding
 edgenext_ecs_security_group
 edgenext_ecs_security_group_rule
 edgenext_ecs_tag
@@ -155,6 +155,31 @@ edgenext_ecs_instance_power
 edgenext_ecs_instance_reboot
 
 Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically.
+
+Elastic Load Balancer (ELB)
+Data Source
+edgenext_elb_load_balancers
+edgenext_elb_certificates
+edgenext_elb_listeners
+edgenext_elb_target_groups
+edgenext_elb_target_group_attachments
+edgenext_elb_l7_policies
+edgenext_elb_l7_rules
+
+Resource
+edgenext_elb_certificate
+edgenext_elb_listener
+edgenext_elb_target_group
+edgenext_elb_target_group_attachment
+edgenext_elb_l7_policy
+edgenext_elb_l7_rule
+
+Elastic IP (EIP)
+Data Source
+edgenext_eip_floating_ips
+
+Resource
+edgenext_eip_association
 
 Relational Database Service (RDS)
 Data Source

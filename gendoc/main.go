@@ -341,8 +341,14 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		productDir = "ssl"
 	case "object storage service(oss)", "object storage service":
 		productDir = "oss"
+	case "elastic compute service(ecs)", "elastic compute service", "ecs":
+		productDir = "ecs"
 	case "relational database service(rds)", "relational database service", "rds":
 		productDir = "rds"
+	case "elastic load balancer(elb)", "elastic load balancer", "elb":
+		productDir = "elb"
+	case "elastic ip(eip)", "elastic ip", "eip":
+		productDir = "eip"
 	case "security cdn(scdn)", "security cdn", "scdn":
 		productDir = "scdn"
 	case "security dns(sdns)", "security dns", "sdns":
@@ -836,9 +842,8 @@ func getResourceDesc(resourceName string) string {
 		"edgenext_ecs_router":              "ECS routers",
 		"edgenext_ecs_router_port":         "ECS router port attachments",
 		"edgenext_ecs_network_interface":   "ECS network interfaces",
-		"edgenext_ecs_network_interface_instance_binding":    "ECS network interface instance bindings",
-		"edgenext_ecs_network_interface_floating_ip_binding": "ECS network interface floating IP bindings",
-		"edgenext_ecs_security_group":      "ECS security groups",
+		"edgenext_ecs_network_interface_instance_binding": "ECS network interface instance bindings",
+		"edgenext_ecs_security_group":                     "ECS security groups",
 		"edgenext_ecs_security_group_rule": "ECS security group rules",
 		"edgenext_ecs_tag":                 "ECS tags",
 		"edgenext_ecs_instance_tag":        "ECS instance tag bindings",
@@ -852,6 +857,15 @@ func getResourceDesc(resourceName string) string {
 		"edgenext_rds_account":                          "RDS database users",
 		"edgenext_rds_account_privilege":                "RDS database user privileges",
 		"edgenext_rds_account_root_password":            "RDS root password management",
+		// ELB resources
+		"edgenext_elb_certificate":             "ELB certificates",
+		"edgenext_elb_listener":                "ELB listeners",
+		"edgenext_elb_target_group":            "ELB target groups",
+		"edgenext_elb_target_group_attachment": "ELB target group attachments",
+		"edgenext_elb_l7_policy":               "ELB L7 policies",
+		"edgenext_elb_l7_rule":                 "ELB L7 rules",
+		// EIP resources
+		"edgenext_eip_association": "EIP associations",
 		// SCDN resources
 		"edgenext_scdn_domain":                                    "SCDN domain configuration",
 		"edgenext_scdn_origin":                                    "SCDN origin servers",
@@ -919,7 +933,6 @@ func getDataSourceDesc(dataSourceName string) string {
 		"edgenext_ecs_vpc_subnets":          "ECS VPC subnets",
 		"edgenext_ecs_routers":              "ECS routers",
 		"edgenext_ecs_router_ports":         "ECS router ports",
-		"edgenext_ecs_floating_ips":         "ECS floating IPs",
 		"edgenext_ecs_network_interfaces":   "ECS network interfaces",
 		"edgenext_ecs_security_groups":      "ECS security groups",
 		"edgenext_ecs_disks":                "ECS disks",
@@ -933,6 +946,16 @@ func getDataSourceDesc(dataSourceName string) string {
 		"edgenext_rds_backups":                           "RDS backups",
 		"edgenext_rds_backup_policies":                   "RDS backup policies",
 		"edgenext_rds_backup_policy_associate_instances": "RDS backup policy associated instances",
+		// ELB data sources
+		"edgenext_elb_load_balancers":           "ELB load balancers",
+		"edgenext_elb_certificates":             "ELB certificates",
+		"edgenext_elb_listeners":                "ELB listeners",
+		"edgenext_elb_target_groups":            "ELB target groups",
+		"edgenext_elb_target_group_attachments": "ELB target group attachments",
+		"edgenext_elb_l7_policies":              "ELB L7 policies",
+		"edgenext_elb_l7_rules":                 "ELB L7 rules",
+		// EIP data sources
+		"edgenext_eip_floating_ips": "EIP floating IPs",
 		// SCDN data sources
 		"edgenext_scdn_domain":                                       "SCDN domain details",
 		"edgenext_scdn_domains":                                      "SCDN domains",

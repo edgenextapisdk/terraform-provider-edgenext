@@ -5,7 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.6] - 2026-05-19
+
+### Added
+- **ELB resources**:
+  - `edgenext_elb_certificate`
+  - `edgenext_elb_listener`
+  - `edgenext_elb_target_group`
+  - `edgenext_elb_target_group_attachment`
+  - `edgenext_elb_l7_policy`
+  - `edgenext_elb_l7_rule`
+- **ELB data sources**:
+  - `data.edgenext_elb_load_balancers`
+  - `data.edgenext_elb_certificates`
+  - `data.edgenext_elb_listeners`
+  - `data.edgenext_elb_target_groups`
+  - `data.edgenext_elb_target_group_attachments`
+  - `data.edgenext_elb_l7_policies`
+  - `data.edgenext_elb_l7_rules`
+- **EIP resources**:
+  - `edgenext_eip_association` (associate an existing EIP with an ECS instance, ELB VIP, or network interface port)
+- **EIP data sources**:
+  - `data.edgenext_eip_floating_ips`
+- **ELB connectivity client** (`ELBClient`) and Octavia-oriented create/delete retry helpers for transient `409 immutable` responses.
+- **Examples** under `examples/elb/` and `examples/eip/`.
+
+### Changed
+- **Floating IP data source relocation**: `data.edgenext_ecs_floating_ips` is replaced by `data.edgenext_eip_floating_ips` (same ECS list API; module path and type name change).
+- **ELB certificates data source**: list items expose `certificate_id` and `certificate_ref` (replacing `container_id` and `container_ref`) to align with `edgenext_elb_certificate`.
+- **ELB L7 policy**: Terraform action `REDIRECT_TO_TARGET_GROUP` maps to API `REDIRECT_TO_POOL`; redirect fields use `redirect_target_group_*` naming.
+
+### Removed
+- `data.edgenext_ecs_floating_ips` (use `data.edgenext_eip_floating_ips`).
+- `edgenext_ecs_network_interface_floating_ip_binding` (use `edgenext_eip_association` for EIP binding by allocation ID).
+
+### Documentation
+- Added ELB and EIP service READMEs, resource/data source markdown, website docs, and provider registration lists.
+- Refreshed top-level `README.md`, `edgenext/provider.md`, doc preview (`website/preview.html`, `generate_doc_list.py`), and `gendoc` descriptions for ELB/EIP.
 
 ## [1.3.5] - 2026-05-08
 
@@ -112,6 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `data.edgenext_ssl_certificate`: Query certificate information
 - `data.edgenext_ssl_certificates`: Query multiple certificates
 
-[Unreleased]: https://github.com/edgenextapisdk/terraform-provider-edgenext/compare/v1.3.5...HEAD
+[Unreleased]: https://github.com/edgenextapisdk/terraform-provider-edgenext/compare/v1.3.6...HEAD
+[1.3.6]: https://github.com/edgenextapisdk/terraform-provider-edgenext/releases/tag/v1.3.6
 [1.3.5]: https://github.com/edgenextapisdk/terraform-provider-edgenext/releases/tag/v1.3.5
 [1.0.0]: https://github.com/edgenextapisdk/terraform-provider-edgenext/releases/tag/v1.0.0

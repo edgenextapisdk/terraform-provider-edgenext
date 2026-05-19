@@ -8,7 +8,9 @@ description: |-
 
 # EdgeNext Provider
 
-The EdgeNext Provider can be used to configure infrastructure in [EdgeNext](https://www.edgenext.com) using the EdgeNext Resource Manager API's. Documentation regarding the Data Sources and Resources supported by the EdgeNext Provider can be found in the navigation to the left.
+The EdgeNext Provider can be used to configure infrastructure in [EdgeNext](https://www.edgenext.com) using EdgeNext OpenAPI services (CDN, SSL, OSS, ECS, ELB, EIP, RDS, SDNS, SCDN, and related APIs). Documentation regarding the Data Sources and Resources supported by the EdgeNext Provider can be found in the navigation to the left.
+
+Service-specific notes and examples live under `edgenext/services/<service>/README.md` in the repository (for example [ECS](https://github.com/edgenextapisdk/terraform-provider-edgenext/tree/main/edgenext/services/ecs), [ELB](https://github.com/edgenextapisdk/terraform-provider-edgenext/tree/main/edgenext/services/elb), [EIP](https://github.com/edgenextapisdk/terraform-provider-edgenext/tree/main/edgenext/services/eip)).
 
 -> **Note:** This provider requires EdgeNext API credentials (access key and secret key).
 
@@ -81,7 +83,7 @@ The following arguments are supported in the `provider` block:
 
 * `secret_key` - (Required) EdgeNext secret key for authentication. It can also be sourced from the `EDGENEXT_SECRET_KEY` environment variable.
 
-* `endpoint` - (Required) EdgeNext API endpoint address. It can also be sourced from the `EDGENEXT_ENDPOINT` environment variable.
+* `endpoint` - (Required) EdgeNext API endpoint address (for example CDN/SCDN, ECS, ELB, RDS base URL for your environment). It can also be sourced from the `EDGENEXT_ENDPOINT` environment variable.
 
 * `region` - (Optional) EdgeNext region. It can also be sourced from the `EDGENEXT_REGION` environment variable.
 
@@ -142,7 +144,6 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_ecs_router_port`](resources/ecs_router_port) - Manage ECS router port attachments
 * [`edgenext_ecs_network_interface`](resources/ecs_network_interface) - Manage ECS network interfaces
 * [`edgenext_ecs_network_interface_instance_binding`](resources/ecs_network_interface_instance_binding) - Manage ECS network interface instance bindings
-* [`edgenext_ecs_network_interface_floating_ip_binding`](resources/ecs_network_interface_floating_ip_binding) - Manage ECS network interface floating IP bindings
 * [`edgenext_ecs_security_group`](resources/ecs_security_group) - Manage ECS security groups
 * [`edgenext_ecs_security_group_rule`](resources/ecs_security_group_rule) - Manage ECS security group rules
 * [`edgenext_ecs_tag`](resources/ecs_tag) - Manage ECS tags
@@ -160,7 +161,6 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_ecs_vpc_subnets`](data-sources/ecs_vpc_subnets) - Query ECS VPC subnets
 * [`edgenext_ecs_routers`](data-sources/ecs_routers) - Query ECS routers
 * [`edgenext_ecs_router_ports`](data-sources/ecs_router_ports) - Query ECS router ports
-* [`edgenext_ecs_floating_ips`](data-sources/ecs_floating_ips) - Query ECS floating IPs
 * [`edgenext_ecs_network_interfaces`](data-sources/ecs_network_interfaces) - Query ECS network interfaces
 * [`edgenext_ecs_security_groups`](data-sources/ecs_security_groups) - Query ECS security groups
 * [`edgenext_ecs_disks`](data-sources/ecs_disks) - Query ECS disks
@@ -169,6 +169,37 @@ The EdgeNext provider supports the following resource types:
 * [`edgenext_ecs_instance_tags`](data-sources/ecs_instance_tags) - Query ECS instance tag relations
 
 ### Note: for several ECS resources, immutable argument changes are rejected during plan/apply instead of replacing resources automatically.
+
+### Elastic Load Balancer (ELB)
+
+#### Resources
+
+* [`edgenext_elb_certificate`](resources/elb_certificate) - Manage ELB certificates
+* [`edgenext_elb_listener`](resources/elb_listener) - Manage ELB listeners
+* [`edgenext_elb_target_group`](resources/elb_target_group) - Manage ELB target groups
+* [`edgenext_elb_target_group_attachment`](resources/elb_target_group_attachment) - Manage ELB target group attachments
+* [`edgenext_elb_l7_policy`](resources/elb_l7_policy) - Manage ELB L7 policies
+* [`edgenext_elb_l7_rule`](resources/elb_l7_rule) - Manage ELB L7 rules
+
+#### Data Sources
+
+* [`edgenext_elb_load_balancers`](data-sources/elb_load_balancers) - Query ELB load balancers
+* [`edgenext_elb_certificates`](data-sources/elb_certificates) - Query ELB certificates
+* [`edgenext_elb_listeners`](data-sources/elb_listeners) - Query ELB listeners
+* [`edgenext_elb_target_groups`](data-sources/elb_target_groups) - Query ELB target groups
+* [`edgenext_elb_target_group_attachments`](data-sources/elb_target_group_attachments) - Query ELB target group attachments
+* [`edgenext_elb_l7_policies`](data-sources/elb_l7_policies) - Query ELB L7 policies
+* [`edgenext_elb_l7_rules`](data-sources/elb_l7_rules) - Query ELB L7 rules
+
+### Elastic IP (EIP)
+
+#### Resources
+
+* [`edgenext_eip_association`](resources/eip_association) - Manage EIP associations
+
+#### Data Sources
+
+* [`edgenext_eip_floating_ips`](data-sources/eip_floating_ips) - Query EIP floating IPs
 
 ### Relational Database Service (RDS)
 

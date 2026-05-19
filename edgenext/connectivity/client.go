@@ -22,6 +22,7 @@ type EdgeNextClient struct {
 	scdnClient *ScdnClient // For SCDN
 	ecsClient  *ECSClient  // For ECS
 	rdsClient  *RDSClient  // For RDS (same HTTP client stack as ECS)
+	elbClient  *ELBClient  // For ELB (same HTTP client stack as ECS)
 
 	// Use sync.Once to ensure clients are initialized only once
 	apiClientOnce  sync.Once
@@ -29,6 +30,7 @@ type EdgeNextClient struct {
 	scdnClientOnce sync.Once
 	ecsClientOnce  sync.Once
 	rdsClientOnce  sync.Once
+	elbClientOnce  sync.Once
 
 	// Store initialization errors
 	apiClientErr  error
@@ -36,6 +38,7 @@ type EdgeNextClient struct {
 	scdnClientErr error
 	ecsClientErr  error
 	rdsClientErr  error
+	elbClientErr  error
 }
 
 // Client returns the EdgeNext client
@@ -102,4 +105,13 @@ func (c *EdgeNextClient) RDSClient() (*RDSClient, error) {
 	})
 
 	return c.rdsClient, c.rdsClientErr
+}
+
+// ELBClient returns or initializes the ELB API client (same signing and transport as ECSClient).
+func (c *EdgeNextClient) ELBClient() (*ELBClient, error) {
+	c.elbClientOnce.Do(func() {
+		c.elbClient = NewELBClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint, c.config.Region)
+	})
+
+	return c.elbClient, c.elbClientErr
 }

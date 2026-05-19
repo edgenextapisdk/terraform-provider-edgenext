@@ -8,6 +8,8 @@ import (
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/connectivity"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/cdn"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/ecs"
+	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/eip"
+	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/elb"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/oss"
 	"github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/rds"
 	scdncache "github.com/edgenextapisdk/terraform-provider-edgenext/edgenext/services/scdn/cache"
@@ -104,11 +106,10 @@ func Provider() *schema.Provider {
 		"edgenext_ecs_router":      ecs.ResourceENECSRouter(),
 		"edgenext_ecs_router_port": ecs.ResourceENECSRouterPort(),
 		// "edgenext_ecs_floating_ip":       ecs.ResourceENECSFloatingIp(),
-		"edgenext_ecs_network_interface":                     ecs.ResourceENECSNetworkInterface(),
-		"edgenext_ecs_network_interface_instance_binding":    ecs.ResourceENECSNetworkInterfaceInstanceBinding(),
-		"edgenext_ecs_network_interface_floating_ip_binding": ecs.ResourceENECSNetworkInterfaceFloatingIPBinding(),
-		"edgenext_ecs_security_group":                        ecs.ResourceENECSSecurityGroup(),
-		"edgenext_ecs_security_group_rule":                   ecs.ResourceENECSSecurityGroupRule(),
+		"edgenext_ecs_network_interface":                  ecs.ResourceENECSNetworkInterface(),
+		"edgenext_ecs_network_interface_instance_binding": ecs.ResourceENECSNetworkInterfaceInstanceBinding(),
+		"edgenext_ecs_security_group":                     ecs.ResourceENECSSecurityGroup(),
+		"edgenext_ecs_security_group_rule":                ecs.ResourceENECSSecurityGroupRule(),
 		// "edgenext_ecs_disk":                ecs.ResourceENECSDisk(),
 		"edgenext_ecs_tag":             ecs.ResourceENECSTag(),
 		"edgenext_ecs_instance_tag":    ecs.ResourceENECSInstanceTag(),
@@ -123,6 +124,17 @@ func Provider() *schema.Provider {
 		"edgenext_rds_account":                          rds.ResourceENRDSAccount(),
 		"edgenext_rds_account_privilege":                rds.ResourceENRDSAccountPrivilege(),
 		"edgenext_rds_account_root_password":            rds.ResourceENRDSAccountRootPassword(),
+
+		// ELB resources
+		"edgenext_elb_certificate":             elb.ResourceENELBCertificate(),
+		"edgenext_elb_listener":                elb.ResourceENELBListener(),
+		"edgenext_elb_target_group":            elb.ResourceENELBTargetGroup(),
+		"edgenext_elb_target_group_attachment": elb.ResourceENELBTargetGroupAttachment(),
+		"edgenext_elb_l7_policy":               elb.ResourceENELBL7Policy(),
+		"edgenext_elb_l7_rule":                 elb.ResourceENELBL7Rule(),
+
+		// EIP resources
+		"edgenext_eip_association": eip.ResourceENEIPAssociation(),
 
 		// SCDN domain management resources (from domain module)
 		// Note: These resources are organized under scdn/domain/ for better module management
@@ -225,7 +237,6 @@ func Provider() *schema.Provider {
 		"edgenext_ecs_vpc_subnets":          ecs.DataSourceENECSVpcSubnets(),
 		"edgenext_ecs_routers":              ecs.DataSourceENECSRouters(),
 		"edgenext_ecs_router_ports":         ecs.DataSourceENECSRouterPorts(),
-		"edgenext_ecs_floating_ips":         ecs.DataSourceENECSFloatingIps(),
 		"edgenext_ecs_network_interfaces":   ecs.DataSourceENECSNetworkInterfaces(),
 		"edgenext_ecs_security_groups":      ecs.DataSourceENECSSecurityGroups(),
 		"edgenext_ecs_disks":                ecs.DataSourceENECSDisks(),
@@ -240,6 +251,18 @@ func Provider() *schema.Provider {
 		"edgenext_rds_backups":                           rds.DataSourceENRDSBackups(),
 		"edgenext_rds_backup_policies":                   rds.DataSourceENRDSBackupPolicies(),
 		"edgenext_rds_backup_policy_associate_instances": rds.DataSourceENRDSBackupPolicyAssociateInstances(),
+
+		// ELB data sources
+		"edgenext_elb_load_balancers":           elb.DataSourceENELBLoadBalancers(),
+		"edgenext_elb_certificates":             elb.DataSourceENELBCertificates(),
+		"edgenext_elb_listeners":                elb.DataSourceENELBListeners(),
+		"edgenext_elb_target_groups":            elb.DataSourceENELBTargetGroups(),
+		"edgenext_elb_target_group_attachments": elb.DataSourceENELBTargetGroupAttachments(),
+		"edgenext_elb_l7_policies":              elb.DataSourceENELBL7Policies(),
+		"edgenext_elb_l7_rules":                 elb.DataSourceENELBL7Rules(),
+
+		// EIP data sources
+		"edgenext_eip_floating_ips": eip.DataSourceENEIPFloatingIps(),
 
 		// SCDN domain data sources (from domain module)
 		// Note: These data sources are organized under scdn/domain/ for better module management

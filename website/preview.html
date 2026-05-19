@@ -192,6 +192,8 @@
                 <li><strong>SSL</strong> - SSL Certificate Management</li>
                 <li><strong>OSS</strong> - Object Storage Service</li>
                 <li><strong>ECS</strong> - Elastic Compute Service</li>
+                <li><strong>ELB</strong> - Elastic Load Balancer</li>
+                <li><strong>EIP</strong> - Elastic IP</li>
                 <li><strong>RDS</strong> - Relational Database Service</li>
                 <li><strong>SCDN</strong> - Security CDN</li>
                 <li><strong>SDNS</strong> - Security DNS</li>
@@ -271,7 +273,7 @@
             html += '</div>';
 
             // Categories
-            const categoryOrder = ['CDN', 'SSL', 'OSS', 'ECS', 'RDS', 'SCDN', 'SDNS'];
+            const categoryOrder = ['CDN', 'SSL', 'OSS', 'ECS', 'ELB', 'EIP', 'RDS', 'SCDN', 'SDNS'];
             categoryOrder.forEach(catName => {
                 const category = docData.categories[catName];
                 if (!category) return;

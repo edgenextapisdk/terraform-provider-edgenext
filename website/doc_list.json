@@ -122,11 +122,6 @@
           "display_name": "ecs external gateways"
         },
         {
-          "name": "ecs_floating_ips",
-          "path": "docs/d/ecs_floating_ips.html.markdown",
-          "display_name": "ecs floating ips"
-        },
-        {
           "name": "ecs_images",
           "path": "docs/d/ecs_images.html.markdown",
           "display_name": "ecs images"
@@ -214,11 +209,6 @@
           "display_name": "ecs network interface"
         },
         {
-          "name": "ecs_network_interface_floating_ip_binding",
-          "path": "docs/r/ecs_network_interface_floating_ip_binding.html.markdown",
-          "display_name": "ecs network interface floating ip binding"
-        },
-        {
           "name": "ecs_network_interface_instance_binding",
           "path": "docs/r/ecs_network_interface_instance_binding.html.markdown",
           "display_name": "ecs network interface instance binding"
@@ -257,6 +247,93 @@
           "name": "ecs_vpc_subnet",
           "path": "docs/r/ecs_vpc_subnet.html.markdown",
           "display_name": "ecs vpc subnet"
+        }
+      ]
+    },
+    "ELB": {
+      "data_sources": [
+        {
+          "name": "elb_certificates",
+          "path": "docs/d/elb_certificates.html.markdown",
+          "display_name": "elb certificates"
+        },
+        {
+          "name": "elb_l7_policies",
+          "path": "docs/d/elb_l7_policies.html.markdown",
+          "display_name": "elb l7 policies"
+        },
+        {
+          "name": "elb_l7_rules",
+          "path": "docs/d/elb_l7_rules.html.markdown",
+          "display_name": "elb l7 rules"
+        },
+        {
+          "name": "elb_listeners",
+          "path": "docs/d/elb_listeners.html.markdown",
+          "display_name": "elb listeners"
+        },
+        {
+          "name": "elb_load_balancers",
+          "path": "docs/d/elb_load_balancers.html.markdown",
+          "display_name": "elb load balancers"
+        },
+        {
+          "name": "elb_target_group_attachments",
+          "path": "docs/d/elb_target_group_attachments.html.markdown",
+          "display_name": "elb target group attachments"
+        },
+        {
+          "name": "elb_target_groups",
+          "path": "docs/d/elb_target_groups.html.markdown",
+          "display_name": "elb target groups"
+        }
+      ],
+      "resources": [
+        {
+          "name": "elb_certificate",
+          "path": "docs/r/elb_certificate.html.markdown",
+          "display_name": "elb certificate"
+        },
+        {
+          "name": "elb_l7_policy",
+          "path": "docs/r/elb_l7_policy.html.markdown",
+          "display_name": "elb l7 policy"
+        },
+        {
+          "name": "elb_l7_rule",
+          "path": "docs/r/elb_l7_rule.html.markdown",
+          "display_name": "elb l7 rule"
+        },
+        {
+          "name": "elb_listener",
+          "path": "docs/r/elb_listener.html.markdown",
+          "display_name": "elb listener"
+        },
+        {
+          "name": "elb_target_group",
+          "path": "docs/r/elb_target_group.html.markdown",
+          "display_name": "elb target group"
+        },
+        {
+          "name": "elb_target_group_attachment",
+          "path": "docs/r/elb_target_group_attachment.html.markdown",
+          "display_name": "elb target group attachment"
+        }
+      ]
+    },
+    "EIP": {
+      "data_sources": [
+        {
+          "name": "eip_floating_ips",
+          "path": "docs/d/eip_floating_ips.html.markdown",
+          "display_name": "eip floating ips"
+        }
+      ],
+      "resources": [
+        {
+          "name": "eip_association",
+          "path": "docs/r/eip_association.html.markdown",
+          "display_name": "eip association"
         }
       ]
     },
@@ -796,11 +873,6 @@
       "display_name": "ecs external gateways"
     },
     {
-      "name": "ecs_floating_ips",
-      "path": "docs/d/ecs_floating_ips.html.markdown",
-      "display_name": "ecs floating ips"
-    },
-    {
       "name": "ecs_images",
       "path": "docs/d/ecs_images.html.markdown",
       "display_name": "ecs images"
@@ -859,6 +931,46 @@
       "name": "ecs_vpcs",
       "path": "docs/d/ecs_vpcs.html.markdown",
       "display_name": "ecs vpcs"
+    },
+    {
+      "name": "eip_floating_ips",
+      "path": "docs/d/eip_floating_ips.html.markdown",
+      "display_name": "eip floating ips"
+    },
+    {
+      "name": "elb_certificates",
+      "path": "docs/d/elb_certificates.html.markdown",
+      "display_name": "elb certificates"
+    },
+    {
+      "name": "elb_l7_policies",
+      "path": "docs/d/elb_l7_policies.html.markdown",
+      "display_name": "elb l7 policies"
+    },
+    {
+      "name": "elb_l7_rules",
+      "path": "docs/d/elb_l7_rules.html.markdown",
+      "display_name": "elb l7 rules"
+    },
+    {
+      "name": "elb_listeners",
+      "path": "docs/d/elb_listeners.html.markdown",
+      "display_name": "elb listeners"
+    },
+    {
+      "name": "elb_load_balancers",
+      "path": "docs/d/elb_load_balancers.html.markdown",
+      "display_name": "elb load balancers"
+    },
+    {
+      "name": "elb_target_group_attachments",
+      "path": "docs/d/elb_target_group_attachments.html.markdown",
+      "display_name": "elb target group attachments"
+    },
+    {
+      "name": "elb_target_groups",
+      "path": "docs/d/elb_target_groups.html.markdown",
+      "display_name": "elb target groups"
     },
     {
       "name": "oss_buckets",
@@ -1178,11 +1290,6 @@
       "display_name": "ecs network interface"
     },
     {
-      "name": "ecs_network_interface_floating_ip_binding",
-      "path": "docs/r/ecs_network_interface_floating_ip_binding.html.markdown",
-      "display_name": "ecs network interface floating ip binding"
-    },
-    {
       "name": "ecs_network_interface_instance_binding",
       "path": "docs/r/ecs_network_interface_instance_binding.html.markdown",
       "display_name": "ecs network interface instance binding"
@@ -1221,6 +1328,41 @@
       "name": "ecs_vpc_subnet",
       "path": "docs/r/ecs_vpc_subnet.html.markdown",
       "display_name": "ecs vpc subnet"
+    },
+    {
+      "name": "eip_association",
+      "path": "docs/r/eip_association.html.markdown",
+      "display_name": "eip association"
+    },
+    {
+      "name": "elb_certificate",
+      "path": "docs/r/elb_certificate.html.markdown",
+      "display_name": "elb certificate"
+    },
+    {
+      "name": "elb_l7_policy",
+      "path": "docs/r/elb_l7_policy.html.markdown",
+      "display_name": "elb l7 policy"
+    },
+    {
+      "name": "elb_l7_rule",
+      "path": "docs/r/elb_l7_rule.html.markdown",
+      "display_name": "elb l7 rule"
+    },
+    {
+      "name": "elb_listener",
+      "path": "docs/r/elb_listener.html.markdown",
+      "display_name": "elb listener"
+    },
+    {
+      "name": "elb_target_group",
+      "path": "docs/r/elb_target_group.html.markdown",
+      "display_name": "elb target group"
+    },
+    {
+      "name": "elb_target_group_attachment",
+      "path": "docs/r/elb_target_group_attachment.html.markdown",
+      "display_name": "elb target group attachment"
     },
     {
       "name": "oss_bucket",
