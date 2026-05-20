@@ -2,6 +2,7 @@ package connectivity
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 )
@@ -50,68 +51,154 @@ func (c *Config) Client() (*EdgeNextClient, error) {
 	return client, nil
 }
 
+// validateServiceClientConfig checks credentials and endpoint required for signed HTTP service clients.
+func validateServiceClientConfig(accessKey, secretKey, endpoint string) error {
+	if strings.TrimSpace(accessKey) == "" {
+		return fmt.Errorf("access_key is required")
+	}
+	if strings.TrimSpace(secretKey) == "" {
+		return fmt.Errorf("secret_key is required")
+	}
+	if strings.TrimSpace(endpoint) == "" {
+		return fmt.Errorf("endpoint is required")
+	}
+	return nil
+}
+
 // APIClient returns or initializes the API client
 func (c *EdgeNextClient) APIClient() (*APIClient, error) {
 	c.apiClientOnce.Do(func() {
-		c.apiClient = NewAPIClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint)
+		if err := validateServiceClientConfig(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint); err != nil {
+			c.apiClientErr = fmt.Errorf("failed to create API client: %w", err)
+			return
+		}
+
+		client := NewAPIClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint)
+		if client == nil {
+			c.apiClientErr = fmt.Errorf("failed to create API client: client constructor returned nil")
+			return
+		}
+		c.apiClient = client
 	})
 
-	return c.apiClient, c.apiClientErr
+	if c.apiClientErr != nil {
+		return nil, c.apiClientErr
+	}
+	return c.apiClient, nil
 }
 
 // OSSClient returns or initializes the OSS S3 client
 func (c *EdgeNextClient) OSSClient() (*OSSClient, error) {
 	c.ossClientOnce.Do(func() {
+		if err := validateServiceClientConfig(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint); err != nil {
+			c.ossClientErr = fmt.Errorf("failed to create OSS client: %w", err)
+			return
+		}
+
 		client, err := NewOSSClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint, c.config.Region)
 		if err != nil {
 			c.ossClientErr = fmt.Errorf("failed to create OSS client: %w", err)
+			return
+		}
+		if client == nil {
+			c.ossClientErr = fmt.Errorf("failed to create OSS client: client constructor returned nil")
 			return
 		}
 
 		c.ossClient = client
 	})
 
-	return c.ossClient, c.ossClientErr
+	if c.ossClientErr != nil {
+		return nil, c.ossClientErr
+	}
+	return c.ossClient, nil
 }
 
 // ScdnClient returns or initializes the SCDN API client
 func (c *EdgeNextClient) ScdnClient() (*ScdnClient, error) {
 	c.scdnClientOnce.Do(func() {
-		// Use the same endpoint as API client but with SCDN-specific path
-		scdnEndpoint := c.config.Endpoint
-		if scdnEndpoint == "" {
-			scdnEndpoint = "https://api.edgenextscdn.com"
+		if err := validateServiceClientConfig(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint); err != nil {
+			c.scdnClientErr = fmt.Errorf("failed to create SCDN client: %w", err)
+			return
 		}
 
-		c.scdnClient = NewScdnClient(scdnEndpoint, c.config.AccessKey, c.config.SecretKey, 30*time.Second)
+		scdnEndpoint := c.config.Endpoint
+		client := NewScdnClient(scdnEndpoint, c.config.AccessKey, c.config.SecretKey, 30*time.Second)
+		if client == nil {
+			c.scdnClientErr = fmt.Errorf("failed to create SCDN client: client constructor returned nil")
+			return
+		}
+		c.scdnClient = client
 	})
 
-	return c.scdnClient, c.scdnClientErr
+	if c.scdnClientErr != nil {
+		return nil, c.scdnClientErr
+	}
+	return c.scdnClient, nil
 }
 
 // ECSClient returns or initializes the ECS API client
 func (c *EdgeNextClient) ECSClient() (*ECSClient, error) {
 	c.ecsClientOnce.Do(func() {
-		c.ecsClient = NewECSClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint, c.config.Region)
+		if err := validateServiceClientConfig(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint); err != nil {
+			c.ecsClientErr = fmt.Errorf("failed to create ECS client: %w", err)
+			return
+		}
+
+		client := NewECSClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint, c.config.Region)
+		if client == nil {
+			c.ecsClientErr = fmt.Errorf("failed to create ECS client: client constructor returned nil")
+			return
+		}
+		c.ecsClient = client
 	})
 
-	return c.ecsClient, c.ecsClientErr
+	if c.ecsClientErr != nil {
+		return nil, c.ecsClientErr
+	}
+	return c.ecsClient, nil
 }
 
 // RDSClient returns or initializes the RDS API client (same signing and transport as ECSClient).
 func (c *EdgeNextClient) RDSClient() (*RDSClient, error) {
 	c.rdsClientOnce.Do(func() {
-		c.rdsClient = NewRDSClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint, c.config.Region)
+		if err := validateServiceClientConfig(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint); err != nil {
+			c.rdsClientErr = fmt.Errorf("failed to create RDS client: %w", err)
+			return
+		}
+
+		client := NewRDSClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint, c.config.Region)
+		if client == nil {
+			c.rdsClientErr = fmt.Errorf("failed to create RDS client: client constructor returned nil")
+			return
+		}
+		c.rdsClient = client
 	})
 
-	return c.rdsClient, c.rdsClientErr
+	if c.rdsClientErr != nil {
+		return nil, c.rdsClientErr
+	}
+	return c.rdsClient, nil
 }
 
 // ELBClient returns or initializes the ELB API client (same signing and transport as ECSClient).
 func (c *EdgeNextClient) ELBClient() (*ELBClient, error) {
 	c.elbClientOnce.Do(func() {
-		c.elbClient = NewELBClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint, c.config.Region)
+		if err := validateServiceClientConfig(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint); err != nil {
+			c.elbClientErr = fmt.Errorf("failed to create ELB client: %w", err)
+			return
+		}
+
+		client := NewELBClient(c.config.AccessKey, c.config.SecretKey, c.config.Endpoint, c.config.Region)
+		if client == nil {
+			c.elbClientErr = fmt.Errorf("failed to create ELB client: client constructor returned nil")
+			return
+		}
+		c.elbClient = client
 	})
 
-	return c.elbClient, c.elbClientErr
+	if c.elbClientErr != nil {
+		return nil, c.elbClientErr
+	}
+	return c.elbClient, nil
 }

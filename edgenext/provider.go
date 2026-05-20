@@ -79,8 +79,8 @@ func Provider() *schema.Provider {
 	sdnsRecordResources := sdnsrecord.Resources()
 	sdnsRecordDataSources := sdnsrecord.DataSources()
 
-	// Build resources map
-	ResourcesMap := map[string]*schema.Resource{
+	// Build resources map (merge with duplicate-key detection per source)
+	resourcesMap := map[string]*schema.Resource{
 		// CDN domain and configuration management resources
 		"edgenext_cdn_domain": cdn.ResourceEdgenextCdnDomainConfig(),
 
@@ -98,23 +98,19 @@ func Provider() *schema.Provider {
 		"edgenext_oss_object_copy": oss.ResourceOSSObjectCopy(),
 
 		// ECS resources
-		// "edgenext_ecs_instance":          ecs.ResourceENECSInstance(),
-		// "edgenext_ecs_image":             ecs.ResourceENECSImage(),
-		"edgenext_ecs_key_pair":    ecs.ResourceENECSKeyPair(),
-		"edgenext_ecs_vpc":         ecs.ResourceENECSVpc(),
-		"edgenext_ecs_vpc_subnet":  ecs.ResourceENECSVpcSubnet(),
-		"edgenext_ecs_router":      ecs.ResourceENECSRouter(),
-		"edgenext_ecs_router_port": ecs.ResourceENECSRouterPort(),
-		// "edgenext_ecs_floating_ip":       ecs.ResourceENECSFloatingIp(),
+		"edgenext_ecs_key_pair":                           ecs.ResourceENECSKeyPair(),
+		"edgenext_ecs_vpc":                                ecs.ResourceENECSVpc(),
+		"edgenext_ecs_vpc_subnet":                         ecs.ResourceENECSVpcSubnet(),
+		"edgenext_ecs_router":                             ecs.ResourceENECSRouter(),
+		"edgenext_ecs_router_port":                        ecs.ResourceENECSRouterPort(),
 		"edgenext_ecs_network_interface":                  ecs.ResourceENECSNetworkInterface(),
 		"edgenext_ecs_network_interface_instance_binding": ecs.ResourceENECSNetworkInterfaceInstanceBinding(),
 		"edgenext_ecs_security_group":                     ecs.ResourceENECSSecurityGroup(),
 		"edgenext_ecs_security_group_rule":                ecs.ResourceENECSSecurityGroupRule(),
-		// "edgenext_ecs_disk":                ecs.ResourceENECSDisk(),
-		"edgenext_ecs_tag":             ecs.ResourceENECSTag(),
-		"edgenext_ecs_instance_tag":    ecs.ResourceENECSInstanceTag(),
-		"edgenext_ecs_instance_power":  ecs.ResourceENECSInstancePower(),
-		"edgenext_ecs_instance_reboot": ecs.ResourceENECSInstanceReboot(),
+		"edgenext_ecs_tag":                                ecs.ResourceENECSTag(),
+		"edgenext_ecs_instance_tag":                       ecs.ResourceENECSInstanceTag(),
+		"edgenext_ecs_instance_power":                     ecs.ResourceENECSInstancePower(),
+		"edgenext_ecs_instance_reboot":                    ecs.ResourceENECSInstanceReboot(),
 
 		// RDS resources
 		"edgenext_rds_backup":                           rds.ResourceENRDSBackup(),
@@ -146,65 +142,21 @@ func Provider() *schema.Provider {
 		"edgenext_scdn_user_ip":      scdnipresource.ResourceEdgenextScdnUserIp(),
 		"edgenext_scdn_user_ip_item": scdnipresource.ResourceEdgenextScdnUserIpItem(),
 	}
+	mergeProviderResources(resourcesMap, "scdn/domain", domainResources)
+	mergeProviderResources(resourcesMap, "scdn/cert", certResources)
+	mergeProviderResources(resourcesMap, "scdn/template", templateResources)
+	mergeProviderResources(resourcesMap, "scdn/network_speed", networkSpeedResources)
+	mergeProviderResources(resourcesMap, "scdn/cache", cacheResources)
+	mergeProviderResources(resourcesMap, "scdn/security_protect", securityProtectResources)
+	mergeProviderResources(resourcesMap, "scdn/origin_group", originGroupResources)
+	mergeProviderResources(resourcesMap, "scdn/cache_operate", cacheOperateResources)
+	mergeProviderResources(resourcesMap, "scdn/log_download", logDownloadResources)
+	mergeProviderResources(resourcesMap, "sdns/domain", sdnsDomainResources)
+	mergeProviderResources(resourcesMap, "sdns/domain_group", sdnsGroupResources)
+	mergeProviderResources(resourcesMap, "sdns/record", sdnsRecordResources)
 
-	// Add domain module resources dynamically
-	for k, v := range domainResources {
-		ResourcesMap[k] = v
-	}
-
-	// Add cert module resources dynamically
-	for k, v := range certResources {
-		ResourcesMap[k] = v
-	}
-
-	// Add template module resources dynamically
-	for k, v := range templateResources {
-		ResourcesMap[k] = v
-	}
-
-	// Add network speed module resources dynamically
-	for k, v := range networkSpeedResources {
-		ResourcesMap[k] = v
-	}
-
-	// Add cache module resources dynamically
-	for k, v := range cacheResources {
-		ResourcesMap[k] = v
-	}
-
-	// Add security protection module resources dynamically
-	for k, v := range securityProtectResources {
-		ResourcesMap[k] = v
-	}
-
-	// Add origin group module resources dynamically
-	for k, v := range originGroupResources {
-		ResourcesMap[k] = v
-	}
-
-	// Add cache operate module resources dynamically
-	for k, v := range cacheOperateResources {
-		ResourcesMap[k] = v
-	}
-
-	// Add log download module resources dynamically
-	for k, v := range logDownloadResources {
-		ResourcesMap[k] = v
-	}
-
-	// Add SDNS module resources
-	for k, v := range sdnsDomainResources {
-		ResourcesMap[k] = v
-	}
-	for k, v := range sdnsGroupResources {
-		ResourcesMap[k] = v
-	}
-	for k, v := range sdnsRecordResources {
-		ResourcesMap[k] = v
-	}
-
-	// Build data sources map
-	DataSourcesMap := map[string]*schema.Resource{
+	// Build data sources map (merge with duplicate-key detection per source)
+	dataSourcesMap := map[string]*schema.Resource{
 		// CDN domain and configuration data sources
 		"edgenext_cdn_domain":  cdn.DataSourceEdgenextCdnDomainConfig(),
 		"edgenext_cdn_domains": cdn.DataSourceEdgenextCdnDomains(),
@@ -275,62 +227,18 @@ func Provider() *schema.Provider {
 		"edgenext_scdn_user_ips":      scdnipdata.DataSourceEdgenextScdnUserIps(),
 		"edgenext_scdn_user_ip_items": scdnipdata.DataSourceEdgenextScdnUserIpItems(),
 	}
-
-	// Add domain module data sources dynamically
-	for k, v := range domainDataSources {
-		DataSourcesMap[k] = v
-	}
-
-	// Add cert module data sources dynamically
-	for k, v := range certDataSources {
-		DataSourcesMap[k] = v
-	}
-
-	// Add template module data sources dynamically
-	for k, v := range templateDataSources {
-		DataSourcesMap[k] = v
-	}
-
-	// Add network speed module data sources dynamically
-	for k, v := range networkSpeedDataSources {
-		DataSourcesMap[k] = v
-	}
-
-	// Add cache module data sources dynamically
-	for k, v := range cacheDataSources {
-		DataSourcesMap[k] = v
-	}
-
-	// Add security protection module data sources dynamically
-	for k, v := range securityProtectDataSources {
-		DataSourcesMap[k] = v
-	}
-
-	// Add origin group module data sources dynamically
-	for k, v := range originGroupDataSources {
-		DataSourcesMap[k] = v
-	}
-
-	// Add cache operate module data sources dynamically
-	for k, v := range cacheOperateDataSources {
-		DataSourcesMap[k] = v
-	}
-
-	// Add log download module data sources dynamically
-	for k, v := range logDownloadDataSources {
-		DataSourcesMap[k] = v
-	}
-
-	// Add SDNS module data sources
-	for k, v := range sdnsDomainDataSources {
-		DataSourcesMap[k] = v
-	}
-	for k, v := range sdnsGroupDataSources {
-		DataSourcesMap[k] = v
-	}
-	for k, v := range sdnsRecordDataSources {
-		DataSourcesMap[k] = v
-	}
+	mergeProviderDataSources(dataSourcesMap, "scdn/domain", domainDataSources)
+	mergeProviderDataSources(dataSourcesMap, "scdn/cert", certDataSources)
+	mergeProviderDataSources(dataSourcesMap, "scdn/template", templateDataSources)
+	mergeProviderDataSources(dataSourcesMap, "scdn/network_speed", networkSpeedDataSources)
+	mergeProviderDataSources(dataSourcesMap, "scdn/cache", cacheDataSources)
+	mergeProviderDataSources(dataSourcesMap, "scdn/security_protect", securityProtectDataSources)
+	mergeProviderDataSources(dataSourcesMap, "scdn/origin_group", originGroupDataSources)
+	mergeProviderDataSources(dataSourcesMap, "scdn/cache_operate", cacheOperateDataSources)
+	mergeProviderDataSources(dataSourcesMap, "scdn/log_download", logDownloadDataSources)
+	mergeProviderDataSources(dataSourcesMap, "sdns/domain", sdnsDomainDataSources)
+	mergeProviderDataSources(dataSourcesMap, "sdns/domain_group", sdnsGroupDataSources)
+	mergeProviderDataSources(dataSourcesMap, "sdns/record", sdnsRecordDataSources)
 
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -362,8 +270,8 @@ func Provider() *schema.Provider {
 				Description: "EdgeNext region",
 			},
 		},
-		ResourcesMap:         ResourcesMap,
-		DataSourcesMap:       DataSourcesMap,
+		ResourcesMap:         resourcesMap,
+		DataSourcesMap:       dataSourcesMap,
 		ConfigureContextFunc: providerConfigure,
 	}
 }
